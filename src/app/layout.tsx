@@ -127,7 +127,6 @@ export default function RootLayout({
               OneSignalDeferred.push(async function(OneSignal) {
                 await OneSignal.init({
                   appId: "f8c5f33a-cf71-43d7-a723-ef8f7125f5fb",
-                  v2AppId: "os_v2_app_7dc7gowpofb5pjzd56hxcjpv7mndgmfdmhgeh7mzf32rbl66tetrens3ngkpv3px6vhwoprlpi2eo4qcb3snn3yv4wdghc4eeffoqnq",
                   notifyButton: {
                     enable: true
                   },
