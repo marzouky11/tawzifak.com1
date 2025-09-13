@@ -132,7 +132,10 @@ export default function RootLayout({
                     enable: true
                   },
                   allowLocalhostAsSecureOrigin: true,
-                  autoRegister: true
+                  autoRegister: true,
+                  promptOptions: {
+                    locale: "ar"
+                  }
                 });
               });
             `
