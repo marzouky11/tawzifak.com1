@@ -120,7 +120,6 @@ export default function RootLayout({
             `,
           }}
         />
-         <script data-cfasync="false" src="//dcbbwymp1bhlf.cloudfront.net/?wbbcd=1214447"></script>
         <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
         <script dangerouslySetInnerHTML={{
             __html: `
