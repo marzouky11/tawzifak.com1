@@ -1,4 +1,3 @@
-
 import { db, auth } from '@/lib/firebase';
 import { collection, getDocs, getDoc, doc, query, where, orderBy, limit, addDoc, serverTimestamp, updateDoc, deleteDoc, setDoc, Query, and, QueryConstraint, QueryFilterConstraint, documentId, increment } from 'firebase/firestore';
 import type { Job, Category, PostType, User, WorkType, Testimonial, Competition, Organizer, Article, Report, ContactMessage, ImmigrationPost } from './types';
@@ -6,6 +5,7 @@ import Fuse from 'fuse.js';
 import { getProgramTypeDetails, slugify } from './utils';
 import { revalidatePath } from './revalidate';
 import { updateProfile } from 'firebase/auth';
+import fetch from 'node-fetch';
 
 const categories: Category[] = [
   { id: 'it', name: 'تكنولوجيا المعلومات', iconName: 'Code', color: '#1E88E5' },
@@ -37,6 +37,45 @@ const organizers: Organizer[] = [
   { name: "المعاهد العليا والمؤسسات العامة", icon: "FileText", color: '#00897B' },
   { name: "خرّيجون جدد (باك/دبلوم)", icon: "Users", color: '#FB8C00' }
 ];
+
+async function sendNewPostNotification(title: string, url: string) {
+  const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID;
+  const ONESIGNAL_REST_API_KEY = process.env.ONESIGNAL_REST_API_KEY;
+
+  if (!ONESIGNAL_APP_ID || !ONESIGNAL_REST_API_KEY) {
+    console.warn("OneSignal App ID or REST API Key is not configured. Skipping notification.");
+    return;
+  }
+
+  const notification = {
+    app_id: ONESIGNAL_APP_ID,
+    contents: { "en": title },
+    headings: { "en": "تم نشر إعلان جديد في توظيفك" },
+    included_segments: ["Subscribed Users"],
+    url: url,
+    chrome_web_icon: "https://www.tawzifak.com/favicon-32x32.png",
+    firefox_icon: "https://www.tawzifak.com/favicon-32x32.png"
+  };
+
+  try {
+    const response = await fetch("https://onesignal.com/api/v1/notifications", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        "Authorization": `Basic ${ONESIGNAL_REST_API_KEY}`
+      },
+      body: JSON.stringify(notification)
+    });
+    const data = await response.json();
+    if (data.errors) {
+      console.error("OneSignal Error:", data.errors);
+    } else {
+      console.log("OneSignal Notification sent successfully:", data);
+    }
+  } catch (error) {
+    console.error("Failed to send OneSignal notification:", error);
+  }
+}
 
 function formatTimeAgo(timestamp: any) {
   if (!timestamp || !timestamp.toDate) {
@@ -270,6 +309,12 @@ export async function postJob(jobData: Omit<Job, 'id' | 'createdAt' | 'likes' | 
         revalidatePath('/');
         revalidatePath(jobData.postType === 'seeking_job' ? '/workers' : '/jobs');
         
+        // Send notification
+        if (jobData.postType === 'seeking_worker') {
+            const url = `https://www.tawzifak.com/jobs/${newDocRef.id}`;
+            await sendNewPostNotification(`وظيفة جديدة: ${jobData.title}`, url);
+        }
+
         return { id: newDocRef.id };
     } catch (e) {
         console.error("Error adding document: ", e);
@@ -312,8 +357,7 @@ export async function updateAd(adId: string, adData: Partial<Job>) {
 
 export async function deleteAd(adId: string) {
     try {
-        const adRef = doc(db, 'ads', adId);
-        await deleteDoc(adRef);
+        await deleteDoc(doc(db, 'ads', adId));
 
         revalidatePath('/');
         revalidatePath('/jobs');
@@ -437,6 +481,10 @@ export async function postCompetition(competitionData: Omit<Competition, 'id' | 
     revalidatePath('/');
     revalidatePath('/competitions');
     
+    // Send notification
+    const url = `https://www.tawzifak.com/competitions/${newDocRef.id}`;
+    await sendNewPostNotification(`مباراة جديدة: ${competitionData.title}`, url);
+
     return { id: newDocRef.id };
   } catch (e) {
     console.error("Error adding competition: ", e);
@@ -679,6 +727,10 @@ export async function postImmigration(postData: Omit<ImmigrationPost, 'id' | 'cr
 
     revalidatePath('/');
     revalidatePath('/immigration');
+    
+    // Send notification
+    const url = `https://www.tawzifak.com/immigration/${newDocRef.id}`;
+    await sendNewPostNotification(`فرصة هجرة: ${postData.title}`, url);
 
     return { id: newDocRef.id };
   } catch (e) {
