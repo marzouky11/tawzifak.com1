@@ -120,25 +120,6 @@ export default function RootLayout({
             `,
           }}
         />
-        <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-        <script dangerouslySetInnerHTML={{
-            __html: `
-              window.OneSignalDeferred = window.OneSignalDeferred || [];
-              OneSignalDeferred.push(async function(OneSignal) {
-                await OneSignal.init({
-                  appId: "f8c5f33a-cf71-43d7-a723-ef8f7125f5fb",
-                  notifyButton: {
-                    enable: true
-                  },
-                  allowLocalhostAsSecureOrigin: true,
-                  autoRegister: true,
-                  promptOptions: {
-                    locale: "ar"
-                  }
-                });
-              });
-            `
-        }} />
       </head>
       <body className={cn("antialiased", tajawal.variable)}>
         <ThemeProvider
