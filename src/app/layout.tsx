@@ -107,7 +107,6 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }}
         />
 
-        {/* Google tag (gtag.js) */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-FE0MP7XYXM"></script>
         <script
           dangerouslySetInnerHTML={{
@@ -120,12 +119,13 @@ export default function RootLayout({
           }}
         />
 
-        {/* Google AdSense */}
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6413953433245789"
           crossOrigin="anonymous"
         />
+
+        <meta name="google-adsense-account" content="ca-pub-6413953433245789" />
       </head>
       <body className={cn("antialiased", tajawal.variable)}>
         <ThemeProvider
