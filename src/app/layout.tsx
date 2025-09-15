@@ -1,8 +1,6 @@
-
-
 import type { Metadata } from 'next';
 import { Tajawal } from 'next/font/google';
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/toaster";
 import './globals.css';
 import { AuthProvider } from '@/context/auth-context';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -16,8 +14,8 @@ const tajawal = Tajawal({
 });
 
 const baseUrl = 'https://www.tawzifak.com';
-const appName = 'توظيفك';
-const appDescription = "منصة توظيفك تجمع لك أحدث عروض العمل والمباريات العمومية وفرص البحث عن عمل بسهولة. تصفح الوظائف حسب المدينة والفئة وابقَ على اطلاع دائم بأحدث الفرص المهنية.";
+const appName = 'توظيفك – اكتشف أحدث الوظائف وفرص الهجرة والمباريات العمومية';
+const appDescription = "تعرّف على أفضل عروض العمل وفرص الهجرة القانونية والمباريات العمومية بسهولة وموثوقية. اعثر على الفرص التي تناسب مهاراتك وطموحاتك المهنية بسرعة وفعالية وابدأ رحلتك نحو مستقبل مهني ناجح";
 const appOgImage = 'https://www.tawzifak.com/og-image.jpg';
 
 export const metadata: Metadata = {
@@ -38,7 +36,7 @@ export const metadata: Metadata = {
     ],
   },
   manifest: "/site.webmanifest",
-   alternates: {
+  alternates: {
     canonical: '/',
   },
   openGraph: {
@@ -70,13 +68,12 @@ export const metadata: Metadata = {
   },
 };
 
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-   const orgSchema = {
+  const orgSchema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: appName,
@@ -95,11 +92,12 @@ export default function RootLayout({
       'query-input': 'required name=search_term_string',
     },
   };
-  
+
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
         <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
+        
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
@@ -108,7 +106,8 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }}
         />
-        {/* <!-- Google tag (gtag.js) --> */}
+
+        {/* Google tag (gtag.js) */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-FE0MP7XYXM"></script>
         <script
           dangerouslySetInnerHTML={{
@@ -119,6 +118,13 @@ export default function RootLayout({
               gtag('config', 'G-FE0MP7XYXM');
             `,
           }}
+        />
+
+        {/* Google AdSense */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6413953433245789"
+          crossOrigin="anonymous"
         />
       </head>
       <body className={cn("antialiased", tajawal.variable)}>
