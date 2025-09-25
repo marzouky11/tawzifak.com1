@@ -15,7 +15,6 @@ import { useSearchParams } from 'next/navigation';
 import type { Job } from '@/lib/types';
 
 const ITEMS_PER_PAGE = 16;
-const sectionColor = '#0D47A1';
 
 function JobFiltersSkeleton() {
     return <div className="h-14 bg-muted rounded-lg w-full animate-pulse" />;
@@ -109,7 +108,7 @@ export default function JobsPage() {
             </div>
             {hasMore && (
               <div className="text-center mt-8">
-                <Button onClick={loadMoreJobs} disabled={loadingMore} size="lg" className="active:scale-95 transition-transform" style={{ backgroundColor: sectionColor }}>
+                <Button onClick={loadMoreJobs} disabled={loadingMore} size="lg" className="active:scale-95 transition-transform" variant="secondary">
                   {loadingMore ? (
                     <>
                       <Loader2 className="ml-2 h-4 w-4 animate-spin" />

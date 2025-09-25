@@ -14,7 +14,6 @@ import type { ImmigrationPost } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
 
 const ITEMS_PER_PAGE = 16;
-const sectionColor = '#0ea5e9';
 
 function ImmigrationListSkeleton() {
   return (
@@ -100,7 +99,7 @@ export default function ImmigrationPage() {
             </div>
             {hasMore && (
               <div className="text-center mt-8">
-                <Button onClick={loadMorePosts} disabled={loadingMore} size="lg" className="active:scale-95 transition-transform" style={{ backgroundColor: sectionColor }}>
+                <Button onClick={loadMorePosts} disabled={loadingMore} size="lg" className="active:scale-95 transition-transform" variant="secondary">
                   {loadingMore ? (
                     <>
                       <Loader2 className="ml-2 h-4 w-4 animate-spin" />

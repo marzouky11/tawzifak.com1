@@ -14,7 +14,6 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 
 const ARTICLES_PER_PAGE = 8;
-const articleSectionColor = '#00897B';
 
 function ArticlesListSkeleton() {
   return (
@@ -100,7 +99,7 @@ export default function ArticlesPage() {
             </div>
             {hasMore && (
               <div className="text-center mt-8">
-                <Button onClick={loadMoreArticles} disabled={loadingMore} size="lg" className="active:scale-95 transition-transform" style={{ backgroundColor: articleSectionColor }}>
+                <Button onClick={loadMoreArticles} disabled={loadingMore} size="lg" className="active:scale-95 transition-transform" variant="secondary">
                    {loadingMore ? (
                     <>
                       <Loader2 className="ml-2 h-4 w-4 animate-spin" />

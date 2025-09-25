@@ -11,7 +11,6 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 
 const TESTIMONIALS_PER_PAGE = 8;
-const buttonColor = '#3b82f6'; // blue-500
 
 export default function TestimonialsPage() {
   const [allTestimonials, setAllTestimonials] = useState<Testimonial[]>([]);
@@ -62,7 +61,7 @@ export default function TestimonialsPage() {
       />
         
       <div className="container mx-auto max-w-7xl px-4 pb-28">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {displayedTestimonials.map((testimonial) => (
             <TestimonialCard key={testimonial.id} testimonial={testimonial} />
           ))}
@@ -70,7 +69,7 @@ export default function TestimonialsPage() {
 
         {hasMore && (
           <div className="text-center mt-8">
-            <Button onClick={loadMoreTestimonials} disabled={loadingMore} size="lg" className="active:scale-95 transition-transform" style={{ backgroundColor: buttonColor }}>
+            <Button onClick={loadMoreTestimonials} disabled={loadingMore} size="lg" className="active:scale-95 transition-transform" variant="secondary">
               {loadingMore ? (
                 <>
                   <Loader2 className="ml-2 h-4 w-4 animate-spin" />

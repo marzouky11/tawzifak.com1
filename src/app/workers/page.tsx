@@ -14,7 +14,6 @@ import { Button } from '@/components/ui/button';
 import { useSearchParams } from 'next/navigation';
 
 const ITEMS_PER_PAGE = 16;
-const sectionColor = '#424242';
 
 function JobFiltersSkeleton() {
     return <div className="h-14 bg-muted rounded-lg w-full animate-pulse" />;
@@ -108,7 +107,7 @@ export default function WorkersPage() {
             </div>
             {hasMore && (
               <div className="text-center mt-8">
-                <Button onClick={loadMoreWorkers} disabled={loadingMore} size="lg" className="active:scale-95 transition-transform" style={{ backgroundColor: sectionColor }}>
+                <Button onClick={loadMoreWorkers} disabled={loadingMore} size="lg" className="active:scale-95 transition-transform" variant="secondary">
                   {loadingMore ? (
                     <>
                       <Loader2 className="ml-2 h-4 w-4 animate-spin" />

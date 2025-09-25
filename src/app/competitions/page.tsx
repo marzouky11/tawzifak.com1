@@ -15,7 +15,6 @@ import type { Competition } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
 
 const ITEMS_PER_PAGE = 16;
-const sectionColor = '#14532d';
 
 function CompetitionListSkeleton() {
   return (
@@ -101,7 +100,7 @@ export default function CompetitionsPage() {
             </div>
             {hasMore && (
               <div className="text-center mt-8">
-                <Button onClick={loadMoreCompetitions} disabled={loadingMore} size="lg" className="active:scale-95 transition-transform" style={{ backgroundColor: sectionColor }}>
+                <Button onClick={loadMoreCompetitions} disabled={loadingMore} size="lg" className="active:scale-95 transition-transform" variant="secondary">
                   {loadingMore ? (
                     <>
                       <Loader2 className="ml-2 h-4 w-4 animate-spin" />
