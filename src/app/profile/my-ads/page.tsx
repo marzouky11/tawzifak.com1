@@ -239,9 +239,9 @@ export default function MyAdsPage() {
               getCompetitions(),
               getImmigrationPosts(),
             ]);
-            setAllAds(jobs);
-            setCompetitions(comps);
-            setImmigrationPosts(immigrations);
+            setAllAds(jobs.data);
+            setCompetitions(comps.data);
+            setImmigrationPosts(immigrations.data);
           } else {
             const userJobs = await getJobsByUserId(user.uid);
             setAllAds(userJobs);
