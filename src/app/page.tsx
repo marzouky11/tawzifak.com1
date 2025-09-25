@@ -5,6 +5,7 @@
 
 
 
+
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { JobCard } from '@/components/job-card';
@@ -73,7 +74,7 @@ function JobSectionSkeleton() {
 }
 
 async function JobOffersSection() {
-    const jobOffers = await getJobs({ postType: 'seeking_worker', count: 8 });
+    const { data: jobOffers } = await getJobs({ postType: 'seeking_worker', count: 8 });
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {jobOffers.map((job, index) => (
@@ -86,7 +87,7 @@ async function JobOffersSection() {
 }
 
 async function CompetitionsSection() {
-    const competitions = await getCompetitions({ count: 8 });
+    const { data: competitions } = await getCompetitions({ count: 8 });
     if (competitions.length === 0) return null;
 
     return (
@@ -110,7 +111,7 @@ async function CompetitionsSection() {
 }
 
 async function ImmigrationSection() {
-    const immigrationPosts = await getImmigrationPosts({ count: 8 });
+    const { data: immigrationPosts } = await getImmigrationPosts({ count: 8 });
     if (immigrationPosts.length === 0) return null;
 
     return (
@@ -134,7 +135,7 @@ async function ImmigrationSection() {
 }
 
 async function JobSeekersSection() {
-    const jobSeekers = await getJobs({ postType: 'seeking_job', count: 8 });
+    const { data: jobSeekers } = await getJobs({ postType: 'seeking_job', count: 8 });
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {jobSeekers.map((job, index) => (
@@ -148,10 +149,10 @@ async function JobSeekersSection() {
 
 async function ExtraSections() {
     const testimonials = await getTestimonials();
-    const jobOffersCount = (await getJobs({ postType: 'seeking_worker', count: 9999 })).length;
-    const competitionsCount = (await getCompetitions({ count: 9999 })).length;
-    const immigrationCount = (await getImmigrationPosts({ count: 9999 })).length;
-    const jobSeekersCount = (await getJobs({ postType: 'seeking_job', count: 9999 })).length;
+    const { totalCount: jobOffersCount } = await getJobs({ postType: 'seeking_worker' });
+    const { totalCount: competitionsCount } = await getCompetitions();
+    const { totalCount: immigrationCount } = await getImmigrationPosts();
+    const { totalCount: jobSeekersCount } = await getJobs({ postType: 'seeking_job' });
 
     return (
         <HomeExtraSections
@@ -317,6 +318,7 @@ export default function HomePage() {
     </>
   );
 }
+
 
 
 
