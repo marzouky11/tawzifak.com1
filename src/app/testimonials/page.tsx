@@ -61,25 +61,45 @@ export default function TestimonialsPage() {
       />
         
       <div className="container mx-auto max-w-7xl px-4 pb-28">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {displayedTestimonials.map((testimonial) => (
-            <TestimonialCard key={testimonial.id} testimonial={testimonial} />
-          ))}
-        </div>
+        {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="flex flex-col space-y-3">
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-[100px]" />
+                      <Skeleton className="h-3 w-[70px]" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-4 w-[80px]" />
+                  <Skeleton className="h-16 w-full" />
+                </div>
+              ))}
+            </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {displayedTestimonials.map((testimonial) => (
+                <TestimonialCard key={testimonial.id} testimonial={testimonial} />
+              ))}
+            </div>
 
-        {hasMore && (
-          <div className="text-center mt-8">
-            <Button onClick={loadMoreTestimonials} disabled={loadingMore} size="lg" className="active:scale-95 transition-transform" variant="outline">
-              {loadingMore ? (
-                <>
-                  <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                  جاري التحميل...
-                </>
-              ) : (
-                'تحميل المزيد'
-              )}
-            </Button>
-          </div>
+            {hasMore && (
+              <div className="text-center mt-8">
+                <Button onClick={loadMoreTestimonials} disabled={loadingMore} size="lg" className="active:scale-95 transition-transform" variant="outline">
+                  {loadingMore ? (
+                    <>
+                      <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                      جاري التحميل...
+                    </>
+                  ) : (
+                    'تحميل المزيد'
+                  )}
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </>
