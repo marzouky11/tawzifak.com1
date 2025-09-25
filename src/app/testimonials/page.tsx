@@ -9,6 +9,7 @@ import { DesktopPageHeader } from '@/components/layout/desktop-page-header';
 import type { Testimonial } from '@/lib/types';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const TESTIMONIALS_PER_PAGE = 8;
 
