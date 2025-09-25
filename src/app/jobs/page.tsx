@@ -88,7 +88,7 @@ export default async function JobsPage({
         <Suspense fallback={<JobListSkeleton />}>
           <JobList jobs={jobs} />
         </Suspense>
-        <PaginationControls totalPages={totalPages} currentPage={page} />
+        <PaginationControls totalPages={totalPages} currentPage={page} themeColor="#0D47A1" />
       </div>
     </>
   );

@@ -68,7 +68,7 @@ export default async function CompetitionsPage({
         ) : (
           <p className="col-span-full text-center text-muted-foreground py-10">لا توجد مباريات تطابق بحثك.</p>
         )}
-        <PaginationControls totalPages={totalPages} currentPage={page} />
+        <PaginationControls totalPages={totalPages} currentPage={page} themeColor="#14532d" />
       </div>
     </>
   );

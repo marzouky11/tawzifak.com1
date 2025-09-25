@@ -65,7 +65,7 @@ export default async function ImmigrationPage({
         ) : (
           <p className="col-span-full text-center text-muted-foreground py-10">لا توجد فرص هجرة تطابق بحثك.</p>
         )}
-        <PaginationControls totalPages={totalPages} currentPage={page} />
+        <PaginationControls totalPages={totalPages} currentPage={page} themeColor="#0ea5e9" />
       </div>
     </>
   );
