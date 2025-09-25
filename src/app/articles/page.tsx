@@ -99,7 +99,7 @@ export default function ArticlesPage() {
             </div>
             {hasMore && (
               <div className="text-center mt-8">
-                <Button onClick={loadMoreArticles} disabled={loadingMore} size="lg" className="active:scale-95 transition-transform" variant="secondary">
+                <Button onClick={loadMoreArticles} disabled={loadingMore} size="lg" className="active:scale-95 transition-transform" variant="outline">
                    {loadingMore ? (
                     <>
                       <Loader2 className="ml-2 h-4 w-4 animate-spin" />
