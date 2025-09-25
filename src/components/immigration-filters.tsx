@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -40,11 +39,11 @@ export function ImmigrationFilters({ className }: ImmigrationFiltersProps) {
         <div className="relative w-full flex-grow">
           <Input
             placeholder="ابحث عن فرصة هجرة، دولة، أو كلمة مفتاحية..."
-            className="h-14 text-base rounded-xl pl-4 pr-14 border bg-background shadow-lg focus-visible:ring-primary/50"
+            className="h-14 text-base rounded-xl pl-4 pr-16 border-2 bg-background shadow-inner focus-visible:ring-primary/50"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-           <div className="absolute right-3 top-1/2 -translate-y-1/2">
+           <div className="absolute right-4 top-1/2 -translate-y-1/2">
               <Button type="submit" size="icon" variant="ghost" className="rounded-full h-10 w-10">
                   <Search className="h-5 w-5 text-primary" />
               </Button>
