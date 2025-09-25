@@ -8,6 +8,7 @@ import { MobilePageHeader } from '@/components/layout/mobile-page-header';
 import { DesktopPageHeader } from '@/components/layout/desktop-page-header';
 import { CompetitionCard } from '@/components/competition-card';
 import { CompetitionFilters } from '@/components/competition-filters';
+import { PaginationControls } from '@/components/pagination-controls';
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -20,6 +21,7 @@ export const metadata: Metadata = {
   },
 };
 
+const ITEMS_PER_PAGE = 16;
 
 function CompetitionFiltersSkeleton() {
     return <div className="h-14 bg-muted rounded-xl w-full animate-pulse" />;
@@ -31,9 +33,14 @@ export default async function CompetitionsPage({
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
 
-  const competitions = await getCompetitions({
+  const page = Number(searchParams?.page || '1');
+  const { data: competitions, totalCount } = await getCompetitions({
       searchQuery: typeof searchParams?.q === 'string' ? searchParams.q : undefined,
+      page: page,
+      limit: ITEMS_PER_PAGE,
   });
+
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   return (
     <>
@@ -61,6 +68,7 @@ export default async function CompetitionsPage({
         ) : (
           <p className="col-span-full text-center text-muted-foreground py-10">لا توجد مباريات تطابق بحثك.</p>
         )}
+        <PaginationControls totalPages={totalPages} currentPage={page} />
       </div>
     </>
   );

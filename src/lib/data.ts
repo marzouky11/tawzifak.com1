@@ -83,8 +83,10 @@ export async function getJobs(
     categoryId?: string;
     workType?: WorkType;
     excludeId?: string;
+    page?: number;
+    limit?: number;
   } = {}
-): Promise<Job[]> {
+): Promise<{ data: Job[]; totalCount: number }> {
   try {
     const {
       postType,
@@ -95,14 +97,12 @@ export async function getJobs(
       categoryId,
       workType,
       excludeId,
+      page = 1,
+      limit,
     } = options;
 
     const adsRef = collection(db, 'ads');
     
-    // Start with a base query
-    let q: Query;
-
-    // Array to hold all our constraints
     const queryConstraints: QueryConstraint[] = [];
 
     if (postType) {
@@ -115,18 +115,16 @@ export async function getJobs(
         queryConstraints.push(where('workType', '==', workType));
     }
     
-    // Always sort by creation date
     queryConstraints.push(orderBy('createdAt', 'desc'));
 
-    // Apply the constraints to the query
-    q = query(adsRef, ...queryConstraints);
+    const q = query(adsRef, ...queryConstraints);
 
     const querySnapshot = await getDocs(q);
 
     let jobs = querySnapshot.docs.map(doc => {
       const data = doc.data();
       const createdAt = data.createdAt.toDate();
-      const isNew = (new Date().getTime() - createdAt.getTime()) < 24 * 60 * 60 * 1000; // Less than 24 hours
+      const isNew = (new Date().getTime() - createdAt.getTime()) < 24 * 60 * 60 * 1000;
       return {
         id: doc.id,
         ...data,
@@ -135,25 +133,20 @@ export async function getJobs(
       } as Job;
     });
     
-    // Client-side filtering
     jobs = jobs.filter(job => {
-       if (excludeId && job.id === excludeId) {
-        return false;
-      }
-      return true;
+       if (excludeId && job.id === excludeId) return false;
+       return true;
     });
 
-    // Fuzzy search using Fuse.js if a search query is provided
     if (searchQuery) {
         const fuse = new Fuse(jobs, {
             keys: ['title', 'description', 'categoryName', 'country', 'city', 'companyName', 'experience', 'qualifications'],
             includeScore: true,
-            threshold: 0.4, // Adjust threshold for more or less strict matching
+            threshold: 0.4,
         });
         jobs = fuse.search(searchQuery).map(result => result.item);
     }
     
-    // These filters are applied after the main search to refine results
     if (country) {
         const fuse = new Fuse(jobs, { keys: ['country'], includeScore: true, threshold: 0.3 });
         jobs = fuse.search(country).map(result => result.item);
@@ -164,14 +157,22 @@ export async function getJobs(
         jobs = fuse.search(city).map(result => result.item);
     }
 
-    if (count) {
-      return jobs.slice(0, count);
+    const totalCount = jobs.length;
+
+    if (limit) {
+      const start = (page - 1) * limit;
+      const end = start + limit;
+      return { data: jobs.slice(start, end), totalCount };
     }
 
-    return jobs;
+    if (count) {
+      return { data: jobs.slice(0, count), totalCount };
+    }
+
+    return { data: jobs, totalCount };
   } catch (error) {
     console.error("Error fetching jobs: ", error);
-    return [];
+    return { data: [], totalCount: 0 };
   }
 }
 
@@ -251,7 +252,6 @@ export async function postJob(jobData: Omit<Job, 'id' | 'createdAt' | 'likes' | 
 
         const newDocRef = await addDoc(adsCollection, newJob);
         
-        // Update user profile if a new photo was uploaded during ad creation
         if (auth.currentUser && newJob.ownerPhotoURL && newJob.ownerPhotoURL.startsWith('data:image')) {
             const updateData: { displayName?: string; photoURL?: string | null } = { photoURL: newJob.ownerPhotoURL };
             if (jobData.ownerName) {
@@ -261,7 +261,7 @@ export async function postJob(jobData: Omit<Job, 'id' | 'createdAt' | 'likes' | 
                 await updateProfile(auth.currentUser, updateData);
              } catch (e: any) {
                 if (e.code !== 'auth/invalid-profile-attribute') {
-                    throw e; // re-throw if it's not the error we want to ignore
+                    throw e;
                 }
              }
         }
@@ -331,13 +331,11 @@ export async function updateUserProfile(uid: string, profileData: Partial<User>)
             dataToUpdate.photoURL = null;
         }
 
-        // Update Firestore first
         await updateDoc(userRef, {
             ...dataToUpdate,
             updatedAt: serverTimestamp()
         });
 
-        // Then update Firebase Auth (only if a currentUser exists)
         const currentUser = auth.currentUser;
         if (currentUser && currentUser.uid === uid) {
             const updateData: { displayName?: string; photoURL?: string | null } = {};
@@ -354,10 +352,8 @@ export async function updateUserProfile(uid: string, profileData: Partial<User>)
                  try {
                     await updateProfile(currentUser, updateData);
                 } catch (e: any) {
-                    // Ignore the specific error about the photo URL being too long
-                    // because the primary storage (Firestore) has already been updated.
                     if (e.code !== 'auth/invalid-profile-attribute') {
-                        throw e; // Re-throw any other errors
+                        throw e;
                     }
                 }
             }
@@ -414,7 +410,6 @@ export async function deleteTestimonial(testimonialId: string) {
     }
 }
 
-// Functions for Competitions
 export async function postCompetition(competitionData: Omit<Competition, 'id' | 'createdAt' | 'postedAt'>): Promise<{ id: string }> {
   try {
     const competitionsCollection = collection(db, 'competitions');
@@ -447,9 +442,11 @@ export async function getCompetitions(options: {
   searchQuery?: string;
   location?: string;
   excludeId?: string;
-} = {}): Promise<Competition[]> {
+  page?: number;
+  limit?: number;
+} = {}): Promise<{ data: Competition[]; totalCount: number }> {
   try {
-    const { count, searchQuery, location, excludeId } = options;
+    const { count, searchQuery, location, excludeId, page = 1, limit } = options;
     const competitionsRef = collection(db, 'competitions');
     const q = query(competitionsRef, orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
@@ -466,12 +463,9 @@ export async function getCompetitions(options: {
       } as Competition;
     });
 
-     // Client-side filtering
     competitions = competitions.filter(comp => {
-       if (excludeId && comp.id === excludeId) {
-        return false;
-      }
-      return true;
+       if (excludeId && comp.id === excludeId) return false;
+       return true;
     });
 
     if (searchQuery) {
@@ -492,14 +486,22 @@ export async function getCompetitions(options: {
         competitions = fuse.search(location).map(result => result.item);
     }
 
+    const totalCount = competitions.length;
+    
+    if (limit) {
+      const start = (page - 1) * limit;
+      const end = start + limit;
+      return { data: competitions.slice(start, end), totalCount };
+    }
+
     if (count) {
-      return competitions.slice(0, count);
+      return { data: competitions.slice(0, count), totalCount };
     }
     
-    return competitions;
+    return { data: competitions, totalCount };
   } catch (error) {
     console.error("Error fetching competitions: ", error);
-    return [];
+    return { data: [], totalCount: 0 };
   }
 }
 
@@ -566,14 +568,15 @@ export async function deleteCompetition(competitionId: string) {
     }
 }
 
-// Functions for Immigration Posts
 export async function getImmigrationPosts(options: { 
   count?: number;
   searchQuery?: string;
   excludeId?: string;
-} = {}): Promise<ImmigrationPost[]> {
+  page?: number;
+  limit?: number;
+} = {}): Promise<{ data: ImmigrationPost[]; totalCount: number }> {
   try {
-    const { count, searchQuery, excludeId } = options;
+    const { count, searchQuery, excludeId, page = 1, limit } = options;
     const postsRef = collection(db, 'immigration');
     const q = query(postsRef, orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
@@ -603,14 +606,22 @@ export async function getImmigrationPosts(options: {
       posts = fuse.search(searchQuery).map(result => result.item);
     }
 
+    const totalCount = posts.length;
+
+    if (limit) {
+      const start = (page - 1) * limit;
+      const end = start + limit;
+      return { data: posts.slice(start, end), totalCount };
+    }
+
     if (count) {
-      return posts.slice(0, count);
+      return { data: posts.slice(0, count), totalCount };
     }
     
-    return posts;
+    return { data: posts, totalCount };
   } catch (error) {
     console.error("Error fetching immigration posts: ", error);
-    return [];
+    return { data: [], totalCount: 0 };
   }
 }
 

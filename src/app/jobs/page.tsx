@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { MobilePageHeader } from '@/components/layout/mobile-page-header';
 import { Briefcase } from 'lucide-react';
 import { DesktopPageHeader } from '@/components/layout/desktop-page-header';
+import { PaginationControls } from '@/components/pagination-controls';
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -17,6 +18,8 @@ export const metadata: Metadata = {
   description: 'تصفح أفضل عروض العمل اليومية في مختلف القطاعات، واعثر على الفرص التي تناسب مهاراتك وطموحاتك المهنية بسرعة وسهولة.',
   robots: 'index, follow',
 };
+
+const ITEMS_PER_PAGE = 16;
 
 function JobFiltersSkeleton() {
     return <div className="h-14 bg-muted rounded-lg w-full animate-pulse" />;
@@ -48,14 +51,21 @@ export default async function JobsPage({
 }: {
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
-  const jobs = await getJobs({
+
+  const page = Number(searchParams?.page || '1');
+
+  const { data: jobs, totalCount } = await getJobs({
       postType: 'seeking_worker',
       searchQuery: typeof searchParams?.q === 'string' ? searchParams.q : undefined,
       country: typeof searchParams?.country === 'string' ? searchParams.country : undefined,
       city: typeof searchParams?.city === 'string' ? searchParams.city : undefined,
       categoryId: typeof searchParams?.category === 'string' ? searchParams.category : undefined,
       workType: typeof searchParams?.workType === 'string' ? searchParams.workType as WorkType : undefined,
+      page: page,
+      limit: ITEMS_PER_PAGE,
   });
+
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   return (
     <>
@@ -78,6 +88,7 @@ export default async function JobsPage({
         <Suspense fallback={<JobListSkeleton />}>
           <JobList jobs={jobs} />
         </Suspense>
+        <PaginationControls totalPages={totalPages} currentPage={page} />
       </div>
     </>
   );

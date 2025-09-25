@@ -8,6 +8,7 @@ import { MobilePageHeader } from '@/components/layout/mobile-page-header';
 import { DesktopPageHeader } from '@/components/layout/desktop-page-header';
 import { ImmigrationCard } from '@/components/immigration-card';
 import { ImmigrationFilters } from '@/components/immigration-filters';
+import { PaginationControls } from '@/components/pagination-controls';
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
   robots: 'index, follow',
 };
 
+const ITEMS_PER_PAGE = 16;
 
 function ImmigrationFiltersSkeleton() {
     return <div className="h-14 bg-muted rounded-xl w-full animate-pulse" />;
@@ -28,9 +30,14 @@ export default async function ImmigrationPage({
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
 
-  const immigrationPosts = await getImmigrationPosts({
+  const page = Number(searchParams?.page || '1');
+  const { data: immigrationPosts, totalCount } = await getImmigrationPosts({
     searchQuery: typeof searchParams?.q === 'string' ? searchParams.q : undefined,
+    page: page,
+    limit: ITEMS_PER_PAGE,
   });
+
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   return (
     <>
@@ -58,6 +65,7 @@ export default async function ImmigrationPage({
         ) : (
           <p className="col-span-full text-center text-muted-foreground py-10">لا توجد فرص هجرة تطابق بحثك.</p>
         )}
+        <PaginationControls totalPages={totalPages} currentPage={page} />
       </div>
     </>
   );
