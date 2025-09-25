@@ -42,18 +42,11 @@ export function PaginationControls({
     let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
     let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
 
-    if (endPage - startPage + 1 < maxPagesToShow) {
+    if (endPage - startPage + 1 < maxPagesToShow && startPage > 1) {
       startPage = Math.max(1, endPage - maxPagesToShow + 1);
     }
     
-    if (isMobile) {
-      startPage = currentPage;
-      endPage = Math.min(totalPages, currentPage + 1);
-    }
-
-
     if (startPage > 1) {
-      if(!isMobile) {
         pageNumbers.push(
             <Button
             key={1}
@@ -64,7 +57,6 @@ export function PaginationControls({
             1
             </Button>
         );
-      }
       if (startPage > 2) {
         pageNumbers.push(
           <span key="start-ellipsis" className="px-1 text-muted-foreground">
@@ -95,6 +87,16 @@ export function PaginationControls({
             ...
           </span>
         );
+       pageNumbers.push(
+            <Button
+            key={totalPages}
+            variant="outline"
+            size="icon"
+            onClick={() => handlePageChange(totalPages)}
+            >
+            {totalPages}
+            </Button>
+        );
     }
 
     return pageNumbers;
@@ -112,7 +114,18 @@ export function PaginationControls({
         <span>السابق</span>
       </Button>
 
-      <div className="flex items-center gap-2">{renderPageNumbers()}</div>
+      <div className="hidden md:flex items-center gap-2">{renderPageNumbers()}</div>
+      
+      <div className="md:hidden flex items-center gap-2">
+        <Button
+          variant="default"
+          size="icon"
+          className="pointer-events-none"
+          style={{ backgroundColor: themeColor, borderColor: themeColor }}
+        >
+          {currentPage}
+        </Button>
+      </div>
 
       <Button
         variant="default"

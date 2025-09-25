@@ -1,46 +1,78 @@
 
+'use client';
+
 import type { Metadata } from 'next';
 import { getCompetitions } from '@/lib/data';
-import { Landmark } from 'lucide-react';
-import { Suspense } from 'react';
+import { Landmark, Loader2 } from 'lucide-react';
+import { Suspense, useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MobilePageHeader } from '@/components/layout/mobile-page-header';
 import { DesktopPageHeader } from '@/components/layout/desktop-page-header';
 import { CompetitionCard } from '@/components/competition-card';
 import { CompetitionFilters } from '@/components/competition-filters';
-import { PaginationControls } from '@/components/pagination-controls';
-
-export const revalidate = 3600; // Revalidate every hour
-
-export const metadata: Metadata = {
-  title: 'المباريات العمومية - آخر إعلانات التوظيف الحكومي',
-  description: 'تصفح آخر مباريات التوظيف في القطاع العام في المغرب والدول العربية. فرص عمل حكومية محدثة يوميًا.',
-  robots: 'index, follow',
-  alternates: {
-    canonical: '/competitions',
-  },
-};
+import { Button } from '@/components/ui/button';
+import type { Competition } from '@/lib/types';
+import { useSearchParams } from 'next/navigation';
 
 const ITEMS_PER_PAGE = 16;
+const sectionColor = '#14532d';
+
+function CompetitionListSkeleton() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {Array.from({ length: 12 }).map((_, i) => (
+        <CompetitionCard key={i} competition={null} />
+      ))}
+    </div>
+  );
+}
 
 function CompetitionFiltersSkeleton() {
     return <div className="h-14 bg-muted rounded-xl w-full animate-pulse" />;
 }
 
-export default async function CompetitionsPage({
-  searchParams,
-}: {
-  searchParams?: { [key: string]: string | string[] | undefined };
-}) {
+export default function CompetitionsPage() {
+  const searchParams = useSearchParams();
+  const q = searchParams.get('q');
 
-  const page = Number(searchParams?.page || '1');
-  const { data: competitions, totalCount } = await getCompetitions({
-      searchQuery: typeof searchParams?.q === 'string' ? searchParams.q : undefined,
-      page: page,
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  useEffect(() => {
+    const fetchInitialCompetitions = async () => {
+      setLoading(true);
+      const { data, totalCount } = await getCompetitions({
+        searchQuery: q || undefined,
+        page: 1,
+        limit: ITEMS_PER_PAGE,
+      });
+      setCompetitions(data);
+      setPage(1);
+      setHasMore(totalCount > ITEMS_PER_PAGE);
+      setLoading(false);
+    };
+
+    fetchInitialCompetitions();
+  }, [q]);
+
+  const loadMoreCompetitions = async () => {
+    if (!hasMore || loadingMore) return;
+    setLoadingMore(true);
+    const nextPage = page + 1;
+    const { data, totalCount } = await getCompetitions({
+      searchQuery: q || undefined,
+      page: nextPage,
       limit: ITEMS_PER_PAGE,
-  });
-
-  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
+    });
+    
+    setCompetitions(prev => [...prev, ...data]);
+    setPage(nextPage);
+    setHasMore(competitions.length + data.length < totalCount);
+    setLoadingMore(false);
+  };
 
   return (
     <>
@@ -61,14 +93,31 @@ export default async function CompetitionsPage({
       </div>
       
       <div className="container pt-4 pb-6">
-        {competitions.length > 0 ? (
-           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {competitions.map((comp) => <CompetitionCard key={comp.id} competition={comp} />)}
-          </div>
+        {loading ? (
+          <CompetitionListSkeleton />
+        ) : competitions.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {competitions.map((comp) => <CompetitionCard key={comp.id} competition={comp} />)}
+            </div>
+            {hasMore && (
+              <div className="text-center mt-8">
+                <Button onClick={loadMoreCompetitions} disabled={loadingMore} size="lg" className="active:scale-95 transition-transform" style={{ backgroundColor: sectionColor }}>
+                  {loadingMore ? (
+                    <>
+                      <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                      جاري التحميل...
+                    </>
+                  ) : (
+                    'تحميل المزيد'
+                  )}
+                </Button>
+              </div>
+            )}
+          </>
         ) : (
           <p className="col-span-full text-center text-muted-foreground py-10">لا توجد مباريات تطابق بحثك.</p>
         )}
-        <PaginationControls totalPages={totalPages} currentPage={page} themeColor="#14532d" />
       </div>
     </>
   );

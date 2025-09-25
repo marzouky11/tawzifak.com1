@@ -1,28 +1,20 @@
 
-import type { Metadata } from 'next';
+'use client';
+
 import { JobCard } from '@/components/job-card';
 import { getJobs } from '@/lib/data';
 import { JobFilters } from '@/components/job-filters';
-import type { WorkType } from '@/lib/types';
-import { Suspense } from 'react';
+import type { WorkType, Job } from '@/lib/types';
+import { Suspense, useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MobilePageHeader } from '@/components/layout/mobile-page-header';
-import { Users } from 'lucide-react';
+import { Users, Loader2 } from 'lucide-react';
 import { DesktopPageHeader } from '@/components/layout/desktop-page-header';
-import { PaginationControls } from '@/components/pagination-controls';
-
-export const revalidate = 3600; // Revalidate every hour
-
-export const metadata: Metadata = {
-  title: 'باحثون عن عمل',
-  description: 'تصفح ملفات المرشحين والمهنيين المستعدين للانضمام إلى فريقك في مختلف التخصصات والمجالات.',
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
+import { Button } from '@/components/ui/button';
+import { useSearchParams } from 'next/navigation';
 
 const ITEMS_PER_PAGE = 16;
+const sectionColor = '#424242';
 
 function JobFiltersSkeleton() {
     return <div className="h-14 bg-muted rounded-lg w-full animate-pulse" />;
@@ -38,37 +30,62 @@ function WorkerListSkeleton() {
   );
 }
 
-async function WorkerList({ jobs }: { jobs: any[] }) {
-  if (jobs.length > 0) {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {jobs.map((job) => <JobCard key={job.id} job={job} />)}
-      </div>
-    );
-  }
-  return <p className="col-span-full text-center text-muted-foreground py-10">لا يوجد باحثون عن عمل يطابقون بحثك.</p>;
-}
+export default function WorkersPage() {
+  const searchParams = useSearchParams();
+  const q = searchParams.get('q');
+  const country = searchParams.get('country');
+  const city = searchParams.get('city');
+  const category = searchParams.get('category');
+  const workType = searchParams.get('workType');
 
-export default async function WorkersPage({
-  searchParams,
-}: {
-  searchParams?: { [key: string]: string | string[] | undefined };
-}) {
+  const [workers, setWorkers] = useState<Job[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  const page = Number(searchParams?.page || '1');
+  useEffect(() => {
+    const fetchInitialWorkers = async () => {
+      setLoading(true);
+      const { data, totalCount } = await getJobs({
+        postType: 'seeking_job',
+        searchQuery: q || undefined,
+        country: country || undefined,
+        city: city || undefined,
+        categoryId: category || undefined,
+        workType: workType as WorkType || undefined,
+        page: 1,
+        limit: ITEMS_PER_PAGE,
+      });
+      setWorkers(data);
+      setPage(1);
+      setHasMore(totalCount > ITEMS_PER_PAGE);
+      setLoading(false);
+    };
 
-  const { data: jobs, totalCount } = await getJobs({
-    postType: 'seeking_job',
-    searchQuery: typeof searchParams?.q === 'string' ? searchParams.q : undefined,
-    country: typeof searchParams?.country === 'string' ? searchParams.country : undefined,
-    city: typeof searchParams?.city === 'string' ? searchParams.city : undefined,
-    categoryId: typeof searchParams?.category === 'string' ? searchParams.category : undefined,
-    workType: typeof searchParams?.workType === 'string' ? searchParams.workType as WorkType : undefined,
-    page: page,
-    limit: ITEMS_PER_PAGE,
-  });
+    fetchInitialWorkers();
+  }, [q, country, city, category, workType]);
 
-  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
+  const loadMoreWorkers = async () => {
+    if (!hasMore || loadingMore) return;
+    setLoadingMore(true);
+    const nextPage = page + 1;
+    const { data, totalCount } = await getJobs({
+      postType: 'seeking_job',
+      searchQuery: q || undefined,
+      country: country || undefined,
+      city: city || undefined,
+      categoryId: category || undefined,
+      workType: workType as WorkType || undefined,
+      page: nextPage,
+      limit: ITEMS_PER_PAGE,
+    });
+    
+    setWorkers(prev => [...prev, ...data]);
+    setPage(nextPage);
+    setHasMore(workers.length + data.length < totalCount);
+    setLoadingMore(false);
+  };
 
   return (
     <>
@@ -88,10 +105,31 @@ export default async function WorkersPage({
         </div>
        </div>
       <div className="container pt-4 pb-6">
-        <Suspense fallback={<WorkerListSkeleton />}>
-          <WorkerList jobs={jobs} />
-        </Suspense>
-        <PaginationControls totalPages={totalPages} currentPage={page} themeColor="#424242" />
+        {loading ? (
+          <WorkerListSkeleton />
+        ) : workers.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {workers.map((job) => <JobCard key={job.id} job={job} />)}
+            </div>
+            {hasMore && (
+              <div className="text-center mt-8">
+                <Button onClick={loadMoreWorkers} disabled={loadingMore} size="lg" className="active:scale-95 transition-transform" style={{ backgroundColor: sectionColor }}>
+                  {loadingMore ? (
+                    <>
+                      <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                      جاري التحميل...
+                    </>
+                  ) : (
+                    'تحميل المزيد'
+                  )}
+                </Button>
+              </div>
+            )}
+          </>
+        ) : (
+          <p className="col-span-full text-center text-muted-foreground py-10">لا يوجد باحثون عن عمل يطابقون بحثك.</p>
+        )}
       </div>
     </>
   );
