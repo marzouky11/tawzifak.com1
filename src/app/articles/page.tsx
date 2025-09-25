@@ -1,52 +1,70 @@
+
+'use client';
+
 import { MobilePageHeader } from '@/components/layout/mobile-page-header';
 import { getArticles as getDbArticles } from '@/lib/data';
 import { getArticles as getStaticArticles } from '@/lib/articles';
 import { Newspaper } from 'lucide-react';
 import { ArticleCard } from './article-card';
 import { DesktopPageHeader } from '@/components/layout/desktop-page-header';
-import type { Metadata } from 'next';
-import { Suspense } from 'react';
+import type { Article } from '@/lib/types';
+import { Suspense, useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 
-export const revalidate = 3600;
-
-export const metadata: Metadata = {
-    title: 'مقالات ونصائح للعمل والتوظيف في الوطن العربي – تحسين فرصك الآن',
-    description: 'نصائح للتوظيف، كتابة السيرة الذاتية، العمل عن بعد، وفرص الربح من الإنترنت. محتوى موجه للعرب الباحثين عن الاستقرار المهني أو الحرية المالية.',
-    robots: 'index, follow',
-};
-
+const ARTICLES_PER_PAGE = 8;
 
 function ArticlesListSkeleton() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-      {Array.from({ length: 8 }).map((_, i) => (
-        <Skeleton key={i} className="h-80 w-full rounded-lg" />
+      {Array.from({ length: ARTICLES_PER_PAGE }).map((_, i) => (
+        <div key={i} className="flex flex-col space-y-3">
+            <Skeleton className="h-[125px] w-full rounded-xl" />
+            <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+            </div>
+        </div>
       ))}
     </div>
   );
 }
 
-async function AllArticles() {
-    const staticArticles = getStaticArticles();
-    const dbArticles = await getDbArticles();
-
-    const allArticles = [...staticArticles, ...dbArticles].sort((a, b) => {
-        const dateA = a.createdAt ? a.createdAt.toMillis() : (a.date ? new Date(a.date).getTime() : 0);
-        const dateB = b.createdAt ? b.createdAt.toMillis() : (b.date ? new Date(b.date).getTime() : 0);
-        return dateB - dateA;
-    });
-
-    return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {allArticles.map((article) => (
-                <ArticleCard key={article.slug} article={article} />
-            ))}
-        </div>
-    )
-}
-
 export default function ArticlesPage() {
+  const [allArticles, setAllArticles] = useState<Article[]>([]);
+  const [displayedArticles, setDisplayedArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    async function fetchArticles() {
+      setLoading(true);
+      const staticArticles = getStaticArticles();
+      const dbArticles = await getDbArticles();
+
+      const sortedArticles = [...staticArticles, ...dbArticles].sort((a, b) => {
+          const dateA = a.createdAt ? a.createdAt.toMillis() : (a.date ? new Date(a.date).getTime() : 0);
+          const dateB = b.createdAt ? b.createdAt.toMillis() : (b.date ? new Date(b.date).getTime() : 0);
+          return dateB - dateA;
+      });
+      
+      setAllArticles(sortedArticles);
+      setDisplayedArticles(sortedArticles.slice(0, ARTICLES_PER_PAGE));
+      setHasMore(sortedArticles.length > ARTICLES_PER_PAGE);
+      setLoading(false);
+    }
+    fetchArticles();
+  }, []);
+
+  const loadMoreArticles = () => {
+    const currentLength = displayedArticles.length;
+    const nextArticles = allArticles.slice(currentLength, currentLength + ARTICLES_PER_PAGE);
+    setDisplayedArticles([...displayedArticles, ...nextArticles]);
+    if (currentLength + ARTICLES_PER_PAGE >= allArticles.length) {
+      setHasMore(false);
+    }
+  };
 
   return (
     <>
@@ -61,9 +79,24 @@ export default function ArticlesPage() {
       />
         
       <div className="container mx-auto max-w-7xl px-4 pb-8">
-        <Suspense fallback={<ArticlesListSkeleton />}>
-            <AllArticles />
-        </Suspense>
+        {loading ? (
+          <ArticlesListSkeleton />
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {displayedArticles.map((article) => (
+                <ArticleCard key={article.slug} article={article} />
+              ))}
+            </div>
+            {hasMore && (
+              <div className="text-center mt-8">
+                <Button onClick={loadMoreArticles} variant="outline" size="lg">
+                  تحميل المزيد
+                </Button>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </>
   );
