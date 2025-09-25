@@ -1,6 +1,8 @@
 
 import { getImmigrationPosts } from '@/lib/data';
 
+export const dynamic = 'force-dynamic';
+
 const baseUrl = 'https://www.tawzifak.com';
 
 function generateSitemap(posts: any[]) {
@@ -25,7 +27,7 @@ function generateSitemap(posts: any[]) {
 
 export async function GET() {
   try {
-    const posts = await getImmigrationPosts({ count: 9999 }); // Fetch all posts
+    const { data: posts } = await getImmigrationPosts({ count: 9999 }); // Fetch all posts
     const sitemap = generateSitemap(posts);
 
     return new Response(sitemap, {

@@ -1,6 +1,8 @@
 
 import { getJobs } from '@/lib/data';
 
+export const dynamic = 'force-dynamic';
+
 const baseUrl = 'https://www.tawzifak.com';
 
 function generateSitemap(jobs: any[]) {
@@ -26,7 +28,7 @@ function generateSitemap(jobs: any[]) {
 
 export async function GET() {
   try {
-    const jobs = await getJobs({ postType: 'seeking_worker' });
+    const { data: jobs } = await getJobs({ postType: 'seeking_worker' });
     const sitemap = generateSitemap(jobs);
 
     return new Response(sitemap, {
@@ -39,4 +41,3 @@ export async function GET() {
     return new Response('Error generating jobs sitemap', { status: 500 });
   }
 }
-

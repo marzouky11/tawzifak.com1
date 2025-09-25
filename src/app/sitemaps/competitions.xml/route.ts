@@ -1,6 +1,8 @@
 
 import { getCompetitions } from '@/lib/data';
 
+export const dynamic = 'force-dynamic';
+
 const baseUrl = 'https://www.tawzifak.com';
 
 function generateSitemap(competitions: any[]) {
@@ -25,7 +27,7 @@ function generateSitemap(competitions: any[]) {
 
 export async function GET() {
   try {
-    const competitions = await getCompetitions({ count: 9999 }); // Fetch all competitions
+    const { data: competitions } = await getCompetitions({ count: 9999 }); // Fetch all competitions
     const sitemap = generateSitemap(competitions);
 
     return new Response(sitemap, {
