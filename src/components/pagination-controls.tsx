@@ -36,49 +36,44 @@ export function PaginationControls({
 
   const renderPageNumbers = () => {
     const pageNumbers = [];
-    const maxPagesToShow = isMobile ? 3 : 5;
+    
+    if (isMobile) {
+      // Mobile: Show current page, next page, ellipsis, and last page.
+      pageNumbers.push(
+        <Button key={currentPage} variant="default" size="icon" style={{ backgroundColor: themeColor, borderColor: themeColor }} className="pointer-events-none">
+          {currentPage}
+        </Button>
+      );
+      if (currentPage < totalPages) {
+         pageNumbers.push(
+          <Button key={currentPage + 1} variant="outline" size="icon" onClick={() => handlePageChange(currentPage + 1)}>
+            {currentPage + 1}
+          </Button>
+        );
+      }
+      if (currentPage + 1 < totalPages -1) {
+         pageNumbers.push(<span key="end-ellipsis" className="px-1 text-muted-foreground">...</span>);
+      }
+      if (currentPage < totalPages -1) {
+         pageNumbers.push(
+          <Button key={totalPages} variant="outline" size="icon" onClick={() => handlePageChange(totalPages)}>
+            {totalPages}
+          </Button>
+        );
+      }
+      return pageNumbers;
+    }
 
+
+    // Desktop logic
+    const maxPagesToShow = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
     let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
 
     if (endPage - startPage + 1 < maxPagesToShow) {
       startPage = Math.max(1, endPage - maxPagesToShow + 1);
     }
-    
-    if (isMobile) {
-      if (currentPage > 1) {
-        pageNumbers.push(
-          <Button key={1} variant="outline" size="icon" onClick={() => handlePageChange(1)}>
-            1
-          </Button>
-        );
-        if (currentPage > 2) {
-          pageNumbers.push(<span key="start-ellipsis" className="px-1 text-muted-foreground">...</span>);
-        }
-      }
 
-      pageNumbers.push(
-        <Button key={currentPage} variant="default" size="icon" style={{ backgroundColor: themeColor, borderColor: themeColor }} className="pointer-events-none">
-          {currentPage}
-        </Button>
-      );
-      
-      if (currentPage < totalPages) {
-         if (currentPage < totalPages - 1) {
-          pageNumbers.push(<span key="end-ellipsis" className="px-1 text-muted-foreground">...</span>);
-        }
-        pageNumbers.push(
-          <Button key={totalPages} variant="outline" size="icon" onClick={() => handlePageChange(totalPages)}>
-            {totalPages}
-          </Button>
-        );
-      }
-      
-      return pageNumbers;
-    }
-
-
-    // Desktop logic
     if (startPage > 1) {
       pageNumbers.push(
         <Button
