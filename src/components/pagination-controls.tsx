@@ -1,16 +1,19 @@
-'use client';
+"use client";
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Button } from './ui/button';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Button } from "./ui/button";
+import { ChevronRight, ChevronLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface PaginationControlsProps {
   totalPages: number;
   currentPage: number;
 }
 
-export function PaginationControls({ totalPages, currentPage }: PaginationControlsProps) {
+export function PaginationControls({
+  totalPages,
+  currentPage,
+}: PaginationControlsProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -21,27 +24,38 @@ export function PaginationControls({ totalPages, currentPage }: PaginationContro
 
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams);
-    params.set('page', page.toString());
+    params.set("page", page.toString());
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   const renderPageNumbers = () => {
     const pageNumbers = [];
     const maxPagesToShow = 5;
-    
+
     let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
     let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
 
     if (endPage - startPage + 1 < maxPagesToShow) {
-        startPage = Math.max(1, endPage - maxPagesToShow + 1);
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
     }
-    
+
     if (startPage > 1) {
       pageNumbers.push(
-        <Button key={1} variant="outline" size="icon" onClick={() => handlePageChange(1)}>1</Button>
+        <Button
+          key={1}
+          variant="outline"
+          size="icon"
+          onClick={() => handlePageChange(1)}
+        >
+          1
+        </Button>
       );
       if (startPage > 2) {
-        pageNumbers.push(<span key="start-ellipsis" className="px-2">...</span>);
+        pageNumbers.push(
+          <span key="start-ellipsis" className="px-2">
+            ...
+          </span>
+        );
       }
     }
 
@@ -49,7 +63,7 @@ export function PaginationControls({ totalPages, currentPage }: PaginationContro
       pageNumbers.push(
         <Button
           key={i}
-          variant={i === currentPage ? 'default' : 'outline'}
+          variant={i === currentPage ? "default" : "outline"}
           size="icon"
           onClick={() => handlePageChange(i)}
           className={cn(i === currentPage && "pointer-events-none")}
@@ -61,10 +75,19 @@ export function PaginationControls({ totalPages, currentPage }: PaginationContro
 
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
-        pageNumbers.push(<span key="end-ellipsis" className="px-2">...</span>);
+        pageNumbers.push(
+          <span key="end-ellipsis" className="px-2">
+            ...
+          </span>
+        );
       }
       pageNumbers.push(
-        <Button key={totalPages} variant="outline" size="icon" onClick={() => handlePageChange(totalPages)}>
+        <Button
+          key={totalPages}
+          variant="outline"
+          size="icon"
+          onClick={() => handlePageChange(totalPages)}
+        >
           {totalPages}
         </Button>
       );
@@ -84,9 +107,7 @@ export function PaginationControls({ totalPages, currentPage }: PaginationContro
         <span>السابق</span>
       </Button>
 
-      <div className="hidden md:flex items-center gap-2">
-        {renderPageNumbers()}
-      </div>
+      <div className="flex items-center gap-2">{renderPageNumbers()}</div>
 
       <Button
         variant="outline"
