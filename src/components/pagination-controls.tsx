@@ -27,7 +27,7 @@ export function PaginationControls({
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams);
     params.set("page", page.toString());
-    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   const renderPageNumbers = () => {
@@ -48,14 +48,13 @@ export function PaginationControls({
           variant="outline"
           size="icon"
           onClick={() => handlePageChange(1)}
-          className="hidden sm:inline-flex"
         >
           1
         </Button>
       );
       if (startPage > 2) {
         pageNumbers.push(
-          <span key="start-ellipsis" className="px-2 hidden sm:inline-block">
+          <span key="start-ellipsis" className="px-2">
             ...
           </span>
         );
@@ -79,7 +78,7 @@ export function PaginationControls({
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
         pageNumbers.push(
-          <span key="end-ellipsis" className="px-2 hidden sm:inline-block">
+          <span key="end-ellipsis" className="px-2">
             ...
           </span>
         );
@@ -90,7 +89,6 @@ export function PaginationControls({
           variant="outline"
           size="icon"
           onClick={() => handlePageChange(totalPages)}
-          className="hidden sm:inline-flex"
         >
           {totalPages}
         </Button>
@@ -111,7 +109,28 @@ export function PaginationControls({
         <span>السابق</span>
       </Button>
 
-      <div className="flex items-center gap-2">{renderPageNumbers()}</div>
+      <div className="hidden sm:flex items-center gap-2">{renderPageNumbers()}</div>
+      <div className="sm:hidden flex items-center gap-2">
+        <Button
+          variant={1 === currentPage ? "default" : "outline"}
+          size="icon"
+          onClick={() => handlePageChange(1)}
+        >
+          1
+        </Button>
+        {totalPages > 2 && (
+          <span className="px-1">...</span>
+        )}
+        {totalPages > 1 && (
+            <Button
+                variant={totalPages === currentPage ? "default" : "outline"}
+                size="icon"
+                onClick={() => handlePageChange(totalPages)}
+            >
+                {totalPages}
+            </Button>
+        )}
+      </div>
 
       <Button
         variant="outline"
