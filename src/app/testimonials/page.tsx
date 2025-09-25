@@ -7,7 +7,7 @@ import { Loader2, MessageSquare } from 'lucide-react';
 import { TestimonialCard } from './testimonial-card';
 import { DesktopPageHeader } from '@/components/layout/desktop-page-header';
 import type { Testimonial } from '@/lib/types';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -15,10 +15,8 @@ const TESTIMONIALS_PER_PAGE = 8;
 
 export default function TestimonialsPage() {
   const [allTestimonials, setAllTestimonials] = useState<Testimonial[]>([]);
-  const [displayedTestimonials, setDisplayedTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -29,25 +27,22 @@ export default function TestimonialsPage() {
       setLoading(true);
       const data = await getTestimonials();
       setAllTestimonials(data);
-      setDisplayedTestimonials(data.slice(0, TESTIMONIALS_PER_PAGE));
-      setHasMore(data.length > TESTIMONIALS_PER_PAGE);
       setLoading(false);
     }
     fetchTestimonials();
   }, []);
 
   const loadMoreTestimonials = () => {
-    setLoadingMore(true);
-    setTimeout(() => {
-      const currentLength = displayedTestimonials.length;
-      const nextTestimonials = allTestimonials.slice(currentLength, currentLength + TESTIMONIALS_PER_PAGE);
-      setDisplayedTestimonials([...displayedTestimonials, ...nextTestimonials]);
-      if (currentLength + TESTIMONIALS_PER_PAGE >= allTestimonials.length) {
-        setHasMore(false);
-      }
-      setLoadingMore(false);
-    }, 500); // Simulate network delay
+    setPage(prevPage => prevPage + 1);
   };
+  
+  const displayedTestimonials = useMemo(() => {
+    return allTestimonials.slice(0, page * TESTIMONIALS_PER_PAGE);
+  }, [allTestimonials, page]);
+
+  const hasMore = useMemo(() => {
+    return displayedTestimonials.length < allTestimonials.length;
+  }, [displayedTestimonials, allTestimonials]);
 
   return (
     <>
@@ -88,15 +83,8 @@ export default function TestimonialsPage() {
 
             {hasMore && (
               <div className="text-center mt-8">
-                <Button onClick={loadMoreTestimonials} disabled={loadingMore} size="lg" className="active:scale-95 transition-transform" variant="outline">
-                  {loadingMore ? (
-                    <>
-                      <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                      جاري التحميل...
-                    </>
-                  ) : (
-                    'تحميل المزيد'
-                  )}
+                <Button onClick={loadMoreTestimonials} size="lg" className="active:scale-95 transition-transform" variant="outline">
+                  تحميل المزيد
                 </Button>
               </div>
             )}

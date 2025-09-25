@@ -2,7 +2,7 @@
 'use client';
 
 import { JobCard } from '@/components/job-card';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState, useCallback } from 'react';
 import { MobilePageHeader } from '@/components/layout/mobile-page-header';
 import { Users } from 'lucide-react';
 import { DesktopPageHeader } from '@/components/layout/desktop-page-header';
@@ -31,53 +31,48 @@ function WorkerListSkeleton() {
 
 function PageContent() {
   const searchParams = useSearchParams();
+  const [workers, setWorkers] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
+  
   const q = searchParams.get('q');
   const country = searchParams.get('country');
   const city = searchParams.get('city');
   const category = searchParams.get('category');
   const workType = searchParams.get('workType');
 
-  const [allWorkers, setAllWorkers] = useState<Job[]>([]);
-  const [displayedWorkers, setDisplayedWorkers] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const fetchAndSetWorkers = useCallback(async (pageNum: number, reset: boolean) => {
+    if(pageNum === 1) setLoading(true); else setLoadingMore(true);
+
+    const { data: newWorkers, totalCount } = await getJobs({
+      postType: 'seeking_job',
+      searchQuery: q || undefined,
+      country: country || undefined,
+      city: city || undefined,
+      categoryId: category || undefined,
+      workType: workType as WorkType || undefined,
+      page: pageNum,
+      limit: ITEMS_PER_PAGE,
+    });
+    
+    setWorkers(prev => reset ? newWorkers : [...prev, ...newWorkers]);
+    setHasMore((pageNum * ITEMS_PER_PAGE) < totalCount);
+
+    if(pageNum === 1) setLoading(false); else setLoadingMore(false);
+  }, [q, country, city, category, workType]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [q, country, city, category, workType]);
-
-  useEffect(() => {
-    const fetchWorkers = async () => {
-      setLoading(true);
-      const { data } = await getJobs({
-        postType: 'seeking_job',
-        searchQuery: q || undefined,
-        country: country || undefined,
-        city: city || undefined,
-        categoryId: category || undefined,
-        workType: workType as WorkType || undefined,
-      });
-      setAllWorkers(data);
-      setDisplayedWorkers(data.slice(0, ITEMS_PER_PAGE));
-      setHasMore(data.length > ITEMS_PER_PAGE);
-      setLoading(false);
-    };
-
-    fetchWorkers();
-  }, [q, country, city, category, workType]);
+    setPage(1);
+    fetchAndSetWorkers(1, true);
+  }, [q, country, city, category, workType, fetchAndSetWorkers]);
 
   const loadMore = () => {
-    setLoadingMore(true);
-    setTimeout(() => {
-        const currentLength = displayedWorkers.length;
-        const nextItems = allWorkers.slice(currentLength, currentLength + ITEMS_PER_PAGE);
-        setDisplayedWorkers([...displayedWorkers, ...nextItems]);
-        if (currentLength + ITEMS_PER_PAGE >= allWorkers.length) {
-          setHasMore(false);
-        }
-        setLoadingMore(false);
-    }, 500);
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchAndSetWorkers(nextPage, false);
   };
   
   return (
@@ -92,10 +87,10 @@ function PageContent() {
       <div className="container pt-4 pb-6">
         {loading ? (
           <WorkerListSkeleton />
-        ) : displayedWorkers.length > 0 ? (
+        ) : workers.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {displayedWorkers.map((job) => <JobCard key={job.id} job={job} />)}
+              {workers.map((job) => <JobCard key={job.id} job={job} />)}
             </div>
             {hasMore && (
               <div className="text-center mt-8">

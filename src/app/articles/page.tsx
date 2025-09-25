@@ -8,7 +8,7 @@ import { Newspaper } from 'lucide-react';
 import { ArticleCard } from './article-card';
 import { DesktopPageHeader } from '@/components/layout/desktop-page-header';
 import type { Article } from '@/lib/types';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
@@ -33,47 +33,46 @@ function ArticlesListSkeleton() {
 
 export default function ArticlesPage() {
   const [allArticles, setAllArticles] = useState<Article[]>([]);
-  const [displayedArticles, setDisplayedArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
+  const staticArticles = useMemo(() => getStaticArticles(), []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
   
   useEffect(() => {
-    async function fetchArticles() {
+    async function fetchInitialArticles() {
       setLoading(true);
-      const staticArticles = getStaticArticles();
       const dbArticles = await getDbArticles();
-
-      const sortedArticles = [...staticArticles, ...dbArticles].sort((a, b) => {
-          const dateA = a.createdAt ? a.createdAt.toMillis() : (a.date ? new Date(a.date).getTime() : 0);
-          const dateB = b.createdAt ? b.createdAt.toMillis() : (b.date ? new Date(b.date).getTime() : 0);
-          return dateB - dateA;
+      const combined = [...staticArticles, ...dbArticles].sort((a, b) => {
+        const dateA = a.createdAt ? a.createdAt.toMillis() : (a.date ? new Date(a.date).getTime() : 0);
+        const dateB = b.createdAt ? b.createdAt.toMillis() : (b.date ? new Date(b.date).getTime() : 0);
+        return dateB - dateA;
       });
       
-      setAllArticles(sortedArticles);
-      setDisplayedArticles(sortedArticles.slice(0, ARTICLES_PER_PAGE));
-      setHasMore(sortedArticles.length > ARTICLES_PER_PAGE);
+      setAllArticles(combined);
+      setHasMore(combined.length > ARTICLES_PER_PAGE);
       setLoading(false);
     }
-    fetchArticles();
-  }, []);
+    fetchInitialArticles();
+  }, [staticArticles]);
 
   const loadMoreArticles = () => {
-    setLoadingMore(true);
-    setTimeout(() => {
-        const currentLength = displayedArticles.length;
-        const nextArticles = allArticles.slice(currentLength, currentLength + ARTICLES_PER_PAGE);
-        setDisplayedArticles([...displayedArticles, ...nextArticles]);
-        if (currentLength + ARTICLES_PER_PAGE >= allArticles.length) {
-          setHasMore(false);
-        }
-        setLoadingMore(false);
-    }, 500); // Simulate network delay
+    setPage(prevPage => prevPage + 1);
   };
+
+  const displayedArticles = useMemo(() => {
+    return allArticles.slice(0, page * ARTICLES_PER_PAGE);
+  }, [allArticles, page]);
+
+  useEffect(() => {
+    if (displayedArticles.length >= allArticles.length && allArticles.length > 0) {
+      setHasMore(false);
+    }
+  }, [displayedArticles, allArticles]);
 
   return (
     <>

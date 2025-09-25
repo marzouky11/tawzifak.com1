@@ -2,7 +2,7 @@
 'use client';
 
 import { Landmark } from 'lucide-react';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState, useCallback } from 'react';
 import { MobilePageHeader } from '@/components/layout/mobile-page-header';
 import { DesktopPageHeader } from '@/components/layout/desktop-page-header';
 import { CompetitionCard } from '@/components/competition-card';
@@ -31,44 +31,39 @@ function CompetitionFiltersSkeleton() {
 
 function PageContent() {
   const searchParams = useSearchParams();
-  const q = searchParams.get('q');
-
-  const [allCompetitions, setAllCompetitions] = useState<Competition[]>([]);
-  const [displayedCompetitions, setDisplayedCompetitions] = useState<Competition[]>([]);
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
+
+  const q = searchParams.get('q');
+
+  const fetchAndSetCompetitions = useCallback(async (pageNum: number, reset: boolean) => {
+    if(pageNum === 1) setLoading(true); else setLoadingMore(true);
+
+    const { data: newCompetitions, totalCount } = await getCompetitions({
+      searchQuery: q || undefined,
+      page: pageNum,
+      limit: ITEMS_PER_PAGE,
+    });
+
+    setCompetitions(prev => reset ? newCompetitions : [...prev, ...newCompetitions]);
+    setHasMore((pageNum * ITEMS_PER_PAGE) < totalCount);
+
+    if(pageNum === 1) setLoading(false); else setLoadingMore(false);
+  }, [q]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [q]);
-
-  useEffect(() => {
-    const fetchCompetitions = async () => {
-      setLoading(true);
-      const { data } = await getCompetitions({
-        searchQuery: q || undefined,
-      });
-      setAllCompetitions(data);
-      setDisplayedCompetitions(data.slice(0, ITEMS_PER_PAGE));
-      setHasMore(data.length > ITEMS_PER_PAGE);
-      setLoading(false);
-    };
-
-    fetchCompetitions();
-  }, [q]);
+    setPage(1);
+    fetchAndSetCompetitions(1, true);
+  }, [q, fetchAndSetCompetitions]);
 
   const loadMore = () => {
-    setLoadingMore(true);
-    setTimeout(() => {
-        const currentLength = displayedCompetitions.length;
-        const nextItems = allCompetitions.slice(currentLength, currentLength + ITEMS_PER_PAGE);
-        setDisplayedCompetitions([...displayedCompetitions, ...nextItems]);
-        if (currentLength + ITEMS_PER_PAGE >= allCompetitions.length) {
-          setHasMore(false);
-        }
-        setLoadingMore(false);
-    }, 500);
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchAndSetCompetitions(nextPage, false);
   };
 
   return (
@@ -84,10 +79,10 @@ function PageContent() {
       <div className="container pt-4 pb-6">
         {loading ? (
           <CompetitionListSkeleton />
-        ) : displayedCompetitions.length > 0 ? (
+        ) : competitions.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {displayedCompetitions.map((comp) => <CompetitionCard key={comp.id} competition={comp} />)}
+              {competitions.map((comp) => <CompetitionCard key={comp.id} competition={comp} />)}
             </div>
             {hasMore && (
               <div className="text-center mt-8">

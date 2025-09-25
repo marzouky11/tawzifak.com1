@@ -2,7 +2,7 @@
 'use client';
 
 import { Plane } from 'lucide-react';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState, useCallback } from 'react';
 import { MobilePageHeader } from '@/components/layout/mobile-page-header';
 import { DesktopPageHeader } from '@/components/layout/desktop-page-header';
 import { ImmigrationCard } from '@/components/immigration-card';
@@ -31,44 +31,39 @@ function ImmigrationFiltersSkeleton() {
 
 function PageContent() {
   const searchParams = useSearchParams();
-  const q = searchParams.get('q');
-
-  const [allPosts, setAllPosts] = useState<ImmigrationPost[]>([]);
-  const [displayedPosts, setDisplayedPosts] = useState<ImmigrationPost[]>([]);
+  const [posts, setPosts] = useState<ImmigrationPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
+
+  const q = searchParams.get('q');
+
+  const fetchAndSetPosts = useCallback(async (pageNum: number, reset: boolean) => {
+    if(pageNum === 1) setLoading(true); else setLoadingMore(true);
+
+    const { data: newPosts, totalCount } = await getImmigrationPosts({
+      searchQuery: q || undefined,
+      page: pageNum,
+      limit: ITEMS_PER_PAGE,
+    });
+
+    setPosts(prev => reset ? newPosts : [...prev, ...newPosts]);
+    setHasMore((pageNum * ITEMS_PER_PAGE) < totalCount);
+
+    if(pageNum === 1) setLoading(false); else setLoadingMore(false);
+  }, [q]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [q]);
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      setLoading(true);
-      const { data } = await getImmigrationPosts({
-        searchQuery: q || undefined,
-      });
-      setAllPosts(data);
-      setDisplayedPosts(data.slice(0, ITEMS_PER_PAGE));
-      setHasMore(data.length > ITEMS_PER_PAGE);
-      setLoading(false);
-    };
-
-    fetchPosts();
-  }, [q]);
+    setPage(1);
+    fetchAndSetPosts(1, true);
+  }, [q, fetchAndSetPosts]);
 
   const loadMore = () => {
-    setLoadingMore(true);
-    setTimeout(() => {
-      const currentLength = displayedPosts.length;
-      const nextItems = allPosts.slice(currentLength, currentLength + ITEMS_PER_PAGE);
-      setDisplayedPosts([...displayedPosts, ...nextItems]);
-      if (currentLength + ITEMS_PER_PAGE >= allPosts.length) {
-        setHasMore(false);
-      }
-      setLoadingMore(false);
-    }, 500);
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchAndSetPosts(nextPage, false);
   };
 
   return (
@@ -84,10 +79,10 @@ function PageContent() {
       <div className="container pt-4 pb-6">
         {loading ? (
           <ImmigrationListSkeleton />
-        ) : displayedPosts.length > 0 ? (
+        ) : posts.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {displayedPosts.map((post) => <ImmigrationCard key={post.id} post={post} />)}
+              {posts.map((post) => <ImmigrationCard key={post.id} post={post} />)}
             </div>
             {hasMore && (
               <div className="text-center mt-8">

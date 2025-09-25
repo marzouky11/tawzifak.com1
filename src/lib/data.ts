@@ -1,3 +1,4 @@
+
 import { db, auth } from '@/lib/firebase';
 import { collection, getDocs, getDoc, doc, query, where, orderBy, limit, addDoc, serverTimestamp, updateDoc, deleteDoc, setDoc, Query, and, QueryConstraint, QueryFilterConstraint, documentId, increment } from 'firebase/firestore';
 import type { Job, Category, PostType, User, WorkType, Testimonial, Competition, Organizer, Article, Report, ContactMessage, ImmigrationPost } from './types';
@@ -83,6 +84,8 @@ export async function getJobs(
     categoryId?: string;
     workType?: WorkType;
     excludeId?: string;
+    page?: number;
+    limit?: number;
   } = {}
 ): Promise<{ data: Job[]; totalCount: number }> {
   try {
@@ -95,71 +98,76 @@ export async function getJobs(
       categoryId,
       workType,
       excludeId,
+      page = 1,
+      limit: pageLimit,
     } = options;
 
-    const adsRef = collection(db, 'ads');
+    let allJobs: Job[] = [];
     
+    // Step 1: Fetch all documents based on filters (excluding pagination)
+    const adsRef = collection(db, 'ads');
     const queryConstraints: QueryConstraint[] = [];
 
-    if (postType) {
-        queryConstraints.push(where('postType', '==', postType));
-    }
-    if (categoryId) {
-        queryConstraints.push(where('categoryId', '==', categoryId));
-    }
-    if (workType) {
-        queryConstraints.push(where('workType', '==', workType));
-    }
+    if (postType) queryConstraints.push(where('postType', '==', postType));
+    if (categoryId) queryConstraints.push(where('categoryId', '==', categoryId));
+    if (workType) queryConstraints.push(where('workType', '==', workType));
     
-    queryConstraints.push(orderBy('createdAt', 'desc'));
-    
-    if (count) {
-        queryConstraints.push(limit(count));
-    }
-
     const q = query(adsRef, ...queryConstraints);
-
     const querySnapshot = await getDocs(q);
-
-    let jobs = querySnapshot.docs.map(doc => {
+    
+    allJobs = querySnapshot.docs.map(doc => {
       const data = doc.data();
       const createdAt = data.createdAt.toDate();
-      const isNew = (new Date().getTime() - createdAt.getTime()) < 24 * 60 * 60 * 1000;
       return {
         id: doc.id,
         ...data,
         postedAt: formatTimeAgo(data.createdAt),
-        isNew,
+        isNew: (new Date().getTime() - createdAt.getTime()) < 24 * 60 * 60 * 1000,
       } as Job;
     });
-    
-    jobs = jobs.filter(job => {
-       if (excludeId && job.id === excludeId) return false;
-       return true;
-    });
 
+    // Step 2: Apply client-side filtering (search, country, city, excludeId)
+    if (excludeId) {
+        allJobs = allJobs.filter(job => job.id !== excludeId);
+    }
+    
     if (searchQuery) {
-        const fuse = new Fuse(jobs, {
+        const fuse = new Fuse(allJobs, {
             keys: ['title', 'description', 'categoryName', 'country', 'city', 'companyName', 'experience', 'qualifications'],
             includeScore: true,
             threshold: 0.4,
         });
-        jobs = fuse.search(searchQuery).map(result => result.item);
+        allJobs = fuse.search(searchQuery).map(result => result.item);
     }
     
     if (country) {
-        const fuse = new Fuse(jobs, { keys: ['country'], includeScore: true, threshold: 0.3 });
-        jobs = fuse.search(country).map(result => result.item);
+        const fuse = new Fuse(allJobs, { keys: ['country'], includeScore: true, threshold: 0.3 });
+        allJobs = fuse.search(country).map(result => result.item);
     }
 
     if (city) {
-        const fuse = new Fuse(jobs, { keys: ['city'], includeScore: true, threshold: 0.3 });
-        jobs = fuse.search(city).map(result => result.item);
+        const fuse = new Fuse(allJobs, { keys: ['city'], includeScore: true, threshold: 0.3 });
+        allJobs = fuse.search(city).map(result => result.item);
+    }
+    
+    // Sort by creation date after all filtering
+    allJobs.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
+
+    const totalCount = allJobs.length;
+
+    // Step 3: Apply pagination or count limit
+    let data: Job[];
+    if (pageLimit) {
+        const startIndex = (page - 1) * pageLimit;
+        const endIndex = startIndex + pageLimit;
+        data = allJobs.slice(startIndex, endIndex);
+    } else if (count) {
+        data = allJobs.slice(0, count);
+    } else {
+        data = allJobs;
     }
 
-    const totalCount = jobs.length;
-
-    return { data: jobs, totalCount };
+    return { data, totalCount };
   } catch (error) {
     console.error("Error fetching jobs: ", error);
     return { data: [], totalCount: 0 };
@@ -432,35 +440,30 @@ export async function getCompetitions(options: {
   searchQuery?: string;
   location?: string;
   excludeId?: string;
+  page?: number;
+  limit?: number;
 } = {}): Promise<{ data: Competition[]; totalCount: number }> {
   try {
-    const { count, searchQuery, location, excludeId } = options;
+    const { count, searchQuery, location, excludeId, page = 1, limit: pageLimit } = options;
     const competitionsRef = collection(db, 'competitions');
     
-    const queryConstraints: QueryConstraint[] = [orderBy('createdAt', 'desc')];
-    if (count) {
-        queryConstraints.push(limit(count));
-    }
-
-    const q = query(competitionsRef, ...queryConstraints);
+    const q = query(competitionsRef);
     const querySnapshot = await getDocs(q);
 
     let competitions = querySnapshot.docs.map(doc => {
       const data = doc.data();
       const createdAt = data.createdAt.toDate();
-      const isNew = (new Date().getTime() - createdAt.getTime()) < 24 * 60 * 60 * 1000;
       return {
         id: doc.id,
         ...data,
         postedAt: formatTimeAgo(data.createdAt),
-        isNew,
+        isNew: (new Date().getTime() - createdAt.getTime()) < 24 * 60 * 60 * 1000,
       } as Competition;
     });
 
-    competitions = competitions.filter(comp => {
-       if (excludeId && comp.id === excludeId) return false;
-       return true;
-    });
+    if (excludeId) {
+      competitions = competitions.filter(comp => comp.id !== excludeId);
+    }
 
     if (searchQuery) {
         const fuse = new Fuse(competitions, {
@@ -479,10 +482,23 @@ export async function getCompetitions(options: {
         });
         competitions = fuse.search(location).map(result => result.item);
     }
+    
+    competitions.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
 
     const totalCount = competitions.length;
+
+    let data: Competition[];
+    if (pageLimit) {
+        const startIndex = (page - 1) * pageLimit;
+        const endIndex = startIndex + pageLimit;
+        data = competitions.slice(startIndex, endIndex);
+    } else if (count) {
+        data = competitions.slice(0, count);
+    } else {
+        data = competitions;
+    }
     
-    return { data: competitions, totalCount };
+    return { data, totalCount };
   } catch (error) {
     console.error("Error fetching competitions: ", error);
     return { data: [], totalCount: 0 };
@@ -556,17 +572,14 @@ export async function getImmigrationPosts(options: {
   count?: number;
   searchQuery?: string;
   excludeId?: string;
+  page?: number;
+  limit?: number;
 } = {}): Promise<{ data: ImmigrationPost[]; totalCount: number }> {
   try {
-    const { count, searchQuery, excludeId } = options;
+    const { count, searchQuery, excludeId, page = 1, limit: pageLimit } = options;
     const postsRef = collection(db, 'immigration');
     
-    const queryConstraints: QueryConstraint[] = [orderBy('createdAt', 'desc')];
-    if (count) {
-        queryConstraints.push(limit(count));
-    }
-
-    const q = query(postsRef, ...queryConstraints);
+    const q = query(postsRef);
     const querySnapshot = await getDocs(q);
 
     let posts = querySnapshot.docs.map(doc => {
@@ -593,10 +606,23 @@ export async function getImmigrationPosts(options: {
       });
       posts = fuse.search(searchQuery).map(result => result.item);
     }
+    
+    posts.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
 
     const totalCount = posts.length;
+
+    let data: ImmigrationPost[];
+    if (pageLimit) {
+        const startIndex = (page - 1) * pageLimit;
+        const endIndex = startIndex + pageLimit;
+        data = posts.slice(startIndex, endIndex);
+    } else if (count) {
+        data = posts.slice(0, count);
+    } else {
+        data = posts;
+    }
     
-    return { data: posts, totalCount };
+    return { data, totalCount };
   } catch (error) {
     console.error("Error fetching immigration posts: ", error);
     return { data: [], totalCount: 0 };
@@ -734,14 +760,10 @@ export function getOrganizerByName(organizerName?: string): Organizer | undefine
 }
 
 // --- Articles Functions ---
-export async function getArticles(options: { count?: number } = {}): Promise<Article[]> {
+export async function getArticles(): Promise<Article[]> {
   try {
     const articlesRef = collection(db, 'articles');
     let q = query(articlesRef, orderBy('createdAt', 'desc'));
-    
-    if (options.count) {
-      q = query(articlesRef, orderBy('createdAt', 'desc'), limit(options.count));
-    }
     
     const querySnapshot = await getDocs(q);
     
