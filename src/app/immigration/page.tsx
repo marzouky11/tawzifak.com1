@@ -34,43 +34,42 @@ export default function ImmigrationPage() {
   const searchParams = useSearchParams();
   const q = searchParams.get('q');
 
-  const [posts, setPosts] = useState<ImmigrationPost[]>([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [allPosts, setAllPosts] = useState<ImmigrationPost[]>([]);
+  const [displayedPosts, setDisplayedPosts] = useState<ImmigrationPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [q]);
 
   useEffect(() => {
     const fetchInitialPosts = async () => {
       setLoading(true);
-      const { data, totalCount } = await getImmigrationPosts({
+      const { data } = await getImmigrationPosts({
         searchQuery: q || undefined,
-        page: 1,
-        limit: ITEMS_PER_PAGE,
       });
-      setPosts(data);
-      setPage(1);
-      setHasMore(totalCount > ITEMS_PER_PAGE);
+      setAllPosts(data);
+      setDisplayedPosts(data.slice(0, ITEMS_PER_PAGE));
+      setHasMore(data.length > ITEMS_PER_PAGE);
       setLoading(false);
     };
 
     fetchInitialPosts();
   }, [q]);
 
-  const loadMorePosts = async () => {
-    if (!hasMore || loadingMore) return;
+  const loadMorePosts = () => {
     setLoadingMore(true);
-    const nextPage = page + 1;
-    const { data, totalCount } = await getImmigrationPosts({
-      searchQuery: q || undefined,
-      page: nextPage,
-      limit: ITEMS_PER_PAGE,
-    });
-    
-    setPosts(prev => [...prev, ...data]);
-    setPage(nextPage);
-    setHasMore(posts.length + data.length < totalCount);
-    setLoadingMore(false);
+    setTimeout(() => {
+      const currentLength = displayedPosts.length;
+      const nextPosts = allPosts.slice(currentLength, currentLength + ITEMS_PER_PAGE);
+      setDisplayedPosts([...displayedPosts, ...nextPosts]);
+      if (currentLength + ITEMS_PER_PAGE >= allPosts.length) {
+        setHasMore(false);
+      }
+      setLoadingMore(false);
+    }, 500);
   };
 
   return (
@@ -94,10 +93,10 @@ export default function ImmigrationPage() {
       <div className="container pt-4 pb-6">
         {loading ? (
           <ImmigrationListSkeleton />
-        ) : posts.length > 0 ? (
+        ) : displayedPosts.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {posts.map((post) => <ImmigrationCard key={post.id} post={post} />)}
+              {displayedPosts.map((post) => <ImmigrationCard key={post.id} post={post} />)}
             </div>
             {hasMore && (
               <div className="text-center mt-8">

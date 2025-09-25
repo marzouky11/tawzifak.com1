@@ -35,43 +35,42 @@ export default function CompetitionsPage() {
   const searchParams = useSearchParams();
   const q = searchParams.get('q');
 
-  const [competitions, setCompetitions] = useState<Competition[]>([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [allCompetitions, setAllCompetitions] = useState<Competition[]>([]);
+  const [displayedCompetitions, setDisplayedCompetitions] = useState<Competition[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [q]);
 
   useEffect(() => {
     const fetchInitialCompetitions = async () => {
       setLoading(true);
-      const { data, totalCount } = await getCompetitions({
+      const { data } = await getCompetitions({
         searchQuery: q || undefined,
-        page: 1,
-        limit: ITEMS_PER_PAGE,
       });
-      setCompetitions(data);
-      setPage(1);
-      setHasMore(totalCount > ITEMS_PER_PAGE);
+      setAllCompetitions(data);
+      setDisplayedCompetitions(data.slice(0, ITEMS_PER_PAGE));
+      setHasMore(data.length > ITEMS_PER_PAGE);
       setLoading(false);
     };
 
     fetchInitialCompetitions();
   }, [q]);
 
-  const loadMoreCompetitions = async () => {
-    if (!hasMore || loadingMore) return;
+  const loadMoreCompetitions = () => {
     setLoadingMore(true);
-    const nextPage = page + 1;
-    const { data, totalCount } = await getCompetitions({
-      searchQuery: q || undefined,
-      page: nextPage,
-      limit: ITEMS_PER_PAGE,
-    });
-    
-    setCompetitions(prev => [...prev, ...data]);
-    setPage(nextPage);
-    setHasMore(competitions.length + data.length < totalCount);
-    setLoadingMore(false);
+    setTimeout(() => {
+      const currentLength = displayedCompetitions.length;
+      const nextCompetitions = allCompetitions.slice(currentLength, currentLength + ITEMS_PER_PAGE);
+      setDisplayedCompetitions([...displayedCompetitions, ...nextCompetitions]);
+      if (currentLength + ITEMS_PER_PAGE >= allCompetitions.length) {
+        setHasMore(false);
+      }
+      setLoadingMore(false);
+    }, 500);
   };
 
   return (
@@ -95,10 +94,10 @@ export default function CompetitionsPage() {
       <div className="container pt-4 pb-6">
         {loading ? (
           <CompetitionListSkeleton />
-        ) : competitions.length > 0 ? (
+        ) : displayedCompetitions.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {competitions.map((comp) => <CompetitionCard key={comp.id} competition={comp} />)}
+              {displayedCompetitions.map((comp) => <CompetitionCard key={comp.id} competition={comp} />)}
             </div>
             {hasMore && (
               <div className="text-center mt-8">

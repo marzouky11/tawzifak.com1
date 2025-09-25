@@ -38,55 +38,49 @@ export default function WorkersPage() {
   const category = searchParams.get('category');
   const workType = searchParams.get('workType');
 
-  const [workers, setWorkers] = useState<Job[]>([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [allWorkers, setAllWorkers] = useState<Job[]>([]);
+  const [displayedWorkers, setDisplayedWorkers] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [q, country, city, category, workType]);
 
   useEffect(() => {
     const fetchInitialWorkers = async () => {
       setLoading(true);
-      const { data, totalCount } = await getJobs({
+      const { data } = await getJobs({
         postType: 'seeking_job',
         searchQuery: q || undefined,
         country: country || undefined,
         city: city || undefined,
         categoryId: category || undefined,
         workType: workType as WorkType || undefined,
-        page: 1,
-        limit: ITEMS_PER_PAGE,
       });
-      setWorkers(data);
-      setPage(1);
-      setHasMore(totalCount > ITEMS_PER_PAGE);
+      setAllWorkers(data);
+      setDisplayedWorkers(data.slice(0, ITEMS_PER_PAGE));
+      setHasMore(data.length > ITEMS_PER_PAGE);
       setLoading(false);
     };
 
     fetchInitialWorkers();
   }, [q, country, city, category, workType]);
 
-  const loadMoreWorkers = async () => {
-    if (!hasMore || loadingMore) return;
+  const loadMoreWorkers = () => {
     setLoadingMore(true);
-    const nextPage = page + 1;
-    const { data, totalCount } = await getJobs({
-      postType: 'seeking_job',
-      searchQuery: q || undefined,
-      country: country || undefined,
-      city: city || undefined,
-      categoryId: category || undefined,
-      workType: workType as WorkType || undefined,
-      page: nextPage,
-      limit: ITEMS_PER_PAGE,
-    });
-    
-    setWorkers(prev => [...prev, ...data]);
-    setPage(nextPage);
-    setHasMore(workers.length + data.length < totalCount);
-    setLoadingMore(false);
+    setTimeout(() => {
+      const currentLength = displayedWorkers.length;
+      const nextWorkers = allWorkers.slice(currentLength, currentLength + ITEMS_PER_PAGE);
+      setDisplayedWorkers([...displayedWorkers, ...nextWorkers]);
+      if (currentLength + ITEMS_PER_PAGE >= allWorkers.length) {
+        setHasMore(false);
+      }
+      setLoadingMore(false);
+    }, 500);
   };
-
+  
   return (
     <>
       <MobilePageHeader title="باحثون عن عمل" sticky={false}>
@@ -107,10 +101,10 @@ export default function WorkersPage() {
       <div className="container pt-4 pb-6">
         {loading ? (
           <WorkerListSkeleton />
-        ) : workers.length > 0 ? (
+        ) : displayedWorkers.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {workers.map((job) => <JobCard key={job.id} job={job} />)}
+              {displayedWorkers.map((job) => <JobCard key={job.id} job={job} />)}
             </div>
             {hasMore && (
               <div className="text-center mt-8">

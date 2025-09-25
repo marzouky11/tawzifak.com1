@@ -40,6 +40,10 @@ export default function ArticlesPage() {
   const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  
+  useEffect(() => {
     async function fetchArticles() {
       setLoading(true);
       const staticArticles = getStaticArticles();

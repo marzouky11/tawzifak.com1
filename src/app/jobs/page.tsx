@@ -38,56 +38,50 @@ export default function JobsPage() {
   const city = searchParams.get('city');
   const category = searchParams.get('category');
   const workType = searchParams.get('workType');
-  
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+
+  const [allJobs, setAllJobs] = useState<Job[]>([]);
+  const [displayedJobs, setDisplayedJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [q, country, city, category, workType]);
 
   useEffect(() => {
     const fetchInitialJobs = async () => {
       setLoading(true);
-      const { data, totalCount } = await getJobs({
+      const { data } = await getJobs({
         postType: 'seeking_worker',
         searchQuery: q || undefined,
         country: country || undefined,
         city: city || undefined,
         categoryId: category || undefined,
         workType: workType as WorkType || undefined,
-        page: 1,
-        limit: ITEMS_PER_PAGE,
       });
-      setJobs(data);
-      setPage(1);
-      setHasMore(totalCount > ITEMS_PER_PAGE);
+      setAllJobs(data);
+      setDisplayedJobs(data.slice(0, ITEMS_PER_PAGE));
+      setHasMore(data.length > ITEMS_PER_PAGE);
       setLoading(false);
     };
 
     fetchInitialJobs();
   }, [q, country, city, category, workType]);
 
-  const loadMoreJobs = async () => {
-    if (!hasMore || loadingMore) return;
+  const loadMoreJobs = () => {
     setLoadingMore(true);
-    const nextPage = page + 1;
-    const { data, totalCount } = await getJobs({
-        postType: 'seeking_worker',
-        searchQuery: q || undefined,
-        country: country || undefined,
-        city: city || undefined,
-        categoryId: category || undefined,
-        workType: workType as WorkType || undefined,
-        page: nextPage,
-        limit: ITEMS_PER_PAGE,
-    });
-    
-    setJobs(prev => [...prev, ...data]);
-    setPage(nextPage);
-    setHasMore(jobs.length + data.length < totalCount);
-    setLoadingMore(false);
+    setTimeout(() => {
+      const currentLength = displayedJobs.length;
+      const nextJobs = allJobs.slice(currentLength, currentLength + ITEMS_PER_PAGE);
+      setDisplayedJobs([...displayedJobs, ...nextJobs]);
+      if (currentLength + ITEMS_PER_PAGE >= allJobs.length) {
+        setHasMore(false);
+      }
+      setLoadingMore(false);
+    }, 500);
   };
-
+  
   return (
     <>
       <MobilePageHeader title="الوظائف" sticky={false}>
@@ -108,10 +102,10 @@ export default function JobsPage() {
       <div className="container pt-4 pb-6">
         {loading ? (
           <JobListSkeleton />
-        ) : jobs.length > 0 ? (
+        ) : displayedJobs.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {jobs.map((job) => <JobCard key={job.id} job={job} />)}
+              {displayedJobs.map((job) => <JobCard key={job.id} job={job} />)}
             </div>
             {hasMore && (
               <div className="text-center mt-8">

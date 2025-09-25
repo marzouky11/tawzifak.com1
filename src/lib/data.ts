@@ -83,8 +83,6 @@ export async function getJobs(
     categoryId?: string;
     workType?: WorkType;
     excludeId?: string;
-    page?: number;
-    limit?: number;
   } = {}
 ): Promise<{ data: Job[]; totalCount: number }> {
   try {
@@ -97,8 +95,6 @@ export async function getJobs(
       categoryId,
       workType,
       excludeId,
-      page = 1,
-      limit,
     } = options;
 
     const adsRef = collection(db, 'ads');
@@ -116,6 +112,10 @@ export async function getJobs(
     }
     
     queryConstraints.push(orderBy('createdAt', 'desc'));
+    
+    if (count) {
+        queryConstraints.push(limit(count));
+    }
 
     const q = query(adsRef, ...queryConstraints);
 
@@ -158,16 +158,6 @@ export async function getJobs(
     }
 
     const totalCount = jobs.length;
-
-    if (limit) {
-      const start = (page - 1) * limit;
-      const end = start + limit;
-      return { data: jobs.slice(start, end), totalCount };
-    }
-
-    if (count) {
-      return { data: jobs.slice(0, count), totalCount };
-    }
 
     return { data: jobs, totalCount };
   } catch (error) {
@@ -442,13 +432,17 @@ export async function getCompetitions(options: {
   searchQuery?: string;
   location?: string;
   excludeId?: string;
-  page?: number;
-  limit?: number;
 } = {}): Promise<{ data: Competition[]; totalCount: number }> {
   try {
-    const { count, searchQuery, location, excludeId, page = 1, limit } = options;
+    const { count, searchQuery, location, excludeId } = options;
     const competitionsRef = collection(db, 'competitions');
-    const q = query(competitionsRef, orderBy('createdAt', 'desc'));
+    
+    const queryConstraints: QueryConstraint[] = [orderBy('createdAt', 'desc')];
+    if (count) {
+        queryConstraints.push(limit(count));
+    }
+
+    const q = query(competitionsRef, ...queryConstraints);
     const querySnapshot = await getDocs(q);
 
     let competitions = querySnapshot.docs.map(doc => {
@@ -487,16 +481,6 @@ export async function getCompetitions(options: {
     }
 
     const totalCount = competitions.length;
-    
-    if (limit) {
-      const start = (page - 1) * limit;
-      const end = start + limit;
-      return { data: competitions.slice(start, end), totalCount };
-    }
-
-    if (count) {
-      return { data: competitions.slice(0, count), totalCount };
-    }
     
     return { data: competitions, totalCount };
   } catch (error) {
@@ -572,13 +556,17 @@ export async function getImmigrationPosts(options: {
   count?: number;
   searchQuery?: string;
   excludeId?: string;
-  page?: number;
-  limit?: number;
 } = {}): Promise<{ data: ImmigrationPost[]; totalCount: number }> {
   try {
-    const { count, searchQuery, excludeId, page = 1, limit } = options;
+    const { count, searchQuery, excludeId } = options;
     const postsRef = collection(db, 'immigration');
-    const q = query(postsRef, orderBy('createdAt', 'desc'));
+    
+    const queryConstraints: QueryConstraint[] = [orderBy('createdAt', 'desc')];
+    if (count) {
+        queryConstraints.push(limit(count));
+    }
+
+    const q = query(postsRef, ...queryConstraints);
     const querySnapshot = await getDocs(q);
 
     let posts = querySnapshot.docs.map(doc => {
@@ -607,16 +595,6 @@ export async function getImmigrationPosts(options: {
     }
 
     const totalCount = posts.length;
-
-    if (limit) {
-      const start = (page - 1) * limit;
-      const end = start + limit;
-      return { data: posts.slice(start, end), totalCount };
-    }
-
-    if (count) {
-      return { data: posts.slice(0, count), totalCount };
-    }
     
     return { data: posts, totalCount };
   } catch (error) {

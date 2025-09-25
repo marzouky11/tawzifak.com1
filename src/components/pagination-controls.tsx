@@ -6,7 +6,7 @@ import { Button } from "./ui/button";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import React from "react";
+import React, { useEffect } from "react";
 
 interface PaginationControlsProps {
   totalPages: number;
@@ -24,6 +24,10 @@ export function PaginationControls({
   const searchParams = useSearchParams();
   const isMobile = useIsMobile();
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentPage]);
+  
   if (totalPages <= 1) {
     return null;
   }
@@ -38,34 +42,35 @@ export function PaginationControls({
   const renderPageNumbers = () => {
     const pageNumbers = [];
     const maxPagesToShow = isMobile ? 2 : 5;
+    
+    let startPage: number, endPage: number;
 
-    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-
-    if (endPage - startPage + 1 < maxPagesToShow && startPage > 1) {
-      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    if (totalPages <= maxPagesToShow) {
+        startPage = 1;
+        endPage = totalPages;
+    } else {
+        const maxPagesBeforeCurrent = Math.floor(maxPagesToShow / 2);
+        const maxPagesAfterCurrent = Math.ceil(maxPagesToShow / 2) - 1;
+        if (currentPage <= maxPagesBeforeCurrent) {
+            startPage = 1;
+            endPage = maxPagesToShow;
+        } else if (currentPage + maxPagesAfterCurrent >= totalPages) {
+            startPage = totalPages - maxPagesToShow + 1;
+            endPage = totalPages;
+        } else {
+            startPage = currentPage - maxPagesBeforeCurrent;
+            endPage = currentPage + maxPagesAfterCurrent;
+        }
     }
     
     if (startPage > 1) {
-        pageNumbers.push(
-            <Button
-            key={1}
-            variant="outline"
-            size="icon"
-            onClick={() => handlePageChange(1)}
-            >
-            1
-            </Button>
-        );
-      if (startPage > 2) {
         pageNumbers.push(
           <span key="start-ellipsis" className="px-1 text-muted-foreground">
             ...
           </span>
         );
-      }
     }
-
+    
     for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(
         <Button
@@ -87,16 +92,6 @@ export function PaginationControls({
             ...
           </span>
         );
-       pageNumbers.push(
-            <Button
-            key={totalPages}
-            variant="outline"
-            size="icon"
-            onClick={() => handlePageChange(totalPages)}
-            >
-            {totalPages}
-            </Button>
-        );
     }
 
     return pageNumbers;
@@ -114,19 +109,8 @@ export function PaginationControls({
         <span>السابق</span>
       </Button>
 
-      <div className="hidden md:flex items-center gap-2">{renderPageNumbers()}</div>
+      <div className="flex items-center gap-2">{renderPageNumbers()}</div>
       
-      <div className="md:hidden flex items-center gap-2">
-        <Button
-          variant="default"
-          size="icon"
-          className="pointer-events-none"
-          style={{ backgroundColor: themeColor, borderColor: themeColor }}
-        >
-          {currentPage}
-        </Button>
-      </div>
-
       <Button
         variant="default"
         onClick={() => handlePageChange(currentPage + 1)}
