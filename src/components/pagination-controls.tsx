@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "./ui/button";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PaginationControlsProps {
   totalPages: number;
@@ -17,6 +18,7 @@ export function PaginationControls({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const isMobile = useIsMobile();
 
   if (totalPages <= 1) {
     return null;
@@ -30,7 +32,7 @@ export function PaginationControls({
 
   const renderPageNumbers = () => {
     const pageNumbers = [];
-    const maxPagesToShow = 5;
+    const maxPagesToShow = isMobile ? 3 : 5;
 
     let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
     let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
@@ -46,13 +48,14 @@ export function PaginationControls({
           variant="outline"
           size="icon"
           onClick={() => handlePageChange(1)}
+          className="hidden sm:inline-flex"
         >
           1
         </Button>
       );
       if (startPage > 2) {
         pageNumbers.push(
-          <span key="start-ellipsis" className="px-2">
+          <span key="start-ellipsis" className="px-2 hidden sm:inline-block">
             ...
           </span>
         );
@@ -76,7 +79,7 @@ export function PaginationControls({
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
         pageNumbers.push(
-          <span key="end-ellipsis" className="px-2">
+          <span key="end-ellipsis" className="px-2 hidden sm:inline-block">
             ...
           </span>
         );
@@ -87,6 +90,7 @@ export function PaginationControls({
           variant="outline"
           size="icon"
           onClick={() => handlePageChange(totalPages)}
+          className="hidden sm:inline-flex"
         >
           {totalPages}
         </Button>
