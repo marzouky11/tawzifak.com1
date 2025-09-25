@@ -38,7 +38,7 @@ export function PaginationControls({
     const pageNumbers = [];
     
     if (isMobile) {
-      // Mobile: Show current page, next page, ellipsis, and last page.
+      // Mobile: Show current page, next page, and ellipsis.
       pageNumbers.push(
         <Button key={currentPage} variant="default" size="icon" style={{ backgroundColor: themeColor, borderColor: themeColor }} className="pointer-events-none">
           {currentPage}
@@ -51,15 +51,8 @@ export function PaginationControls({
           </Button>
         );
       }
-      if (currentPage + 1 < totalPages -1) {
+      if (currentPage + 1 < totalPages) {
          pageNumbers.push(<span key="end-ellipsis" className="px-1 text-muted-foreground">...</span>);
-      }
-      if (currentPage < totalPages -1) {
-         pageNumbers.push(
-          <Button key={totalPages} variant="outline" size="icon" onClick={() => handlePageChange(totalPages)}>
-            {totalPages}
-          </Button>
-        );
       }
       return pageNumbers;
     }
@@ -110,23 +103,11 @@ export function PaginationControls({
     }
 
     if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
         pageNumbers.push(
           <span key="end-ellipsis" className="px-2">
             ...
           </span>
         );
-      }
-      pageNumbers.push(
-        <Button
-          key={totalPages}
-          variant="outline"
-          size="icon"
-          onClick={() => handlePageChange(totalPages)}
-        >
-          {totalPages}
-        </Button>
-      );
     }
 
     return pageNumbers;
