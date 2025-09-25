@@ -22,7 +22,7 @@ export function PaginationControls({ totalPages, currentPage }: PaginationContro
   const handlePageChange = (page: number) => {
     const params = new URLSearchParams(searchParams);
     params.set('page', page.toString());
-    router.push(`${pathname}?${params.toString()}`);
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   const renderPageNumbers = () => {
@@ -32,16 +32,10 @@ export function PaginationControls({ totalPages, currentPage }: PaginationContro
     let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
     let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
 
-    if (totalPages > maxPagesToShow) {
-        if (endPage === totalPages) {
-            startPage = totalPages - maxPagesToShow + 1;
-        } else if (currentPage <= Math.floor(maxPagesToShow / 2) + 1) {
-            startPage = 1;
-            endPage = maxPagesToShow;
-        }
+    if (endPage - startPage + 1 < maxPagesToShow) {
+        startPage = Math.max(1, endPage - maxPagesToShow + 1);
     }
-
-
+    
     if (startPage > 1) {
       pageNumbers.push(
         <Button key={1} variant="outline" size="icon" onClick={() => handlePageChange(1)}>1</Button>
