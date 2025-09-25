@@ -28,8 +28,19 @@ export function PaginationControls({ totalPages, currentPage }: PaginationContro
   const renderPageNumbers = () => {
     const pageNumbers = [];
     const maxPagesToShow = 5;
-    const startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-    const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+    
+    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+    if (totalPages > maxPagesToShow) {
+        if (endPage === totalPages) {
+            startPage = totalPages - maxPagesToShow + 1;
+        } else if (currentPage <= Math.floor(maxPagesToShow / 2) + 1) {
+            startPage = 1;
+            endPage = maxPagesToShow;
+        }
+    }
+
 
     if (startPage > 1) {
       pageNumbers.push(
