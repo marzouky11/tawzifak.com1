@@ -29,6 +29,7 @@ export function PaginationControls({
   }
 
   const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages) return;
     const params = new URLSearchParams(searchParams);
     params.set("page", page.toString());
     router.push(`${pathname}?${params.toString()}`);
@@ -36,51 +37,37 @@ export function PaginationControls({
 
   const renderPageNumbers = () => {
     const pageNumbers = [];
-    
-    if (isMobile) {
-      // Mobile: Show current page, next page, and ellipsis.
-      pageNumbers.push(
-        <Button key={currentPage} variant="default" size="icon" style={{ backgroundColor: themeColor, borderColor: themeColor }} className="pointer-events-none">
-          {currentPage}
-        </Button>
-      );
-      if (currentPage < totalPages) {
-         pageNumbers.push(
-          <Button key={currentPage + 1} variant="outline" size="icon" onClick={() => handlePageChange(currentPage + 1)}>
-            {currentPage + 1}
-          </Button>
-        );
-      }
-      if (currentPage + 1 < totalPages) {
-         pageNumbers.push(<span key="end-ellipsis" className="px-1 text-muted-foreground">...</span>);
-      }
-      return pageNumbers;
-    }
+    const maxPagesToShow = isMobile ? 2 : 5;
 
-
-    // Desktop logic
-    const maxPagesToShow = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
     let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
 
     if (endPage - startPage + 1 < maxPagesToShow) {
       startPage = Math.max(1, endPage - maxPagesToShow + 1);
     }
+    
+    if (isMobile) {
+      startPage = currentPage;
+      endPage = Math.min(totalPages, currentPage + 1);
+    }
+
 
     if (startPage > 1) {
-      pageNumbers.push(
-        <Button
-          key={1}
-          variant="outline"
-          size="icon"
-          onClick={() => handlePageChange(1)}
-        >
-          1
-        </Button>
-      );
+      if(!isMobile) {
+        pageNumbers.push(
+            <Button
+            key={1}
+            variant="outline"
+            size="icon"
+            onClick={() => handlePageChange(1)}
+            >
+            1
+            </Button>
+        );
+      }
       if (startPage > 2) {
         pageNumbers.push(
-          <span key="start-ellipsis" className="px-2">
+          <span key="start-ellipsis" className="px-1 text-muted-foreground">
             ...
           </span>
         );
@@ -103,8 +90,8 @@ export function PaginationControls({
     }
 
     if (endPage < totalPages) {
-        pageNumbers.push(
-          <span key="end-ellipsis" className="px-2">
+       pageNumbers.push(
+          <span key="end-ellipsis" className="px-1 text-muted-foreground">
             ...
           </span>
         );
