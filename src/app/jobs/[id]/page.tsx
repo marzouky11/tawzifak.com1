@@ -149,10 +149,10 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
         notFound();
     }
 
-    const similarJobs = await getJobs({
+    const { data: similarJobs } = await getJobs({
         categoryId: job.categoryId,
         postType: 'seeking_worker',
-        count: 2,
+        count: 3,
         excludeId: job.id,
     });
     

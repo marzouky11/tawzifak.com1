@@ -239,7 +239,7 @@ export function CompetitionDesktopDetails({ competition, similarCompetitions }: 
              {similarCompetitions.length > 0 && (
                 <div className="space-y-4 pt-6 mt-6 border-t">
                     <h2 className="text-2xl font-bold">مباريات مشابهة</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {similarCompetitions.map((similarComp) => (
                         <CompetitionCard key={similarComp.id} competition={similarComp} />
                     ))}

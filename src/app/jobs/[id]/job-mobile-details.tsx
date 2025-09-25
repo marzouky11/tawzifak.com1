@@ -220,7 +220,7 @@ export function JobMobileDetails({ job, similarJobs }: JobMobileDetailsProps) {
                  {similarJobs.length > 0 && (
                     <div className="space-y-4 pt-6 mt-6 border-t">
                         <h2 className="text-2xl font-bold">إعلانات مشابهة</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4">
                         {similarJobs.map((similarJob) => (
                             <JobCard key={similarJob.id} job={similarJob} />
                         ))}
