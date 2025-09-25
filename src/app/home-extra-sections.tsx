@@ -129,14 +129,13 @@ function StatsSection({ stats }: { stats: { jobs: number, competitions: number, 
 }
 
 // Testimonials Section Component
-const INITIAL_DISPLAY_COUNT_MOBILE = 2;
-const INITIAL_DISPLAY_COUNT_DESKTOP = 3;
+const INITIAL_DISPLAY_COUNT = 4;
 
 function TestimonialsSection({ initialTestimonials }: { initialTestimonials: Testimonial[] }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-150px" });
 
-  const displayedTestimonials = initialTestimonials.slice(0, INITIAL_DISPLAY_COUNT_DESKTOP);
+  const displayedTestimonials = initialTestimonials.slice(0, INITIAL_DISPLAY_COUNT);
 
   return (
     <section ref={ref}>
@@ -156,7 +155,7 @@ function TestimonialsSection({ initialTestimonials }: { initialTestimonials: Tes
         </motion.div>
 
         {initialTestimonials.length > 0 ? (  
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">  
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">  
             {displayedTestimonials.map((testimonial, index) => (  
               <motion.div  
                 key={testimonial.id}  
@@ -164,11 +163,6 @@ function TestimonialsSection({ initialTestimonials }: { initialTestimonials: Tes
                 initial={{ opacity: 0, y: 50 }}  
                 animate={isInView ? { opacity: 1, y: 0 } : {}}  
                 transition={{ duration: 0.5, delay: index * 0.2 }}  
-                className={cn(  
-                  index >= INITIAL_DISPLAY_COUNT_DESKTOP ? 'hidden lg:block' : '',  
-                  index >= INITIAL_DISPLAY_COUNT_MOBILE ? 'hidden md:block' : '',  
-                  'lg:block'  
-                )}  
               >  
                 <TestimonialCard testimonial={testimonial} />  
               </motion.div>  
