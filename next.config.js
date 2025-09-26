@@ -43,6 +43,21 @@ const nextConfig = {
       }
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'tawzifak.com',
+          },
+        ],
+        destination: 'https://www.tawzifak.com/:path*',
+        permanent: true,
+      },
+    ]
+  },
   async headers() {
     return [
       {
