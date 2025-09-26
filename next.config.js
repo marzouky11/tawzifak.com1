@@ -1,3 +1,4 @@
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -73,21 +74,8 @@ const nextConfig = {
       },
     ]
   },
-  async redirects() {
-    return [
-      {
-        source: '/:path*',
-        has: [
-          {
-            type: 'host',
-            value: 'www.tawzifak.com' // أي رابط مع www
-          }
-        ],
-        destination: 'https://tawzifak.com/:path*', // يذهب للرابط بدون www
-        permanent: true, // 301 redirect
-      },
-    ];
-  },
 };
 
 module.exports = nextConfig;
+
+    
