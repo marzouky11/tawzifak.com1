@@ -1,4 +1,3 @@
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -24,22 +23,22 @@ const nextConfig = {
         pathname: '/**',
       },
       {
-          protocol: 'https',
-          hostname: 'lh3.googleusercontent.com',
-          port: '',
-          pathname: '/**',
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        port: '',
+        pathname: '/**',
       },
       {
-          protocol: 'https',
-          hostname: 'picsum.photos',
-          port: '',
-          pathname: '/**',
+        protocol: 'https',
+        hostname: 'picsum.photos',
+        port: '',
+        pathname: '/**',
       },
       {
-          protocol: 'https',
-          hostname: 'www.tawzifak.com',
-          port: '',
-          pathname: '/**',
+        protocol: 'https',
+        hostname: 'www.tawzifak.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
@@ -48,34 +47,29 @@ const nextConfig = {
       {
         source: '/(.*)',
         headers: [
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'X-XSS-Protection', value: '1; mode=block' },
         ],
       },
       {
-         // Cache all static assets in the public folder for 1 year
         source: '/:all*(svg|jpg|jpeg|png|gif|ico|webp|avif|css|js|woff2|woff|ttf|otf)',
         headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ],
+      },
+    ]
+  },
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'tawzifak.com' }],
+        destination: 'https://www.tawzifak.com/:path*',
+        permanent: true,
       },
     ]
   },
 };
 
 module.exports = nextConfig;
-
-    
