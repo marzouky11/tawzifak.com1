@@ -1,3 +1,4 @@
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -23,22 +24,22 @@ const nextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'https',
-        hostname: 'lh3.googleusercontent.com',
-        port: '',
-        pathname: '/**',
+          protocol: 'https',
+          hostname: 'lh3.googleusercontent.com',
+          port: '',
+          pathname: '/**',
       },
       {
-        protocol: 'https',
-        hostname: 'picsum.photos',
-        port: '',
-        pathname: '/**',
+          protocol: 'https',
+          hostname: 'picsum.photos',
+          port: '',
+          pathname: '/**',
       },
       {
-        protocol: 'https',
-        hostname: 'www.tawzifak.com',
-        port: '',
-        pathname: '/**',
+          protocol: 'https',
+          hostname: 'www.tawzifak.com',
+          port: '',
+          pathname: '/**',
       }
     ],
   },
@@ -62,7 +63,7 @@ const nextConfig = {
         ],
       },
       {
-        // Cache all static assets in the public folder for 1 year
+         // Cache all static assets in the public folder for 1 year
         source: '/:all*(svg|jpg|jpeg|png|gif|ico|webp|avif|css|js|woff2|woff|ttf|otf)',
         headers: [
           {
@@ -73,26 +74,8 @@ const nextConfig = {
       },
     ]
   },
-  async redirects() {
-    return [
-      {
-        source: '/(.*)',
-        has: [
-          { type: 'host', value: 'tawzifak.com' },
-        ],
-        destination: 'https://tawzifak.com/:1',
-        permanent: true,
-      },
-      {
-        source: '/(.*)',
-        has: [
-          { type: 'host', value: 'www.tawzifak.com' },
-        ],
-        destination: 'https://tawzifak.com/:1',
-        permanent: true,
-      },
-    ];
-  },
 };
 
-module.exports = nextConfig;;
+module.exports = nextConfig;
+
+    
