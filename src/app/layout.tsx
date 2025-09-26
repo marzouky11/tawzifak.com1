@@ -14,7 +14,7 @@ const tajawal = Tajawal({
 });
 
 const baseUrl = 'https://www.tawzifak.com';
-const appName = 'توظيفك – اكتشف أحدث الوظائف وفرص الهجرة والمباريات العمومية';
+const appName = 'توظيفك';
 const appDescription = "تعرّف على أفضل عروض العمل وفرص الهجرة القانونية والمباريات العمومية بسهولة وموثوقية. اعثر على الفرص التي تناسب مهاراتك وطموحاتك المهنية بسرعة وفعالية وابدأ رحلتك نحو مستقبل مهني ناجح";
 const appOgImage = 'https://www.tawzifak.com/og-image.jpg';
 
