@@ -137,9 +137,9 @@ export function CompetitionMobileDetails({ competition, similarCompetitions }: C
                         {competition.competitionType && <InfoItem icon={Briefcase} label="نوع المباراة" value={competition.competitionType} color={organizerColor} />}
                         {competition.location && <InfoItem icon={MapPin} label="الموقع" value={competition.location} color={organizerColor} />}
                         {competition.positionsAvailable && <InfoItem icon={Users2} label="عدد المناصب" value={competition.positionsAvailable} color={organizerColor} />}
-                        <InfoItem icon={CalendarDays} label="بداية التسجيل" value={competition.registrationStartDate} color={sectionColor} />
-                        <InfoItem icon={CalendarDays} label="آخر أجل للتسجيل" value={competition.deadline} color={sectionColor} isDate />
-                        <InfoItem icon={CalendarDays} label="تاريخ المباراة" value={competition.competitionDate} color={sectionColor} />
+                        <InfoItem icon={CalendarDays} label="بداية التسجيل" value={competition.registrationStartDate} color={organizerColor} />
+                        <InfoItem icon={CalendarDays} label="آخر أجل للتسجيل" value={competition.deadline} color={organizerColor} isDate />
+                        <InfoItem icon={CalendarDays} label="تاريخ المباراة" value={competition.competitionDate} color={organizerColor} />
                     </div>
                     
                     {hasDetails && (
@@ -189,7 +189,7 @@ export function CompetitionMobileDetails({ competition, similarCompetitions }: C
                         </Button>
                     )}
                      {competition.email && (
-                        <Button asChild size="lg" variant="outline" className="text-base py-6">
+                        <Button asChild size="lg" variant="outline" className="text-base py-6 hover:bg-green-500/10 hover:border-green-500 hover:text-green-600 font-semibold">
                             <a href={`mailto:${competition.email}`}>
                                 <Mail className="ml-2 h-5 w-5" />
                                 التواصل عبر البريد الإلكتروني
