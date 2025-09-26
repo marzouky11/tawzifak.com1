@@ -80,13 +80,13 @@ const nextConfig = {
         has: [
           {
             type: 'host',
-            value: 'tawzifak.com'
+            value: 'www.tawzifak.com' // أي رابط مع www
           }
         ],
-        destination: 'https://www.tawzifak.com/:path*',
+        destination: 'https://tawzifak.com/:path*', // يذهب للرابط بدون www
         permanent: true, // 301 redirect
       },
-    ]
+    ];
   },
 };
 
