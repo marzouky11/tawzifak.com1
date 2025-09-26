@@ -5,12 +5,6 @@
       "has": [{ "type": "host", "value": "tawzifak.com" }],
       "destination": "https://www.tawzifak.com/$1",
       "permanent": true
-    },
-    {
-      "source": "/(.*)",
-      "has": [{ "type": "scheme", "value": "http" }],
-      "destination": "https://www.tawzifak.com/$1",
-      "permanent": true
     }
   ]
 }
