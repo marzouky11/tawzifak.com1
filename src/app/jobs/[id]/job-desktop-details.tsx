@@ -108,11 +108,11 @@ export function JobDesktopDetails({ job, similarJobs }: JobDesktopDetailsProps) 
     const finalIconName = category?.iconName || 'Briefcase';
 
     const contactButtons = [
-        job.phone && { type: 'phone', href: `tel:${job.phone}`, label: 'اتصال', icon: Phone, color: '#FFFFFF', className: 'bg-[#0D47A1] hover:bg-[#0D47A1]/90' },
-        job.whatsapp && { type: 'whatsapp', href: `https://wa.me/${job.whatsapp.replace(/\+/g, '')}`, label: 'واتساب', icon: MessageSquare, color: '#FFFFFF', className: 'bg-green-600 hover:bg-green-700' },
-        job.email && { type: 'email', href: `mailto:${job.email}`, label: 'البريد الإلكتروني', icon: Mail, color: '#FFFFFF', className: 'bg-gray-600 hover:bg-gray-700' },
-        job.instagram && { type: 'instagram', href: `https://instagram.com/${job.instagram.replace(/@/g, '')}`, label: 'إنستغرام', icon: Instagram, color: '#FFFFFF', className: 'bg-gradient-to-r from-pink-500 to-orange-500 hover:opacity-90' },
-        job.applyUrl && { type: 'applyUrl', href: job.applyUrl, label: 'تسجيل عبر الموقع', icon: LinkIcon, color: '#FFFFFF', className: 'bg-blue-600 hover:bg-blue-700' },
+        job.phone && { type: 'phone', href: `tel:${job.phone}`, label: 'اتصال', icon: Phone, className: 'bg-[#0D47A1] hover:bg-[#0D47A1]/90' },
+        job.whatsapp && { type: 'whatsapp', href: `https://wa.me/${job.whatsapp.replace(/\+/g, '')}`, label: 'واتساب', icon: MessageSquare, className: 'bg-green-600 hover:bg-green-700' },
+        job.email && { type: 'email', href: `mailto:${job.email}`, label: 'البريد الإلكتروني', icon: Mail, className: 'bg-gray-600 hover:bg-gray-700' },
+        job.instagram && { type: 'instagram', href: `https://instagram.com/${job.instagram.replace(/@/g, '')}`, label: 'إنستغرام', icon: Instagram, className: 'bg-gradient-to-r from-pink-500 to-orange-500 hover:opacity-90' },
+        job.applyUrl && { type: 'applyUrl', href: job.applyUrl, label: 'تسجيل عبر الموقع', icon: LinkIcon, className: 'bg-blue-600 hover:bg-blue-700' },
     ].filter(Boolean);
 
     const descriptionSection = job.description ? { id: 'description', icon: FileText, title: "وصف الوظيفة", content: <FormattedText text={job.description} /> } : null;
@@ -207,7 +207,7 @@ export function JobDesktopDetails({ job, similarJobs }: JobDesktopDetailsProps) 
                                     key={button.type}
                                     asChild
                                     size="lg"
-                                    className={cn("h-auto py-3 text-primary-foreground font-semibold text-base", button.className)}
+                                    className={cn("h-auto py-3 text-primary-foreground font-semibold text-base active:scale-95 transition-transform", button.className)}
                                 >
                                     <a href={button.href} target={button.type !== 'phone' ? '_blank' : undefined} rel="noopener noreferrer">
                                         <button.icon className="ml-2 h-5 w-5" />

@@ -171,7 +171,7 @@ export function ImmigrationMobileDetails({ post, similarPosts }: ImmigrationMobi
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 gap-3 pt-0">
                     {post.applyUrl && (
-                        <Button asChild size="lg" className="text-primary-foreground font-semibold text-base py-6" style={{backgroundColor: sectionColor}}>
+                        <Button asChild size="lg" className="text-primary-foreground font-semibold text-base py-6 active:scale-95 transition-transform" style={{backgroundColor: sectionColor}}>
                             <a href={post.applyUrl} target="_blank" rel="noopener noreferrer" className="hover:opacity-90">
                                 <LinkIcon className="ml-2 h-5 w-5" />
                                 الذهاب إلى رابط التسجيل
@@ -181,7 +181,7 @@ export function ImmigrationMobileDetails({ post, similarPosts }: ImmigrationMobi
                     {contactButtons.map(button => {
                         if (!button) return null;
                         return (
-                        <Button key={button.type} asChild size="lg" className={cn("text-primary-foreground font-semibold text-base py-6", button.className)}>
+                        <Button key={button.type} asChild size="lg" className={cn("text-primary-foreground font-semibold text-base py-6 active:scale-95 transition-transform", button.className)}>
                             <a href={button.href} target={button.type !== 'phone' ? '_blank' : undefined} rel="noopener noreferrer">
                                 <button.icon className="ml-2 h-5 w-5" />
                                 {button.label}

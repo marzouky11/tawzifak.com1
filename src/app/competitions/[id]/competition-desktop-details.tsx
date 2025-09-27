@@ -192,7 +192,7 @@ export function CompetitionDesktopDetails({ competition, similarCompetitions }: 
                     </CardHeader>
                     <CardContent className="grid grid-cols-1 gap-3 pt-0">
                          {competition.officialLink && (
-                            <Button asChild size="lg" className="text-primary-foreground font-semibold text-base py-6" style={{backgroundColor: sectionColor}}>
+                            <Button asChild size="lg" className="text-primary-foreground font-semibold text-base py-6 active:scale-95 transition-transform" style={{backgroundColor: sectionColor}}>
                                 <a href={competition.officialLink} target="_blank" rel="noopener noreferrer" className="hover:opacity-90">
                                     <LinkIcon className="ml-2 h-5 w-5" />
                                     الذهاب إلى رابط التسجيل
@@ -200,7 +200,7 @@ export function CompetitionDesktopDetails({ competition, similarCompetitions }: 
                             </Button>
                         )}
                         {competition.fileUrl && (
-                            <Button asChild size="lg" variant="outline" className="text-base py-6 hover:bg-green-500/10 hover:border-green-500 hover:text-green-600 font-semibold">
+                            <Button asChild size="lg" variant="outline" className="text-base py-6 active:scale-95 transition-transform font-semibold">
                                 <a href={competition.fileUrl} target="_blank" rel="noopener noreferrer">
                                     <FileUp className="ml-2 h-5 w-5" />
                                     تحميل إعلان المباراة (PDF)
@@ -208,7 +208,7 @@ export function CompetitionDesktopDetails({ competition, similarCompetitions }: 
                             </Button>
                         )}
                          {competition.email && (
-                            <Button asChild size="lg" variant="outline" className="text-base py-6 hover:bg-green-500/10 hover:border-green-500 hover:text-green-600 font-semibold">
+                            <Button asChild size="lg" variant="outline" className="text-base py-6 active:scale-95 transition-transform font-semibold">
                                 <a href={`mailto:${competition.email}`}>
                                     <Mail className="ml-2 h-5 w-5" />
                                     التواصل عبر البريد الإلكتروني
