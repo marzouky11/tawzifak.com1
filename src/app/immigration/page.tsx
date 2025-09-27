@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 16;
+const CACHE_KEY_PREFIX = 'immigration_cache_';
 
 function ImmigrationListSkeleton() {
   return (
@@ -39,6 +40,10 @@ function PageContent() {
 
   const q = searchParams.get('q');
 
+  const getCacheKey = useCallback(() => {
+    return `${CACHE_KEY_PREFIX}${q || ''}`;
+  }, [q]);
+
   const fetchAndSetPosts = useCallback(async (pageNum: number, reset: boolean) => {
     if(pageNum === 1) setLoading(true); else setLoadingMore(true);
 
@@ -48,17 +53,41 @@ function PageContent() {
       limit: ITEMS_PER_PAGE,
     });
 
-    setPosts(prev => reset ? newPosts : [...prev, ...newPosts]);
+    setPosts(prev => {
+        const updatedPosts = reset ? newPosts : [...prev, ...newPosts];
+        try {
+            sessionStorage.setItem(getCacheKey(), JSON.stringify({
+                items: updatedPosts,
+                page: pageNum,
+                hasMore: (pageNum * ITEMS_PER_PAGE) < totalCount
+            }));
+        } catch (e) { console.error("Failed to save to sessionStorage", e); }
+        return updatedPosts;
+    });
     setHasMore((pageNum * ITEMS_PER_PAGE) < totalCount);
 
     if(pageNum === 1) setLoading(false); else setLoadingMore(false);
-  }, [q]);
+  }, [q, getCacheKey]);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const cacheKey = getCacheKey();
+    try {
+        const cachedData = sessionStorage.getItem(cacheKey);
+        if (cachedData) {
+            const { items, page: cachedPage, hasMore: cachedHasMore } = JSON.parse(cachedData);
+            setPosts(items);
+            setPage(cachedPage);
+            setHasMore(cachedHasMore);
+            setLoading(false);
+            return;
+        }
+    } catch(e) { console.error("Failed to read from sessionStorage", e); }
+
+    setPosts([]);
     setPage(1);
+    setHasMore(true);
     fetchAndSetPosts(1, true);
-  }, [q, fetchAndSetPosts]);
+  }, [q, fetchAndSetPosts, getCacheKey]);
 
   const loadMore = () => {
     const nextPage = page + 1;

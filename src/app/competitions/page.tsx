@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 16;
+const CACHE_KEY_PREFIX = 'competitions_cache_';
 
 function CompetitionListSkeleton() {
   return (
@@ -38,6 +39,10 @@ function PageContent() {
   const [page, setPage] = useState(1);
 
   const q = searchParams.get('q');
+  
+  const getCacheKey = useCallback(() => {
+    return `${CACHE_KEY_PREFIX}${q || ''}`;
+  }, [q]);
 
   const fetchAndSetCompetitions = useCallback(async (pageNum: number, reset: boolean) => {
     if(pageNum === 1) setLoading(true); else setLoadingMore(true);
@@ -48,17 +53,41 @@ function PageContent() {
       limit: ITEMS_PER_PAGE,
     });
 
-    setCompetitions(prev => reset ? newCompetitions : [...prev, ...newCompetitions]);
+    setCompetitions(prev => {
+        const updatedCompetitions = reset ? newCompetitions : [...prev, ...newCompetitions];
+        try {
+            sessionStorage.setItem(getCacheKey(), JSON.stringify({
+                items: updatedCompetitions,
+                page: pageNum,
+                hasMore: (pageNum * ITEMS_PER_PAGE) < totalCount
+            }));
+        } catch (e) { console.error("Failed to save to sessionStorage", e); }
+        return updatedCompetitions;
+    });
     setHasMore((pageNum * ITEMS_PER_PAGE) < totalCount);
 
     if(pageNum === 1) setLoading(false); else setLoadingMore(false);
-  }, [q]);
+  }, [q, getCacheKey]);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const cacheKey = getCacheKey();
+    try {
+        const cachedData = sessionStorage.getItem(cacheKey);
+        if (cachedData) {
+            const { items, page: cachedPage, hasMore: cachedHasMore } = JSON.parse(cachedData);
+            setCompetitions(items);
+            setPage(cachedPage);
+            setHasMore(cachedHasMore);
+            setLoading(false);
+            return;
+        }
+    } catch(e) { console.error("Failed to read from sessionStorage", e); }
+    
+    setCompetitions([]);
     setPage(1);
+    setHasMore(true);
     fetchAndSetCompetitions(1, true);
-  }, [q, fetchAndSetCompetitions]);
+  }, [q, fetchAndSetCompetitions, getCacheKey]);
 
   const loadMore = () => {
     const nextPage = page + 1;

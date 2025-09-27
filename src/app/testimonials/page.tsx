@@ -2,35 +2,47 @@
 'use client';
 
 import { MobilePageHeader } from '@/components/layout/mobile-page-header';
-import { getTestimonials } from '@/lib/data';
+import { getTestimonials as getDbTestimonials } from '@/lib/data';
 import { Loader2, MessageSquare } from 'lucide-react';
 import { TestimonialCard } from './testimonial-card';
 import { DesktopPageHeader } from '@/components/layout/desktop-page-header';
 import type { Testimonial } from '@/lib/types';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const TESTIMONIALS_PER_PAGE = 8;
+const CACHE_KEY = 'testimonials_cache';
 
 export default function TestimonialsPage() {
   const [allTestimonials, setAllTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
+  const fetchTestimonials = useCallback(async () => {
+      setLoading(true);
+      const data = await getDbTestimonials();
+      setAllTestimonials(data);
+      try {
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
+      } catch (e) { console.error("Failed to save to sessionStorage", e); }
+      setLoading(false);
   }, []);
   
   useEffect(() => {
-    async function fetchTestimonials() {
-      setLoading(true);
-      const data = await getTestimonials();
-      setAllTestimonials(data);
-      setLoading(false);
+    try {
+        const cachedData = sessionStorage.getItem(CACHE_KEY);
+        if (cachedData) {
+            setAllTestimonials(JSON.parse(cachedData));
+            setLoading(false);
+        } else {
+            fetchTestimonials();
+        }
+    } catch (e) {
+        console.error("Failed to read from sessionStorage", e);
+        fetchTestimonials();
     }
-    fetchTestimonials();
-  }, []);
+  }, [fetchTestimonials]);
 
   const loadMoreTestimonials = () => {
     setPage(prevPage => prevPage + 1);

@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 16;
+const CACHE_KEY_PREFIX = 'workers_cache_';
 
 function JobFiltersSkeleton() {
     return <div className="h-14 bg-muted rounded-lg w-full animate-pulse" />;
@@ -43,6 +44,10 @@ function PageContent() {
   const category = searchParams.get('category');
   const workType = searchParams.get('workType');
 
+  const getCacheKey = useCallback(() => {
+    return `${CACHE_KEY_PREFIX}${q || ''}_${country || ''}_${city || ''}_${category || ''}_${workType || ''}`;
+  }, [q, country, city, category, workType]);
+
   const fetchAndSetWorkers = useCallback(async (pageNum: number, reset: boolean) => {
     if(pageNum === 1) setLoading(true); else setLoadingMore(true);
 
@@ -57,17 +62,41 @@ function PageContent() {
       limit: ITEMS_PER_PAGE,
     });
     
-    setWorkers(prev => reset ? newWorkers : [...prev, ...newWorkers]);
+    setWorkers(prev => {
+        const updatedWorkers = reset ? newWorkers : [...prev, ...newWorkers];
+        try {
+            sessionStorage.setItem(getCacheKey(), JSON.stringify({
+                items: updatedWorkers,
+                page: pageNum,
+                hasMore: (pageNum * ITEMS_PER_PAGE) < totalCount
+            }));
+        } catch (e) { console.error("Failed to save to sessionStorage", e); }
+        return updatedWorkers;
+    });
     setHasMore((pageNum * ITEMS_PER_PAGE) < totalCount);
 
     if(pageNum === 1) setLoading(false); else setLoadingMore(false);
-  }, [q, country, city, category, workType]);
+  }, [q, country, city, category, workType, getCacheKey]);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const cacheKey = getCacheKey();
+    try {
+        const cachedData = sessionStorage.getItem(cacheKey);
+        if (cachedData) {
+            const { items, page: cachedPage, hasMore: cachedHasMore } = JSON.parse(cachedData);
+            setWorkers(items);
+            setPage(cachedPage);
+            setHasMore(cachedHasMore);
+            setLoading(false);
+            return;
+        }
+    } catch (e) { console.error("Failed to read from sessionStorage", e); }
+    
+    setWorkers([]);
     setPage(1);
+    setHasMore(true);
     fetchAndSetWorkers(1, true);
-  }, [q, country, city, category, workType, fetchAndSetWorkers]);
+  }, [q, country, city, category, workType, fetchAndSetWorkers, getCacheKey]);
 
   const loadMore = () => {
     const nextPage = page + 1;
