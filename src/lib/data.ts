@@ -373,6 +373,10 @@ export async function addTestimonial(testimonialData: Omit<Testimonial, 'id' | '
             createdAt: serverTimestamp(),
         };
         const newDocRef = await addDoc(reviewsCollection, dataToSave);
+        
+        revalidatePath('/');
+        revalidatePath('/testimonials');
+        
         return { id: newDocRef.id };
     } catch (e) {
         console.error("Error adding testimonial: ", e);
