@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { TestimonialCard } from '@/app/testimonials/testimonial-card';
 import { Separator } from '@/components/ui/separator';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // CountUp component for animating numbers
 const CountUp = ({ end, duration = 2 }: { end: number, duration?: number }) => {
@@ -129,13 +130,13 @@ function StatsSection({ stats }: { stats: { jobs: number, competitions: number, 
 }
 
 // Testimonials Section Component
-const INITIAL_DISPLAY_COUNT = 4;
-
 function TestimonialsSection({ initialTestimonials }: { initialTestimonials: Testimonial[] }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-150px" });
+  const isMobile = useIsMobile();
 
-  const displayedTestimonials = initialTestimonials.slice(0, INITIAL_DISPLAY_COUNT);
+  const displayCount = isMobile ? 1 : 4;
+  const displayedTestimonials = initialTestimonials.slice(0, displayCount);
 
   return (
     <section ref={ref}>
