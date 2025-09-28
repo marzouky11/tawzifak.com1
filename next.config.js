@@ -2,6 +2,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  trailingSlash: false,
   images: {
     unoptimized: false,
     remotePatterns: [
@@ -71,6 +72,21 @@ const nextConfig = {
             value: 'public, max-age=31536000, immutable',
           },
         ],
+      },
+    ]
+  },
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'tawzifak.com',
+          },
+        ],
+        destination: 'https://www.tawzifak.com/:path*',
+        permanent: true,
       },
     ]
   },
