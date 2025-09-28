@@ -42,6 +42,7 @@ export const programTypes = [
     { value: 'education', label: 'التعليم', icon: 'School', color: '#3949AB' },
     { value: 'agriculture', label: 'الفلاحة والزراعة', icon: 'Sprout', color: '#7CB342' },
     { value: 'livestock', label: 'العمل في المزارع', icon: 'Home', color: '#8d6e63' },
+    { value: 'beauty', label: 'الحلاقة والتجميل', icon: 'Scissors', color: '#ec4899' },
 ];
 
 export function getProgramTypeDetails(programType: string) {

@@ -98,7 +98,8 @@ export type ImmigrationProgramType =
   | 'hospitality'
   | 'education'
   | 'agriculture'
-  | 'livestock';
+  | 'livestock'
+  | 'beauty';
 
 export interface ImmigrationPost {
   id: string;
