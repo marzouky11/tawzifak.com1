@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import { Tajawal } from 'next/font/google';
 import { Toaster } from "@/components/ui/toaster";
@@ -6,11 +7,13 @@ import { AuthProvider } from '@/context/auth-context';
 import { ThemeProvider } from '@/components/theme-provider';
 import { cn } from '@/lib/utils';
 import { AppLayout } from '@/components/layout/app-layout';
+import Script from 'next/script';
 
 const tajawal = Tajawal({
   subsets: ['arabic'],
   weight: ['200', '300', '400', '500', '700', '800', '900'],
   variable: '--font-tajawal',
+  display: 'swap', // Ensures text remains visible during font loading
 });
 
 const baseUrl = 'https://www.tawzifak.com';
@@ -106,28 +109,27 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }}
         />
-
-        {/* Google tag (gtag.js) */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-FE0MP7XYXM"></script>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-FE0MP7XYXM');
-            `,
-          }}
+      </head>
+      <body className={cn("antialiased", tajawal.variable)}>
+        <Script
+          id="gtag-manager"
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtag/js?id=G-FE0MP7XYXM"
         />
-
-        {/* Google AdSense */}
-        <script
-          async
+        <Script id="gtag-inline" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-FE0MP7XYXM');
+          `}
+        </Script>
+        <Script
+          id="adsense"
+          strategy="afterInteractive"
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6413953433245789"
           crossOrigin="anonymous"
         />
-      </head>
-      <body className={cn("antialiased", tajawal.variable)}>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
