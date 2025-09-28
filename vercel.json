@@ -1,0 +1,16 @@
+
+{
+  "redirects": [
+    {
+      "source": "/:path((?!sitemaps/|api/|revalidate).*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "tawzifak.com"
+        }
+      ],
+      "destination": "https://www.tawzifak.com/:path",
+      "permanent": true
+    }
+  ]
+}
