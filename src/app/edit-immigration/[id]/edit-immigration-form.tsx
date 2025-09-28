@@ -22,7 +22,7 @@ import { slugify, getProgramTypeDetails, programTypes } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { CategoryIcon } from '@/components/icons';
 
-const programTypeValues = programTypes.map(p => p.value) as [string, ...string[]];
+const programTypeValues = programTypes.map(p => p.value) as [ImmigrationProgramType, ...ImmigrationProgramType[]];
 
 const formSchema = z.object({
   title: z.string().min(5, 'العنوان يجب أن يكون 5 أحرف على الأقل.'),
@@ -40,7 +40,7 @@ const formSchema = z.object({
   experience: z.string().optional(),
   tasks: z.string().optional(),
   featuresAndOpportunities: z.string().optional(),
-  applyUrl: z.string().url('رابط التقديم يجب أن يكون رابطًا صحيحًا.'),
+  applyUrl: z.string().url('رابط التقديم يجب أن يكون رابطًا صحيحًا.').optional().or(z.literal('')),
   howToApply: z.string().optional(),
   
   phone: z.string().optional(),

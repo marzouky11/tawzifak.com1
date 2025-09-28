@@ -25,7 +25,7 @@ import { CategoryIcon } from '@/components/icons';
 import type { ImmigrationProgramType } from '@/lib/types';
 
 
-const programTypeValues = programTypes.map(p => p.value) as [string, ...string[]];
+const programTypeValues = programTypes.map(p => p.value) as [ImmigrationProgramType, ...ImmigrationProgramType[]];
 
 const formSchema = z.object({
   title: z.string().min(5, 'العنوان يجب أن يكون 5 أحرف على الأقل.'),
@@ -246,9 +246,9 @@ export function PostImmigrationForm() {
         <div className="flex gap-4 items-center justify-between p-6 border-t bg-muted/50 rounded-b-lg mt-auto">
           {currentStep > 0 ? (<Button type="button" variant="outline" onClick={prevStep}><ArrowRight className="ml-2 h-4 w-4" />السابق</Button>) : <div />}
           {currentStep < steps.length - 1 ? (
-            <Button type="button" onClick={nextStep} className="text-primary-foreground" style={{backgroundColor: sectionColor}}>التالي<ArrowLeft className="mr-2 h-4 w-4" /></Button>
+            <Button type="button" onClick={nextStep} className="text-primary-foreground active:scale-95 transition-transform" style={{backgroundColor: sectionColor}}>التالي<ArrowLeft className="mr-2 h-4 w-4" /></Button>
           ) : (
-            <Button type="button" onClick={nextStep} disabled={isSubmitting} className="text-primary-foreground" style={{backgroundColor: sectionColor}}>
+            <Button type="button" onClick={nextStep} disabled={isSubmitting} className="text-primary-foreground active:scale-95 transition-transform" style={{backgroundColor: sectionColor}}>
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               نشر الإعلان
             </Button>
