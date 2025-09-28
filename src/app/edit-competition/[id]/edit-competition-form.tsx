@@ -159,7 +159,7 @@ export function EditCompetitionForm({ competition }: EditCompetitionFormProps) {
           <FormField control={form.control} name="email" render={({ field }) => (<FormItem><FormLabelIcon icon={Mail} label="البريد الإلكتروني للتواصل (اختياري)" /><FormControl><Input type="email" placeholder="contact@example.com" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
         </div>
         
-        <Button type="submit" disabled={isSubmitting} className="w-full mt-8" size="lg" style={{backgroundColor: sectionColor}}>
+        <Button type="submit" disabled={isSubmitting} className="w-full mt-8 active:scale-95 transition-transform" size="lg" style={{backgroundColor: sectionColor}}>
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           تحديث المباراة
         </Button>

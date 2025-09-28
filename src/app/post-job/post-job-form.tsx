@@ -250,7 +250,7 @@ export function PostJobForm({ categories, job, preselectedType }: PostJobFormPro
           title: "تم تحديث الإعلان بنجاح!",
           description: "تم حفظ التغييرات على إعلانك.",
         });
-        router.push(`/profile/my-ads`);
+        router.push(values.postType === 'seeking_job' ? `/workers/${job.id}` : `/jobs/${job.id}`);
       } else {
         const newJobData = {
           userId: user.uid,

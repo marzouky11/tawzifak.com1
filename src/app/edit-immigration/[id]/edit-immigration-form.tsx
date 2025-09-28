@@ -175,7 +175,7 @@ export function EditImmigrationForm({ post }: EditImmigrationFormProps) {
         <h2 className="text-xl font-bold border-b pb-2">التواصل والتقديم</h2>
         {step3Content}
 
-        <Button type="submit" disabled={isSubmitting} className="w-full mt-8" size="lg" style={{backgroundColor: sectionColor}}>
+        <Button type="submit" disabled={isSubmitting} className="w-full mt-8 active:scale-95 transition-transform" size="lg" style={{backgroundColor: sectionColor}}>
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           تحديث الإعلان
         </Button>

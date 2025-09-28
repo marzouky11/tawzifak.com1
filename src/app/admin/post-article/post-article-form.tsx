@@ -191,7 +191,7 @@ export function PostArticleForm({ article }: PostArticleFormProps) {
           </FormItem>
         )} />
         
-        <Button type="submit" disabled={isSubmitting} className="w-full mt-8" size="lg" style={{backgroundColor: sectionColor}}>
+        <Button type="submit" disabled={isSubmitting} className="w-full mt-8 active:scale-95 transition-transform" size="lg" style={{backgroundColor: sectionColor}}>
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isEditing ? 'تحديث المقال' : 'نشر المقال'}
         </Button>
