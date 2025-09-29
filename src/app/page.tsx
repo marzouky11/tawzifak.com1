@@ -1,11 +1,4 @@
 
-
-
-
-
-
-
-
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { JobCard } from '@/components/job-card';
@@ -13,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { getJobs, getTestimonials, getCompetitions, getImmigrationPosts } from '@/lib/data';
 import React, { Suspense } from 'react';
-import { Newspaper, Briefcase, Users, ArrowLeft, Landmark, Plane, FileText } from 'lucide-react';
+import { Newspaper, Briefcase, Users, ArrowLeft, Landmark, Plane } from 'lucide-react';
 import { HomePageFilters } from './home-page-filters';
 import { HomeCarousel } from './home-carousel';
 import { HomeExtraSections } from './home-extra-sections';
@@ -23,8 +16,7 @@ import { HomeHeaderMobile } from './home-header-mobile';
 import { CompetitionCard } from '@/components/competition-card';
 import { ImmigrationCard } from '@/components/immigration-card';
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
-import { CategoryIcon } from '@/components/icons';
+import type { Job, Competition, ImmigrationPost, Testimonial } from '@/lib/types';
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -63,7 +55,7 @@ function JobFiltersSkeleton() {
     );
 }
 
-function JobSectionSkeleton() {
+function SectionSkeleton() {
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -73,125 +65,37 @@ function JobSectionSkeleton() {
     );
 }
 
-async function JobOffersSection() {
-    const { data: jobOffers } = await getJobs({ postType: 'seeking_worker', count: 8 });
-    return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {jobOffers.map((job, index) => (
-                <div key={job.id} className={cn(index >= 4 && 'hidden sm:block')}>
-                    <JobCard job={job} />
-                </div>
-            ))}
-        </div>
-    );
+interface SectionProps {
+    icon: React.ElementType;
+    title: string;
+    description: string;
+    href: string;
+    iconColor?: string;
+    children: React.ReactNode;
 }
 
-async function CompetitionsSection() {
-    const { data: competitions } = await getCompetitions({ count: 8 });
-    if (competitions.length === 0) return null;
-
-    return (
-      <>
-        <SectionHeader 
-          icon={Landmark}
-          title="المباريات العمومية"
-          description="تصفح آخر مباريات التوظيف في القطاع العام."
-          href="/competitions"
-          iconColor="#14532d"
-        />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {competitions.map((comp, index) => (
-             <div key={comp.id} className={cn(index >= 4 && 'hidden sm:block')}>
-                <CompetitionCard competition={comp} />
-            </div>
-          ))}
-        </div>
-      </>
-    );
-}
-
-async function ImmigrationSection() {
-    const { data: immigrationPosts } = await getImmigrationPosts({ count: 8 });
-    if (immigrationPosts.length === 0) return null;
-
-    return (
-      <>
-        <SectionHeader 
-          icon={Plane}
-          title="فرص الهجرة"
-          description="اكتشف أحدث فرص الهجرة للعمل، الدراسة، أو التدريب حول العالم."
-          href="/immigration"
-          iconColor="#0ea5e9" // sky-500
-        />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {immigrationPosts.map((post, index) => (
-             <div key={post.id} className={cn(index >= 4 && 'hidden sm:block')}>
-                <ImmigrationCard post={post} />
-            </div>
-          ))}
-        </div>
-      </>
-    );
-}
-
-async function JobSeekersSection() {
-    const { data: jobSeekers } = await getJobs({ postType: 'seeking_job', count: 8 });
-    return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {jobSeekers.map((job, index) => (
-                <div key={job.id} className={cn(index >= 4 && 'hidden sm:block')}>
-                    <JobCard job={job} />
-                </div>
-            ))}
-        </div>
-    );
-}
-
-async function ExtraSections() {
-    const testimonials = await getTestimonials();
-    const { totalCount: jobOffersCount } = await getJobs({ postType: 'seeking_worker' });
-    const { totalCount: competitionsCount } = await getCompetitions();
-    const { totalCount: immigrationCount } = await getImmigrationPosts();
-    const { totalCount: jobSeekersCount } = await getJobs({ postType: 'seeking_job' });
-
-    return (
-        <HomeExtraSections
-            testimonials={testimonials}
-            jobOffersCount={jobOffersCount}
-            competitionsCount={competitionsCount}
-            immigrationCount={immigrationCount}
-            jobSeekersCount={jobSeekersCount}
-        />
-    );
-}
-
-interface SectionHeaderProps {
-  icon: React.ElementType;
-  title: string;
-  description: string;
-  href: string;
-  iconColor?: string;
-}
-
-function SectionHeader({ icon: Icon, title, description, href, iconColor }: SectionHeaderProps) {
+function Section({ icon: Icon, title, description, href, iconColor, children }: SectionProps) {
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-      <div className="flex items-center gap-4">
-        <div className="p-3 bg-primary/10 rounded-full">
-            <Icon className="h-8 w-8" style={{ color: iconColor || 'hsl(var(--primary))' }} />
+    <section>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div className="flex items-center gap-4">
+                <div className="p-3 bg-primary/10 rounded-full">
+                    <Icon className="h-8 w-8" style={{ color: iconColor || 'hsl(var(--primary))' }} />
+                </div>
+                <div>
+                    <h2 className="text-2xl font-bold text-foreground">{title}</h2>
+                    <p className="text-muted-foreground">{description}</p>
+                </div>
+            </div>
+            <Button asChild variant="outline" className="shrink-0 active:scale-95 transition-transform">
+                <Link href={href}>
+                    عرض الكل
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                </Link>
+            </Button>
         </div>
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">{title}</h2>
-          <p className="text-muted-foreground">{description}</p>
-        </div>
-      </div>
-      <Button asChild variant="outline" className="shrink-0 active:scale-95 transition-transform">
-        <Link href={href}>
-          عرض الكل
-          <ArrowLeft className="mr-2 h-4 w-4" />
-        </Link>
-      </Button>
-    </div>
+        {children}
+    </section>
   );
 }
 
@@ -236,8 +140,54 @@ function ArticlesSection() {
   );
 }
 
+interface HomePageData {
+    jobOffers: Job[];
+    jobSeekers: Job[];
+    competitions: Competition[];
+    immigrationPosts: ImmigrationPost[];
+    testimonials: Testimonial[];
+    stats: {
+        jobs: number;
+        competitions: number;
+        immigration: number;
+        seekers: number;
+    };
+}
 
-export default function HomePage() {
+async function getHomePageData(): Promise<HomePageData> {
+    const [
+        jobOffersData,
+        jobSeekersData,
+        competitionsData,
+        immigrationPostsData,
+        testimonialsData,
+    ] = await Promise.all([
+        getJobs({ postType: 'seeking_worker', count: 8 }),
+        getJobs({ postType: 'seeking_job', count: 8 }),
+        getCompetitions({ count: 8 }),
+        getImmigrationPosts({ count: 8 }),
+        getTestimonials(),
+    ]);
+
+    return {
+        jobOffers: jobOffersData.data,
+        jobSeekers: jobSeekersData.data,
+        competitions: competitionsData.data,
+        immigrationPosts: immigrationPostsData.data,
+        testimonials: testimonialsData,
+        stats: {
+            jobs: jobOffersData.totalCount,
+            competitions: competitionsData.totalCount,
+            immigration: immigrationPostsData.totalCount,
+            seekers: jobSeekersData.totalCount,
+        }
+    };
+}
+
+
+export default async function HomePage() {
+  const data = await getHomePageData();
+
   return (
     <>
       <HomeHeaderMobile />
@@ -251,66 +201,107 @@ export default function HomePage() {
       <div className="container mt-6 md:mt-8 mb-12">
         <div className="space-y-12">
             <HomeCarousel />
-
-            <section>
-                <SectionHeader 
-                icon={Briefcase}
-                title="عروض العمل"
-                description="اكتشف آخر فرص الشغل التي أضافها أصحاب العمل في مختلف المجالات."
-                href="/jobs"
-                iconColor="#0D47A1"
-                />
-                <Suspense fallback={<JobSectionSkeleton />}>
-                <JobOffersSection />
-                </Suspense>
-            </section>
-
-            <div>
-                <Separator />
-                <div className="pt-12">
-                    <Suspense>
-                        <ImmigrationSection />
-                    </Suspense>
-                </div>
-            </div>
-
-            <div>
-                <Separator />
-                <div className="pt-12">
-                    <Suspense>
-                        <CompetitionsSection />
-                    </Suspense>
-                </div>
-            </div>
             
-            <div>
-                <Separator />
-                <div className="pt-12">
-                    <section>
-                        <SectionHeader
+            <Suspense fallback={<SectionSkeleton />}>
+                <Section 
+                    icon={Briefcase}
+                    title="عروض العمل"
+                    description="اكتشف آخر فرص الشغل التي أضافها أصحاب العمل في مختلف المجالات."
+                    href="/jobs"
+                    iconColor="#0D47A1"
+                >
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        {data.jobOffers.map((job, index) => (
+                            <div key={job.id} className={cn(index >= 4 && 'hidden sm:block')}>
+                                <JobCard job={job} />
+                            </div>
+                        ))}
+                    </div>
+                </Section>
+            </Suspense>
+            
+            {data.immigrationPosts.length > 0 && (
+                <div>
+                    <Separator />
+                    <div className="pt-12">
+                        <Suspense fallback={<SectionSkeleton />}>
+                             <Section 
+                                icon={Plane}
+                                title="فرص الهجرة"
+                                description="اكتشف أحدث فرص الهجرة للعمل، الدراسة، أو التدريب حول العالم."
+                                href="/immigration"
+                                iconColor="#0ea5e9"
+                            >
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                  {data.immigrationPosts.map((post, index) => (
+                                     <div key={post.id} className={cn(index >= 4 && 'hidden sm:block')}>
+                                        <ImmigrationCard post={post} />
+                                    </div>
+                                  ))}
+                                </div>
+                            </Section>
+                        </Suspense>
+                    </div>
+                </div>
+            )}
+
+            {data.competitions.length > 0 && (
+                <div>
+                    <Separator />
+                    <div className="pt-12">
+                         <Suspense fallback={<SectionSkeleton />}>
+                            <Section 
+                              icon={Landmark}
+                              title="المباريات العمومية"
+                              description="تصفح آخر مباريات التوظيف في القطاع العام."
+                              href="/competitions"
+                              iconColor="#14532d"
+                            >
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                  {data.competitions.map((comp, index) => (
+                                     <div key={comp.id} className={cn(index >= 4 && 'hidden sm:block')}>
+                                        <CompetitionCard competition={comp} />
+                                    </div>
+                                  ))}
+                                </div>
+                            </Section>
+                        </Suspense>
+                    </div>
+                </div>
+            )}
+            
+            <Separator />
+            <div className="pt-12">
+                <Suspense fallback={<SectionSkeleton />}>
+                    <Section
                         icon={Users}
                         title="باحثون عن عمل"
                         description="تصفح ملفات المرشحين والمهنيين المستعدين للانضمام إلى فريقك."
                         href="/workers"
                         iconColor="#424242"
-                        />
-                        <Suspense fallback={<JobSectionSkeleton />}>
-                        <JobSeekersSection />
-                        </Suspense>
-                    </section>
-                </div>
+                    >
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            {data.jobSeekers.map((job, index) => (
+                                <div key={job.id} className={cn(index >= 4 && 'hidden sm:block')}>
+                                    <JobCard job={job} />
+                                </div>
+                            ))}
+                        </div>
+                    </Section>
+                </Suspense>
             </div>
-
-            <div>
-                <Separator />
-                <div className="pt-12">
-                    <ArticlesSection />
-                </div>
+            
+            <Separator />
+            <div className="pt-12">
+                <ArticlesSection />
             </div>
             
             <div className="pt-0">
                 <Suspense>
-                    <ExtraSections />
+                    <HomeExtraSections
+                        testimonials={data.testimonials}
+                        stats={data.stats}
+                    />
                 </Suspense>
             </div>
         </div>
@@ -318,9 +309,3 @@ export default function HomePage() {
     </>
   );
 }
-
-
-
-
-
-

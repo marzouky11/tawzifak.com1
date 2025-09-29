@@ -130,13 +130,13 @@ function StatsSection({ stats }: { stats: { jobs: number, competitions: number, 
 }
 
 // Testimonials Section Component
-function TestimonialsSection({ initialTestimonials }: { initialTestimonials: Testimonial[] }) {
+function TestimonialsSection({ testimonials }: { testimonials: Testimonial[] }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-150px" });
   const isMobile = useIsMobile();
 
   const displayCount = isMobile ? 1 : 4;
-  const displayedTestimonials = initialTestimonials.slice(0, displayCount);
+  const displayedTestimonials = testimonials.slice(0, displayCount);
 
   return (
     <section ref={ref}>
@@ -155,7 +155,7 @@ function TestimonialsSection({ initialTestimonials }: { initialTestimonials: Tes
           <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">آراؤكم هي مصدر إلهامنا ووقودنا للتطور المستمر.</p>
         </motion.div>
 
-        {initialTestimonials.length > 0 ? (  
+        {testimonials.length > 0 ? (  
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">  
             {displayedTestimonials.map((testimonial, index) => (  
               <motion.div  
@@ -191,21 +191,21 @@ function TestimonialsSection({ initialTestimonials }: { initialTestimonials: Tes
 
 interface HomeExtraSectionsProps {
   testimonials: Testimonial[];
-  jobOffersCount: number;
-  competitionsCount: number;
-  immigrationCount: number;
-  jobSeekersCount: number;
+  stats: {
+    jobs: number;
+    competitions: number;
+    immigration: number;
+    seekers: number;
+  };
 }
 
 // Main component to export
-export function HomeExtraSections({ testimonials, jobOffersCount, competitionsCount, immigrationCount, jobSeekersCount }: HomeExtraSectionsProps) {
-  const stats = { jobs: jobOffersCount, competitions: competitionsCount, immigration: immigrationCount, seekers: jobSeekersCount };
-
+export function HomeExtraSections({ testimonials, stats }: HomeExtraSectionsProps) {
   return (  
     <div className="space-y-12">  
       <StatsSection stats={stats} />  
       <Separator />
-      <TestimonialsSection initialTestimonials={testimonials} />  
+      <TestimonialsSection testimonials={testimonials} />  
     </div>  
   );
 }
