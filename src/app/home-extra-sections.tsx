@@ -4,7 +4,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Briefcase, Star, Users, MessageSquare, Landmark, Plane, BarChart3, StarIcon } from 'lucide-react';
-import { motion, useInView } from "framer-motion";
 import type { Testimonial } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -12,39 +11,36 @@ import { cn } from '@/lib/utils';
 import { TestimonialCard } from '@/app/testimonials/testimonial-card';
 import { Separator } from '@/components/ui/separator';
 
-// CountUp component for animating numbers
 const CountUp = ({ end, duration = 2 }: { end: number, duration?: number }) => {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   useEffect(() => {
-    if (!isInView) return;
+    let start = 0;
+    const frameDuration = 1000 / 60;
+    const totalFrames = Math.round(duration * 1000 / frameDuration);
+    const increment = (end - start) / totalFrames;
 
-    let start = 0;  
-    const frameDuration = 1000 / 60;  
-    const totalFrames = Math.round(duration * 1000 / frameDuration);  
-    const increment = (end - start) / totalFrames;  
-
-    let currentFrame = 0;  
-    const timer = setInterval(() => {  
-        currentFrame++;  
-        start += increment;  
-        setCount(Math.floor(start));  
-        if (currentFrame === totalFrames) {  
-            setCount(end); // Ensure it ends on the exact number  
-            clearInterval(timer);  
-        }  
-    }, frameDuration);  
+    let currentFrame = 0;
+    const timer = setInterval(() => {
+      currentFrame++;
+      start += increment;
+      const newCount = Math.floor(start);
+      if (newCount <= end) {
+        setCount(newCount);
+      }
+      if (currentFrame === totalFrames) {
+        setCount(end);
+        clearInterval(timer);
+      }
+    }, frameDuration);
 
     return () => clearInterval(timer);
-
-  }, [end, duration, isInView]);
+  }, [end, duration]);
 
   return <span ref={ref}>{count.toLocaleString()}</span>;
 };
 
-// Stats Section Component
 function StatsSection({ stats }: { stats: { jobs: number, competitions: number, immigration: number, seekers: number } }) {
   const statItems = [
     {
@@ -80,11 +76,7 @@ function StatsSection({ stats }: { stats: { jobs: number, competitions: number, 
         className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5"  
       ></div>
       <div className="container relative mx-auto px-4 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.5 }}
+        <div
           className="text-center mb-10"
         >
           <h2 className="text-3xl font-bold tracking-tight text-foreground flex justify-center items-center gap-2">
@@ -92,15 +84,11 @@ function StatsSection({ stats }: { stats: { jobs: number, competitions: number, 
             منصتنا بالأرقام
           </h2>
           <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">نحن ننمو كل يوم بفضل ثقتكم، ونسعى لربط الكفاءات بأفضل الفرص.</p>
-        </motion.div>
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 max-w-5xl mx-auto">
-          {statItems.map((item, index) => (
-            <motion.div
+          {statItems.map((item) => (
+            <div
               key={item.label}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.5, delay: index * 0.15 }}
             >
               <Card 
                 className="p-4 md:p-6 text-center flex flex-col items-center gap-3 transition-all duration-300 hover:scale-105 hover:shadow-2xl border-transparent border bg-background"
@@ -120,7 +108,7 @@ function StatsSection({ stats }: { stats: { jobs: number, competitions: number, 
                   <CountUp end={item.count} />
                 </div>
               </Card>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>
@@ -128,14 +116,10 @@ function StatsSection({ stats }: { stats: { jobs: number, competitions: number, 
   );
 }
 
-// Testimonials Section Component
 function TestimonialsSection({ testimonials }: { testimonials: Testimonial[] }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-150px" });
-
   if (!testimonials || testimonials.length === 0) {
     return (
-        <section ref={ref}>
+        <section>
             <div className="container mx-auto px-1">
                 <Card className="text-center text-muted-foreground p-8 flex flex-col items-center gap-4">  
                     <MessageSquare className="w-16 h-16 text-muted-foreground/30" />  
@@ -150,13 +134,9 @@ function TestimonialsSection({ testimonials }: { testimonials: Testimonial[] }) 
   }
 
   return (
-    <section ref={ref}>
+    <section>
       <div className="container mx-auto px-1">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.5 }}
+        <div
           className="text-center mb-10"
         >
           <h2 className="text-3xl font-bold tracking-tight text-foreground flex justify-center items-center gap-2">
@@ -164,20 +144,16 @@ function TestimonialsSection({ testimonials }: { testimonials: Testimonial[] }) 
             ماذا يقول مستخدمونا؟
           </h2>
           <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">آراؤكم هي مصدر إلهامنا ووقودنا للتطور المستمر.</p>
-        </motion.div>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">  
             {testimonials.map((testimonial, index) => (  
-              <motion.div  
+              <div  
                 key={testimonial.id}  
-                custom={index}  
-                initial={{ opacity: 0, y: 50 }}  
-                animate={isInView ? { opacity: 1, y: 0 } : {}}  
-                transition={{ duration: 0.5, delay: index * 0.2 }}  
                 className={cn(index >= 1 && 'hidden sm:block', index >= 4 && 'hidden lg:block')}
               >  
                 <TestimonialCard testimonial={testimonial} />  
-              </motion.div>  
+              </div>  
             ))}  
         </div>
 
@@ -204,7 +180,6 @@ interface HomeExtraSectionsProps {
   };
 }
 
-// Main component to export
 export function HomeExtraSections({ testimonials, stats }: HomeExtraSectionsProps) {
   return (  
     <div className="space-y-12">  
