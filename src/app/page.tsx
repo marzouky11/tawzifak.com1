@@ -1,5 +1,4 @@
 
-
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { JobCard } from '@/components/job-card';
@@ -158,10 +157,10 @@ interface HomePageData {
 
 async function getHomePageData(isMobile: boolean): Promise<HomePageData> {
     const counts = {
-        jobOffers: isMobile ? 4 : 8,
+        jobOffers: isMobile ? 2 : 8,
         jobSeekers: isMobile ? 2 : 4,
         competitions: isMobile ? 2 : 4,
-        immigrationPosts: isMobile ? 4 : 8,
+        immigrationPosts: isMobile ? 2 : 8,
         testimonials: isMobile ? 1 : 4,
     };
     
@@ -222,9 +221,9 @@ export default async function HomePage() {
                     href="/jobs"
                     iconColor="#0D47A1"
                 >
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                        {data.jobOffers.map((job, index) => (
-                           <div key={job.id} className={cn(index >= 4 && 'hidden sm:block', index >= 2 && 'sm:hidden')}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {data.jobOffers.map((job) => (
+                           <div key={job.id}>
                                 <JobCard job={job} />
                             </div>
                         ))}
@@ -243,9 +242,9 @@ export default async function HomePage() {
                             href="/immigration"
                             iconColor="#0ea5e9"
                         >
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                              {data.immigrationPosts.map((post, index) => (
-                                 <div key={post.id} className={cn(index >= 4 && 'hidden sm:block', index >= 2 && 'sm:hidden')}>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                              {data.immigrationPosts.map((post) => (
+                                 <div key={post.id}>
                                     <ImmigrationCard post={post} />
                                 </div>
                               ))}
@@ -266,9 +265,9 @@ export default async function HomePage() {
                           href="/competitions"
                           iconColor="#14532d"
                         >
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                               {data.competitions.map((comp, index) => (
-                                 <div key={comp.id} className={cn(index >= 2 && 'hidden sm:block', index >= 4 && 'hidden xl:block')}>
+                                 <div key={comp.id} className={cn(index >= 2 && 'hidden sm:block')}>
                                     <CompetitionCard competition={comp} />
                                 </div>
                               ))}
@@ -287,9 +286,9 @@ export default async function HomePage() {
                     href="/workers"
                     iconColor="#424242"
                 >
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         {data.jobSeekers.map((job, index) => (
-                            <div key={job.id} className={cn(index >= 2 && 'hidden sm:block', index >= 4 && 'hidden xl:block')}>
+                            <div key={job.id} className={cn(index >= 2 && 'hidden sm:block')}>
                                 <JobCard job={job} />
                             </div>
                         ))}
@@ -311,4 +310,3 @@ export default async function HomePage() {
     </>
   );
 }
-
