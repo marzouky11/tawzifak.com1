@@ -1,4 +1,5 @@
 
+
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { JobCard } from '@/components/job-card';
@@ -223,7 +224,7 @@ export default async function HomePage() {
                 >
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {data.jobOffers.map((job, index) => (
-                            <div key={job.id} className={cn(index >= 4 && 'hidden sm:block', index >= 2 && 'sm:hidden')}>
+                           <div key={job.id} className={cn(index >= 4 && 'hidden sm:block', index >= 2 && 'sm:hidden')}>
                                 <JobCard job={job} />
                             </div>
                         ))}
@@ -270,7 +271,7 @@ export default async function HomePage() {
                             >
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
                                   {data.competitions.map((comp, index) => (
-                                     <div key={comp.id} className={cn(index >= 2 && 'hidden sm:block')}>
+                                     <div key={comp.id} className={cn(index >= 2 && 'hidden sm:block', index >= 4 && 'hidden xl:block')}>
                                         <CompetitionCard competition={comp} />
                                     </div>
                                   ))}
@@ -293,7 +294,7 @@ export default async function HomePage() {
                     >
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
                             {data.jobSeekers.map((job, index) => (
-                                <div key={job.id} className={cn(index >= 2 && 'hidden sm:block')}>
+                                <div key={job.id} className={cn(index >= 2 && 'hidden sm:block', index >= 4 && 'hidden xl:block')}>
                                     <JobCard job={job} />
                                 </div>
                             ))}
