@@ -11,7 +11,6 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { TestimonialCard } from '@/app/testimonials/testimonial-card';
 import { Separator } from '@/components/ui/separator';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 // CountUp component for animating numbers
 const CountUp = ({ end, duration = 2 }: { end: number, duration?: number }) => {
@@ -133,10 +132,22 @@ function StatsSection({ stats }: { stats: { jobs: number, competitions: number, 
 function TestimonialsSection({ testimonials }: { testimonials: Testimonial[] }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-150px" });
-  const isMobile = useIsMobile();
 
-  const displayCount = isMobile ? 1 : 4;
-  const displayedTestimonials = testimonials.slice(0, displayCount);
+  if (!testimonials || testimonials.length === 0) {
+    return (
+        <section ref={ref}>
+            <div className="container mx-auto px-1">
+                <Card className="text-center text-muted-foreground p-8 flex flex-col items-center gap-4">  
+                    <MessageSquare className="w-16 h-16 text-muted-foreground/30" />  
+                    <p className="text-lg">كن أول من يشاركنا رأيه في المنصة!</p>
+                    <Button asChild size="lg" className="active:scale-95 transition-transform mt-4">  
+                      <Link href="/add-testimonial">أضف رأيك</Link>  
+                    </Button>
+                </Card>  
+            </div>
+        </section>
+    );
+  }
 
   return (
     <section ref={ref}>
@@ -155,9 +166,8 @@ function TestimonialsSection({ testimonials }: { testimonials: Testimonial[] }) 
           <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">آراؤكم هي مصدر إلهامنا ووقودنا للتطور المستمر.</p>
         </motion.div>
 
-        {testimonials.length > 0 ? (  
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">  
-            {displayedTestimonials.map((testimonial, index) => (  
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">  
+            {testimonials.map((testimonial, index) => (  
               <motion.div  
                 key={testimonial.id}  
                 custom={index}  
@@ -169,13 +179,7 @@ function TestimonialsSection({ testimonials }: { testimonials: Testimonial[] }) 
                 <TestimonialCard testimonial={testimonial} />  
               </motion.div>  
             ))}  
-          </div>  
-        ) : (  
-          <Card className="text-center text-muted-foreground p-8 flex flex-col items-center gap-4">  
-            <MessageSquare className="w-16 h-16 text-muted-foreground/30" />  
-            <p className="text-lg">كن أول من يشاركنا رأيه في المنصة!</p>  
-          </Card>  
-        )}  
+        </div>
 
         <div className="mt-10 text-center flex flex-col sm:flex-row justify-center items-center gap-4">  
           <Button asChild variant="outline" size="lg" className="active:scale-95 transition-transform">  

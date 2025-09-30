@@ -17,6 +17,7 @@ import { CompetitionCard } from '@/components/competition-card';
 import { ImmigrationCard } from '@/components/immigration-card';
 import { cn } from '@/lib/utils';
 import type { Job, Competition, ImmigrationPost, Testimonial } from '@/lib/types';
+import { headers } from 'next/headers';
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -154,7 +155,15 @@ interface HomePageData {
     };
 }
 
-async function getHomePageData(): Promise<HomePageData> {
+async function getHomePageData(isMobile: boolean): Promise<HomePageData> {
+    const counts = {
+        jobOffers: isMobile ? 4 : 8,
+        jobSeekers: isMobile ? 2 : 4,
+        competitions: isMobile ? 2 : 4,
+        immigrationPosts: isMobile ? 4 : 8,
+        testimonials: isMobile ? 1 : 4,
+    };
+    
     const [
         jobOffersData,
         jobSeekersData,
@@ -162,11 +171,11 @@ async function getHomePageData(): Promise<HomePageData> {
         immigrationPostsData,
         testimonialsData,
     ] = await Promise.all([
-        getJobs({ postType: 'seeking_worker', count: 8 }),
-        getJobs({ postType: 'seeking_job', count: 4 }),
-        getCompetitions({ count: 4 }),
-        getImmigrationPosts({ count: 8 }),
-        getTestimonials(),
+        getJobs({ postType: 'seeking_worker', count: counts.jobOffers }),
+        getJobs({ postType: 'seeking_job', count: counts.jobSeekers }),
+        getCompetitions({ count: counts.competitions }),
+        getImmigrationPosts({ count: counts.immigrationPosts }),
+        getTestimonials(), // Fetch all, but will be sliced in the component
     ]);
 
     return {
@@ -174,7 +183,7 @@ async function getHomePageData(): Promise<HomePageData> {
         jobSeekers: jobSeekersData.data,
         competitions: competitionsData.data,
         immigrationPosts: immigrationPostsData.data,
-        testimonials: testimonialsData,
+        testimonials: testimonialsData.slice(0, counts.testimonials),
         stats: {
             jobs: jobOffersData.totalCount,
             competitions: competitionsData.totalCount,
@@ -186,7 +195,9 @@ async function getHomePageData(): Promise<HomePageData> {
 
 
 export default async function HomePage() {
-  const data = await getHomePageData();
+  const userAgent = headers().get('user-agent') || '';
+  const isMobile = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+  const data = await getHomePageData(isMobile);
 
   return (
     <>
@@ -212,7 +223,7 @@ export default async function HomePage() {
                 >
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                         {data.jobOffers.map((job, index) => (
-                            <div key={job.id} className={cn(index >= 4 && 'hidden sm:block')}>
+                            <div key={job.id} className={cn(index >= 4 && 'hidden sm:block', index >= 2 && 'sm:hidden')}>
                                 <JobCard job={job} />
                             </div>
                         ))}
@@ -234,7 +245,7 @@ export default async function HomePage() {
                             >
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                   {data.immigrationPosts.map((post, index) => (
-                                     <div key={post.id} className={cn(index >= 4 && 'hidden sm:block')}>
+                                     <div key={post.id} className={cn(index >= 4 && 'hidden sm:block', index >= 2 && 'sm:hidden')}>
                                         <ImmigrationCard post={post} />
                                     </div>
                                   ))}
@@ -258,8 +269,8 @@ export default async function HomePage() {
                               iconColor="#14532d"
                             >
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
-                                  {data.competitions.map((comp) => (
-                                     <div key={comp.id}>
+                                  {data.competitions.map((comp, index) => (
+                                     <div key={comp.id} className={cn(index >= 2 && 'hidden sm:block')}>
                                         <CompetitionCard competition={comp} />
                                     </div>
                                   ))}
@@ -281,8 +292,8 @@ export default async function HomePage() {
                         iconColor="#424242"
                     >
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
-                            {data.jobSeekers.map((job) => (
-                                <div key={job.id}>
+                            {data.jobSeekers.map((job, index) => (
+                                <div key={job.id} className={cn(index >= 2 && 'hidden sm:block')}>
                                     <JobCard job={job} />
                                 </div>
                             ))}
