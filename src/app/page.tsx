@@ -58,7 +58,7 @@ function JobFiltersSkeleton() {
 function SectionSkeleton() {
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {Array.from({ length: 8 }).map((_, i) => (
+            {Array.from({ length: 4 }).map((_, i) => (
                 <JobCard key={i} job={null} />
             ))}
         </div>
@@ -163,8 +163,8 @@ async function getHomePageData(): Promise<HomePageData> {
         testimonialsData,
     ] = await Promise.all([
         getJobs({ postType: 'seeking_worker', count: 8 }),
-        getJobs({ postType: 'seeking_job', count: 8 }),
-        getCompetitions({ count: 8 }),
+        getJobs({ postType: 'seeking_job', count: 4 }),
+        getCompetitions({ count: 4 }),
         getImmigrationPosts({ count: 8 }),
         getTestimonials(),
     ]);
@@ -257,9 +257,9 @@ export default async function HomePage() {
                               href="/competitions"
                               iconColor="#14532d"
                             >
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                  {data.competitions.map((comp, index) => (
-                                     <div key={comp.id} className={cn(index >= 4 && 'hidden sm:block')}>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
+                                  {data.competitions.map((comp) => (
+                                     <div key={comp.id}>
                                         <CompetitionCard competition={comp} />
                                     </div>
                                   ))}
@@ -280,9 +280,9 @@ export default async function HomePage() {
                         href="/workers"
                         iconColor="#424242"
                     >
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                            {data.jobSeekers.map((job, index) => (
-                                <div key={job.id} className={cn(index >= 4 && 'hidden sm:block')}>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4">
+                            {data.jobSeekers.map((job) => (
+                                <div key={job.id}>
                                     <JobCard job={job} />
                                 </div>
                             ))}

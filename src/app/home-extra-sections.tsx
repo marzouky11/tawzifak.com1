@@ -164,6 +164,7 @@ function TestimonialsSection({ testimonials }: { testimonials: Testimonial[] }) 
                 initial={{ opacity: 0, y: 50 }}  
                 animate={isInView ? { opacity: 1, y: 0 } : {}}  
                 transition={{ duration: 0.5, delay: index * 0.2 }}  
+                className={cn(index >= 1 && 'hidden sm:block', index >= 4 && 'hidden lg:block')}
               >  
                 <TestimonialCard testimonial={testimonial} />  
               </motion.div>  
