@@ -157,10 +157,10 @@ interface HomePageData {
 
 async function getHomePageData(isMobile: boolean): Promise<HomePageData> {
     const counts = {
-        jobOffers: isMobile ? 2 : 8,
+        jobOffers: isMobile ? 4 : 8,
         jobSeekers: isMobile ? 2 : 4,
         competitions: isMobile ? 2 : 4,
-        immigrationPosts: isMobile ? 2 : 8,
+        immigrationPosts: isMobile ? 4 : 8,
         testimonials: isMobile ? 1 : 4,
     };
     
@@ -267,7 +267,7 @@ export default async function HomePage() {
                         >
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                               {data.competitions.map((comp, index) => (
-                                 <div key={comp.id} className={cn(index >= 2 && 'hidden sm:block')}>
+                                 <div key={comp.id} className={cn(index >= 2 && 'hidden sm:block', index >= 4 && 'lg:hidden')}>
                                     <CompetitionCard competition={comp} />
                                 </div>
                               ))}
@@ -288,7 +288,7 @@ export default async function HomePage() {
                 >
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         {data.jobSeekers.map((job, index) => (
-                            <div key={job.id} className={cn(index >= 2 && 'hidden sm:block')}>
+                            <div key={job.id} className={cn(index >= 2 && 'hidden sm:block', index >= 4 && 'lg:hidden')}>
                                 <JobCard job={job} />
                             </div>
                         ))}
