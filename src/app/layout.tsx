@@ -1,4 +1,3 @@
-
 import type { Metadata } from 'next';
 import { Tajawal } from 'next/font/google';
 import { Toaster } from "@/components/ui/toaster";
@@ -13,7 +12,7 @@ const tajawal = Tajawal({
   subsets: ['arabic'],
   weight: ['200', '300', '400', '500', '700', '800', '900'],
   variable: '--font-tajawal',
-  display: 'swap', // Ensures text remains visible during font loading
+  display: 'swap',
 });
 
 const baseUrl = 'https://www.tawzifak.com';
@@ -124,12 +123,6 @@ export default function RootLayout({
             gtag('config', 'G-FE0MP7XYXM');
           `}
         </Script>
-        <Script
-          id="adsense"
-          strategy="afterInteractive"
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6413953433245789"
-          crossOrigin="anonymous"
-        />
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
