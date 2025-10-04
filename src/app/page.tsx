@@ -17,9 +17,8 @@ import { ImmigrationCard } from '@/components/immigration-card';
 import { cn } from '@/lib/utils';
 import type { Job, Competition, ImmigrationPost, Testimonial } from '@/lib/types';
 import { headers } from 'next/headers';
-import { getHomePageFromCache, setHomePageToCache } from '@/lib/home-cache';
 
-export const revalidate = 3600;
+export const revalidate = 3600; // Revalidate every hour
 
 const appName = 'توظيفك';
 const appDescription = "تعرّف أفضل عروض العمل وفرص الهجرة القانونية والمباريات العمومية بسهولة وموثوقية. اعثر على الفرص التي تناسب مهاراتك وطموحاتك المهنية بسرعة وفعالية وابدأ رحلتك نحو مستقبل مهني ناجح.";
@@ -154,13 +153,6 @@ interface HomePageData {
 }
 
 async function getHomePageData(isMobile: boolean): Promise<HomePageData> {
-  const cacheKey = `home-data-${isMobile ? 'mobile' : 'desktop'}`;
-  
-  const cached = getHomePageFromCache(cacheKey);
-  if (cached) {
-    return cached;
-  }
-
   const counts = {
     jobOffers: isMobile ? 4 : 8,
     jobSeekers: isMobile ? 2 : 4,
@@ -183,7 +175,7 @@ async function getHomePageData(isMobile: boolean): Promise<HomePageData> {
     getTestimonials(),  
   ]);  
 
-  const result = {  
+  return {  
     jobOffers: jobOffersData.data,  
     jobSeekers: jobSeekersData.data,  
     competitions: competitionsData.data,  
@@ -196,9 +188,6 @@ async function getHomePageData(isMobile: boolean): Promise<HomePageData> {
       seekers: jobSeekersData.totalCount,  
     }  
   };
-
-  setHomePageToCache(cacheKey, result);
-  return result;
 }
 
 export default async function HomePage() {
@@ -316,4 +305,4 @@ export default async function HomePage() {
       </div>  
     </>
   );
-            }
+      }
