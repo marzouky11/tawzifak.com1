@@ -45,7 +45,6 @@ const platformLinks = [
 { label: 'اتصل بنا', href: '/contact', icon: Mail },
 { label: 'سياسة الخصوصية', href: '/privacy', icon: Shield },
 { label: 'شروط الاستخدام', href: '/terms', icon: FileText },
-{ label: 'الأسئلة الشائعة', href: '/faq', icon: HelpCircle },
 ];
 
 const FooterLinkItem = ({ href, icon: Icon, label }: { href: string; icon: React.ElementType; label: string; }) => {

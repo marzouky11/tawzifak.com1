@@ -68,11 +68,6 @@ const commonLinks = (
             href="/terms"
         />
         <SettingItem
-            icon={HelpCircle}
-            label="الأسئلة الشائعة"
-            href="/faq"
-        />
-        <SettingItem
             icon={Facebook}
             label="تابعنا على فيسبوك"
             href="https://www.facebook.com/profile.php?id=61578748771269"
