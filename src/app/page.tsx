@@ -1,139 +1,95 @@
-'use client';
+import type { Metadata } from 'next';
+import { getJobs, getTestimonials, getCompetitions, getImmigrationPosts } from '@/lib/data';
+import { HomeHeaderMobile } from './home-header-mobile';
+import { HomePageClient } from './home-page-client';
+import { headers } from 'next/headers';
 
-import * as React from 'react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { useAuth } from '@/context/auth-context';
-import { Skeleton } from '@/components/ui/skeleton';
-import Image from 'next/image';
+const appName = 'توظيفك';
+const appDescription = "تعرّف أفضل عروض العمل وفرص الهجرة القانونية والمباريات العمومية بسهولة وموثوقية. اعثر على الفرص التي تناسب مهاراتك وطموحاتك المهنية بسرعة وفعالية وابدأ رحلتك نحو مستقبل مهني ناجح.";
 
-const slidesData = [
-  {
-    key: 'jobs',
-    desktopSrc: "/web1.png",
-    mobileSrc: "/Sliderphone1.jpg",
-    alt: "وظائف مميزة",
-    title: "وظائف مميزة بانتظارك",
-    description: "استكشف الفرص المناسبة لمهاراتك واهتماماتك",
-    buttonText: "استكشف الآن",
-    buttonLink: "/jobs",
-    buttonClass: "bg-[#0D47A1] hover:bg-[#0D47A1]/90"
+export const metadata: Metadata = {
+  title: {
+    default: "توظيفك – اكتشف أحدث الوظائف وفرص الهجرة والمباريات العمومية",
+    template: `%s | ${appName}`
   },
-  {
-    key: 'immigration',
-    desktopSrc: "/web2.png",
-    mobileSrc: "/Sliderphone2.png",
-    alt: "فرص الهجرة",
-    title: "فرص الهجرة حول العالم",
-    description: "اكتشف أحدث فرص الهجرة للعمل والدراسة",
-    buttonText: "استكشف الآن",
-    buttonLink: "/immigration",
-    buttonClass: "bg-[#0ea5e9] hover:bg-[#0ea5e9]/90"
+  description: appDescription,
+  robots: 'index, follow',
+  alternates: {
+    canonical: '/',
   },
-  {
-    key: 'competitions',
-    desktopSrc: "/web5.png",
-    mobileSrc: "/Sliderphone5.jpg",
-    alt: "المباريات العمومية",
-    title: "المباريات العمومية",
-    description: "اكتشف آخر مباريات التوظيف في القطاع العام",
-    buttonText: "استكشف الآن",
-    buttonLink: "/competitions",
-    buttonClass: "bg-[#14532d] hover:bg-[#14532d]/90"
+  icons: {
+    icon: [
+      { url: "/favicon.ico", type: "image/x-icon", sizes: "any" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
-  {
-    key: 'workers',
-    desktopSrc: "/web3.png",
-    mobileSrc: "/Sliderphone3.png",
-    alt: "باحثون عن عمل",
-    title: "باحثون عن عمل",
-    description: "تصفح ملفات الباحثين عن عمل في مختلف المجالات",
-    buttonText: "استكشف الآن",
-    buttonLink: "/workers",
-    buttonClass: "bg-[#424242] hover:bg-[#424242]/90"
-  }
-];
+};
 
-export function HomeCarousel() {
-  const { user, loading: authLoading } = useAuth();
-  const [isMounted, setIsMounted] = React.useState(false);
-  const [currentSlide, setCurrentSlide] = React.useState(0);
+interface HomePageData {
+  jobOffers: any[];
+  jobSeekers: any[];
+  competitions: any[];
+  immigrationPosts: any[];
+  testimonials: any[];
+  stats: {
+    jobs: number;
+    competitions: number;
+    immigration: number;
+    seekers: number;
+  };
+}
 
-  React.useEffect(() => {
-    setIsMounted(true);
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slidesData.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
+async function getHomePageData(isMobile: boolean): Promise<HomePageData> {
+  const counts = {
+    jobOffers: isMobile ? 4 : 8,
+    jobSeekers: isMobile ? 2 : 4,
+    competitions: isMobile ? 2 : 4,
+    immigrationPosts: isMobile ? 4 : 8,
+    testimonials: isMobile ? 1 : 4,
+  };
 
-  if (!isMounted || authLoading) {
-    return <Skeleton className="w-full h-64 md:h-80 rounded-2xl" />;
-  }
+  const [  
+    jobOffersData,  
+    jobSeekersData,  
+    competitionsData,  
+    immigrationPostsData,  
+    testimonialsData,  
+  ] = await Promise.all([  
+    getJobs({ postType: 'seeking_worker', count: counts.jobOffers }),  
+    getJobs({ postType: 'seeking_job', count: counts.jobSeekers }),  
+    getCompetitions({ count: counts.competitions }),  
+    getImmigrationPosts({ count: counts.immigrationPosts }),  
+    getTestimonials(),  
+  ]);  
+
+  return {  
+    jobOffers: jobOffersData.data,  
+    jobSeekers: jobSeekersData.data,  
+    competitions: competitionsData.data,  
+    immigrationPosts: immigrationPostsData.data,  
+    testimonials: testimonialsData.slice(0, counts.testimonials),  
+    stats: {  
+      jobs: jobOffersData.totalCount,  
+      competitions: competitionsData.totalCount,  
+      immigration: immigrationPostsData.totalCount,  
+      seekers: jobSeekersData.totalCount,  
+    }  
+  };
+}
+
+export default async function HomePage() {
+  const userAgent = headers().get('user-agent') || '';
+  const isMobile = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+  const data = await getHomePageData(isMobile);
 
   return (
-    <div className="w-full rounded-2xl overflow-hidden shadow-lg relative h-64 md:h-80">
-      {slidesData.map((slide, index) => (
-        <div
-          key={slide.key}
-          className={cn(
-            "absolute inset-0 w-full h-full transition-opacity duration-1000",
-            index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
-          )}
-        >
-          <div className="hidden md:block w-full h-full relative">
-            <Image
-              src={slide.desktopSrc}
-              alt={slide.alt}
-              fill
-              sizes="100vw"
-              priority
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-transparent flex items-center p-12">
-              <div className="w-[45%] text-white space-y-4">
-                <h2 className="text-5xl font-bold leading-tight drop-shadow-md">{slide.title}</h2>
-                <p className="text-lg text-white/90 drop-shadow-sm">{slide.description}</p>
-                <Button
-                  asChild
-                  size="lg"
-                  className={cn(
-                    "text-white font-semibold transition-transform hover:scale-105",
-                    slide.buttonClass
-                  )}
-                >
-                  <Link href={slide.buttonLink}>{slide.buttonText}</Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="md:hidden w-full h-full relative">
-            <Image
-              src={slide.mobileSrc}
-              alt={slide.alt}
-              fill
-              sizes="100vw"
-              priority
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-center p-4">
-              <div className="text-white space-y-2">
-                <h2 className="text-2xl font-bold leading-tight drop-shadow-md">{slide.title}</h2>
-                <p className="text-sm text-white/90 drop-shadow-sm">{slide.description}</p>
-                <Button
-                  asChild
-                  size="sm"
-                  className={cn("text-white font-semibold mt-2", slide.buttonClass)}
-                >
-                  <Link href={slide.buttonLink}>{slide.buttonText}</Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
+    <>
+      <HomeHeaderMobile />
+      <HomePageClient initialData={data} isMobile={isMobile} />
+    </>
   );
-                  }
+}
