@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -59,13 +60,27 @@ export function HomeCarousel() {
   const { user, loading: authLoading } = useAuth();
   const [isMounted, setIsMounted] = React.useState(false);
   const [currentSlide, setCurrentSlide] = React.useState(0);
+  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
 
   React.useEffect(() => {
     setIsMounted(true);
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slidesData.length);
-    }, 5000);
-    return () => clearInterval(timer);
+    
+    const startTimer = () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+      timerRef.current = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % slidesData.length);
+      }, 5000);
+    };
+
+    startTimer();
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
   }, []);
 
   if (!isMounted || authLoading) {
@@ -136,4 +151,4 @@ export function HomeCarousel() {
       ))}
     </div>
   );
-          }
+}
