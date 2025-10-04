@@ -87,18 +87,18 @@ export function ReportAdDialog({ adId }: ReportAdDialogProps) {
 
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => {
-        setIsOpen(open);
-        if (!open) {
-            form.reset();
-        }
+      setIsOpen(open);
+      if (!open) {
+        form.reset();
+      }
     }}>
       <AlertDialogTrigger asChild>
         <Button variant="link" className="text-destructive hover:text-destructive/80 w-fit mx-auto p-0 h-auto">
-          <Flag className="mr-2 h-4 w-4" /> {/* تم تغيير ml-2 إلى mr-2 */}
+          <Flag className="mr-2 h-4 w-4" />
           الإبلاغ عن هذا الإعلان
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent className="text-right"> {/* إضافة text-right */}
+      <AlertDialogContent className="text-right">
         <Form {...form}>
           <form ref={formRef} onSubmit={form.handleSubmit(onSubmit)}>
             <AlertDialogHeader>
@@ -108,54 +108,67 @@ export function ReportAdDialog({ adId }: ReportAdDialogProps) {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <div className="py-4 space-y-4">
-               <FormField
-                  control={form.control}
-                  name="reason"
-                  render={({ field }) => (
-                    <FormItem className="space-y-3">
-                      <FormLabel className="text-right block">سبب الإبلاغ</FormLabel>
-                      <FormControl>
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          className="flex flex-col space-y-1 text-right"
-                        >
-                          {reportReasons.map((reason) => (
-                            <FormItem key={reason} className="flex items-center space-x-2 space-x-reverse"> {/* إضافة space-x-reverse */}
-                              <FormControl>
-                                <RadioGroupItem value={reason} id={reason} />
-                              </FormControl>
-                              <Label htmlFor={reason} className="font-normal text-right">{reason}</Label>
-                            </FormItem>
-                          ))}
-                        </RadioGroup>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <FormField
+                control={form.control}
+                name="reason"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel className="text-right block">سبب الإبلاغ</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="flex flex-col space-y-1 text-right"
+                      >
+                        {reportReasons.map((reason) => (
+                          <FormItem key={reason} className="flex items-center space-x-2 space-x-reverse">
+                            <FormControl>
+                              <RadioGroupItem value={reason} id={reason} />
+                            </FormControl>
+                            <Label htmlFor={reason} className="font-normal text-right">{reason}</Label>
+                          </FormItem>
+                        ))}
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="details"
                 render={({ field }) => (
-                    <FormItem>
-                        <FormLabel className="text-right block">تفاصيل إضافية (اختياري)</FormLabel>
-                        <FormControl>
-                            <Textarea
-                                placeholder="اكتب تفاصيل إضافية هنا..."
-                                className="text-right" {/* إضافة text-right */}
-                                {...field}
-                            />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
+                  <FormItem>
+                    <FormLabel className="text-right block">تفاصيل إضافية (اختياري)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="اكتب تفاصيل إضافية هنا..."
+                        className="text-right"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-               />
+              />
             </div>
-            <AlertDialogFooter className="flex flex-row-reverse gap-2"> {/* إضافة flex-row-reverse */}
-              <AlertDialogCancel type="button" onClick={() => { setIsOpen(false); form.reset(); }} className="active:scale-95 transition-transform">إلغاء</AlertDialogCancel>
-              <Button type="submit" disabled={isSubmitting} className="active:scale-95 transition-transform">
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} {/* تم تغيير ml-2 إلى mr-2 */}
+            <AlertDialogFooter className="flex flex-row-reverse gap-2">
+              <AlertDialogCancel 
+                type="button" 
+                onClick={() => { 
+                  setIsOpen(false); 
+                  form.reset(); 
+                }} 
+                className="active:scale-95 transition-transform"
+              >
+                إلغاء
+              </AlertDialogCancel>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting} 
+                className="active:scale-95 transition-transform"
+              >
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 إرسال البلاغ
               </Button>
             </AlertDialogFooter>
@@ -164,4 +177,4 @@ export function ReportAdDialog({ adId }: ReportAdDialogProps) {
       </AlertDialogContent>
     </AlertDialog>
   );
-          }
+                      }
