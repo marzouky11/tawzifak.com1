@@ -94,11 +94,11 @@ export function ReportAdDialog({ adId }: ReportAdDialogProps) {
     }}>
       <AlertDialogTrigger asChild>
         <Button variant="link" className="text-destructive hover:text-destructive/80 w-fit mx-auto p-0 h-auto">
-          <Flag className="mr-2 h-4 w-4" />
+          <Flag className="ml-2 h-4 w-4" />
           الإبلاغ عن هذا الإعلان
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent className="text-right">
+      <AlertDialogContent>
         <Form {...form}>
           <form ref={formRef} onSubmit={form.handleSubmit(onSubmit)}>
             <AlertDialogHeader>
@@ -113,19 +113,19 @@ export function ReportAdDialog({ adId }: ReportAdDialogProps) {
                 name="reason"
                 render={({ field }) => (
                   <FormItem className="space-y-3">
-                    <FormLabel className="text-right block">سبب الإبلاغ</FormLabel>
+                    <FormLabel className="text-right">سبب الإبلاغ</FormLabel>
                     <FormControl>
                       <RadioGroup
                         onValueChange={field.onChange}
                         defaultValue={field.value}
-                        className="flex flex-col space-y-1 text-right"
+                        className="flex flex-col space-y-2"
                       >
                         {reportReasons.map((reason) => (
-                          <FormItem key={reason} className="flex items-center space-x-2 space-x-reverse">
+                          <FormItem key={reason} className="flex flex-row-reverse items-center gap-2">
                             <FormControl>
                               <RadioGroupItem value={reason} id={reason} />
                             </FormControl>
-                            <Label htmlFor={reason} className="font-normal text-right">{reason}</Label>
+                            <Label htmlFor={reason} className="font-normal">{reason}</Label>
                           </FormItem>
                         ))}
                       </RadioGroup>
@@ -139,11 +139,10 @@ export function ReportAdDialog({ adId }: ReportAdDialogProps) {
                 name="details"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-right block">تفاصيل إضافية (اختياري)</FormLabel>
+                    <FormLabel className="text-right">تفاصيل إضافية (اختياري)</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="اكتب تفاصيل إضافية هنا..."
-                        className="text-right"
                         {...field}
                       />
                     </FormControl>
@@ -152,23 +151,10 @@ export function ReportAdDialog({ adId }: ReportAdDialogProps) {
                 )}
               />
             </div>
-            <AlertDialogFooter className="flex flex-row-reverse gap-2">
-              <AlertDialogCancel 
-                type="button" 
-                onClick={() => { 
-                  setIsOpen(false); 
-                  form.reset(); 
-                }} 
-                className="active:scale-95 transition-transform"
-              >
-                إلغاء
-              </AlertDialogCancel>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting} 
-                className="active:scale-95 transition-transform"
-              >
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <AlertDialogFooter className="justify-end">
+              <AlertDialogCancel type="button" onClick={() => { setIsOpen(false); form.reset(); }} className="active:scale-95 transition-transform">إلغاء</AlertDialogCancel>
+              <Button type="submit" disabled={isSubmitting} className="active:scale-95 transition-transform">
+                {isSubmitting && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
                 إرسال البلاغ
               </Button>
             </AlertDialogFooter>
@@ -177,4 +163,4 @@ export function ReportAdDialog({ adId }: ReportAdDialogProps) {
       </AlertDialogContent>
     </AlertDialog>
   );
-                      }
+  }
