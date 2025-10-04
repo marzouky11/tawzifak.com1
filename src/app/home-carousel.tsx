@@ -136,4 +136,4 @@ export function HomeCarousel() {
       ))}
     </div>
   );
-}
+          }
