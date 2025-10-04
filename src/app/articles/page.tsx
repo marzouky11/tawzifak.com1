@@ -83,7 +83,7 @@ export default function ArticlesPage() {
     } else if (allArticles.length > 0) {
       setHasMore(true);
     }
-  }, [displayedTestimonials, allArticles]);
+  }, [displayedArticles, allArticles]);
 
   return (
     <>
