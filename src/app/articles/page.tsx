@@ -1,4 +1,3 @@
-
 'use client';
 
 import { MobilePageHeader } from '@/components/layout/mobile-page-header';
@@ -84,11 +83,11 @@ export default function ArticlesPage() {
     } else if (allArticles.length > 0) {
       setHasMore(true);
     }
-  }, [displayedArticles, allArticles]);
+  }, [displayedTestimonials, allArticles]);
 
   return (
     <>
-      <MobilePageHeader title="مقالات">
+      <MobilePageHeader title="مقالات" href="/">
         <Newspaper className="h-5 w-5 text-primary" />
       </MobilePageHeader>
       

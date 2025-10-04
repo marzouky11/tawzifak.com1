@@ -1,4 +1,3 @@
-
 'use client';
 
 import { JobCard } from '@/components/job-card';
@@ -148,7 +147,7 @@ function PageContent() {
 export default function WorkersPage() {
     return (
         <>
-            <MobilePageHeader title="باحثون عن عمل" sticky={false}>
+            <MobilePageHeader title="باحثون عن عمل" sticky={false} href="/">
                 <Users className="h-5 w-5 text-primary" />
             </MobilePageHeader>
             <DesktopPageHeader

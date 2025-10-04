@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import { notFound } from 'next/navigation';
 import { getImmigrationPostById, getImmigrationPosts } from '@/lib/data';
@@ -133,7 +131,7 @@ export default async function ImmigrationDetailPage({ params }: ImmigrationDetai
     
     return (
         <>
-            <MobilePageHeader title="فرصة هجرة">
+            <MobilePageHeader title="فرصة هجرة" href="/immigration">
                 <Plane className="h-5 w-5 text-primary" />
             </MobilePageHeader>
             <DesktopPageHeader

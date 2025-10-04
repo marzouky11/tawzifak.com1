@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import { notFound } from 'next/navigation';
 import { getJobById, getJobs } from '@/lib/data';
@@ -159,7 +157,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
     return (
         <>
             {/* Common Headers for both mobile and desktop */}
-            <MobilePageHeader title="تفاصيل عرض العمل">
+            <MobilePageHeader title="تفاصيل عرض العمل" href="/jobs">
                 <Briefcase className="h-5 w-5 text-primary" />
             </MobilePageHeader>
             <DesktopPageHeader

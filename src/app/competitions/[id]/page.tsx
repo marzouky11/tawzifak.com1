@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import { notFound } from 'next/navigation';
 import { getCompetitionById, getCompetitions } from '@/lib/data';
@@ -128,7 +126,7 @@ export default async function CompetitionDetailPage({ params }: CompetitionDetai
 
     return (
         <>
-            <MobilePageHeader title="تفاصيل المباراة">
+            <MobilePageHeader title="تفاصيل المباراة" href="/competitions">
                 <Landmark className="h-5 w-5 text-primary" />
             </MobilePageHeader>
             <DesktopPageHeader

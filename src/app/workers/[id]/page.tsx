@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import { notFound } from 'next/navigation';
 import { getJobById, getJobs } from '@/lib/data';
@@ -58,7 +56,7 @@ export default async function WorkerDetailPage({ params }: JobDetailPageProps) {
     
     return (
         <>
-            <MobilePageHeader title="ملف باحث عن عمل">
+            <MobilePageHeader title="ملف باحث عن عمل" href="/workers">
                 <UserIcon className="h-5 w-5 text-primary" />
             </MobilePageHeader>
             <DesktopPageHeader

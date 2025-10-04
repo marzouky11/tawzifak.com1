@@ -1,4 +1,3 @@
-
 'use client';
 
 import { MobilePageHeader } from '@/components/layout/mobile-page-header';
@@ -10,7 +9,7 @@ import Link from 'next/link';
 export default function TermsOfServicePage() {
   return (
     <>
-      <MobilePageHeader title="شروط الاستخدام">
+      <MobilePageHeader title="شروط الاستخدام" href="/">
         <FileText className="h-5 w-5 text-primary" />
       </MobilePageHeader>
       <DesktopPageHeader

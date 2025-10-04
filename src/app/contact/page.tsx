@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect } from 'react';
@@ -16,7 +15,7 @@ export default function ContactUsPage() {
   
   return (
     <>
-      <MobilePageHeader title="اتصل بنا">
+      <MobilePageHeader title="اتصل بنا" href="/">
         <Mail className="h-5 w-5 text-primary" />
       </MobilePageHeader>
        <DesktopPageHeader

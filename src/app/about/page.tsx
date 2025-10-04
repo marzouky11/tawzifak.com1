@@ -1,4 +1,3 @@
-
 'use client';
 
 import { MobilePageHeader } from '@/components/layout/mobile-page-header';
@@ -9,7 +8,7 @@ import { DesktopPageHeader } from '@/components/layout/desktop-page-header';
 export default function AboutUsPage() {
   return (
     <>
-      <MobilePageHeader title="من نحن">
+      <MobilePageHeader title="من نحن" href="/">
         <Info className="h-5 w-5 text-primary" />
       </MobilePageHeader>
       <DesktopPageHeader

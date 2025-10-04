@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Plane } from 'lucide-react';
@@ -139,7 +138,7 @@ function PageContent() {
 export default function ImmigrationPage() {
     return (
         <>
-            <MobilePageHeader title="فرص الهجرة" sticky={false}>
+            <MobilePageHeader title="فرص الهجرة" sticky={false} href="/">
                 <Plane className="h-5 w-5 text-primary" />
             </MobilePageHeader>
             <DesktopPageHeader

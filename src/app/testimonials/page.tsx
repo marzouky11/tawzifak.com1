@@ -1,4 +1,3 @@
-
 'use client';
 
 import { MobilePageHeader } from '@/components/layout/mobile-page-header';
@@ -58,7 +57,7 @@ export default function TestimonialsPage() {
 
   return (
     <>
-      <MobilePageHeader title="آراء المستخدمين">
+      <MobilePageHeader title="آراء المستخدمين" href="/">
         <MessageSquare className="h-5 w-5 text-primary" />
       </MobilePageHeader>
       

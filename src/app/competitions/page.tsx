@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Landmark } from 'lucide-react';
@@ -140,7 +139,7 @@ function PageContent() {
 export default function CompetitionsPage() {
     return (
         <>
-            <MobilePageHeader title="المباريات العمومية" sticky={false}>
+            <MobilePageHeader title="المباريات العمومية" sticky={false} href="/">
                 <Landmark className="h-5 w-5 text-primary" />
             </MobilePageHeader>
             <DesktopPageHeader

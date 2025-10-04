@@ -1,19 +1,28 @@
-
 'use client';
 
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 interface MobilePageHeaderProps {
   title: string;
   children?: React.ReactNode;
   sticky?: boolean;
+  href?: string;
 }
 
-export function MobilePageHeader({ title, children, sticky = true }: MobilePageHeaderProps) {
+export function MobilePageHeader({ title, children, sticky = true, href }: MobilePageHeaderProps) {
   const router = useRouter();
+
+  const handleBack = () => {
+    if (href) {
+      router.push(href);
+    } else {
+      router.back();
+    }
+  };
 
   return (
     <div
@@ -22,7 +31,7 @@ export function MobilePageHeader({ title, children, sticky = true }: MobilePageH
         sticky && 'sticky top-0 z-40'
       )}
     >
-      <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0" onClick={() => router.back()}>
+      <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0" onClick={handleBack}>
         <ArrowRight className="h-5 w-5" />
       </Button>
       <div className="flex items-center gap-3 text-lg font-bold text-foreground">
