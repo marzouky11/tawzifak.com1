@@ -1,4 +1,4 @@
-فرصيةيةclient';
+client';
 
 import { Landmark } from 'lucide-react';
 import { Suspense, useEffect, useState, useCallback } from 'react';
