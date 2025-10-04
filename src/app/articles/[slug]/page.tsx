@@ -197,7 +197,7 @@ export default async function ArticlePage({ params }: Props) {
 
   return (
     <>
-      <MobilePageHeader title="مقالات" href="/articles">
+      <MobilePageHeader title="مقالات">
         <Newspaper className="h-5 w-5 text-primary" />
       </MobilePageHeader>
       <div className="container mx-auto max-w-5xl px-4 md:py-8 pb-8">

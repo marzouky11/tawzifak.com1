@@ -138,7 +138,7 @@ function PageContent() {
 export default function ImmigrationPage() {
     return (
         <>
-            <MobilePageHeader title="فرص الهجرة" sticky={false} href="/">
+            <MobilePageHeader title="فرص الهجرة" sticky={false}>
                 <Plane className="h-5 w-5 text-primary" />
             </MobilePageHeader>
             <DesktopPageHeader

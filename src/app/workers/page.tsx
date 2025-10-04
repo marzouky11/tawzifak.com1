@@ -147,7 +147,7 @@ function PageContent() {
 export default function WorkersPage() {
     return (
         <>
-            <MobilePageHeader title="باحثون عن عمل" sticky={false} href="/">
+            <MobilePageHeader title="باحثون عن عمل" sticky={false}>
                 <Users className="h-5 w-5 text-primary" />
             </MobilePageHeader>
             <DesktopPageHeader

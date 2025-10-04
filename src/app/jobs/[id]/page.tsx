@@ -157,7 +157,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
     return (
         <>
             {/* Common Headers for both mobile and desktop */}
-            <MobilePageHeader title="تفاصيل عرض العمل" href="/jobs">
+            <MobilePageHeader title="تفاصيل عرض العمل">
                 <Briefcase className="h-5 w-5 text-primary" />
             </MobilePageHeader>
             <DesktopPageHeader

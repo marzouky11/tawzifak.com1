@@ -15,6 +15,10 @@ export default function AddTestimonialPage() {
   const router = useRouter();
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     if (!loading && !user) {
       router.replace('/login?redirect=/add-testimonial');
     }

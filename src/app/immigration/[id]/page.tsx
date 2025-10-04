@@ -131,7 +131,7 @@ export default async function ImmigrationDetailPage({ params }: ImmigrationDetai
     
     return (
         <>
-            <MobilePageHeader title="فرصة هجرة" href="/immigration">
+            <MobilePageHeader title="فرصة هجرة">
                 <Plane className="h-5 w-5 text-primary" />
             </MobilePageHeader>
             <DesktopPageHeader

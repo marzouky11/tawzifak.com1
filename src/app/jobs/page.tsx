@@ -147,7 +147,7 @@ function PageContent() {
 export default function JobsPage() {
   return (
     <>
-      <MobilePageHeader title="الوظائف" sticky={false} href="/">
+      <MobilePageHeader title="الوظائف" sticky={false}>
         <Briefcase className="h-5 w-5 text-primary" />
       </MobilePageHeader>
       <DesktopPageHeader

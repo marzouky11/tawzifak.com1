@@ -126,7 +126,7 @@ export default async function CompetitionDetailPage({ params }: CompetitionDetai
 
     return (
         <>
-            <MobilePageHeader title="تفاصيل المباراة" href="/competitions">
+            <MobilePageHeader title="تفاصيل المباراة">
                 <Landmark className="h-5 w-5 text-primary" />
             </MobilePageHeader>
             <DesktopPageHeader

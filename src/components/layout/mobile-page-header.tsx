@@ -10,18 +10,13 @@ interface MobilePageHeaderProps {
   title: string;
   children?: React.ReactNode;
   sticky?: boolean;
-  href?: string;
 }
 
-export function MobilePageHeader({ title, children, sticky = true, href }: MobilePageHeaderProps) {
+export function MobilePageHeader({ title, children, sticky = true }: MobilePageHeaderProps) {
   const router = useRouter();
 
   const handleBack = () => {
-    if (href) {
-      router.push(href);
-    } else {
-      router.back();
-    }
+    router.back();
   };
 
   return (

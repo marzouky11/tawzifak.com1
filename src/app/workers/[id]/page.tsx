@@ -56,7 +56,7 @@ export default async function WorkerDetailPage({ params }: JobDetailPageProps) {
     
     return (
         <>
-            <MobilePageHeader title="ملف باحث عن عمل" href="/workers">
+            <MobilePageHeader title="ملف باحث عن عمل">
                 <UserIcon className="h-5 w-5 text-primary" />
             </MobilePageHeader>
             <DesktopPageHeader

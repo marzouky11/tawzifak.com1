@@ -57,7 +57,7 @@ export default function TestimonialsPage() {
 
   return (
     <>
-      <MobilePageHeader title="آراء المستخدمين" href="/">
+      <MobilePageHeader title="آراء المستخدمين">
         <MessageSquare className="h-5 w-5 text-primary" />
       </MobilePageHeader>
       

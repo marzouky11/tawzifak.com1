@@ -87,7 +87,7 @@ export default function ArticlesPage() {
 
   return (
     <>
-      <MobilePageHeader title="مقالات" href="/">
+      <MobilePageHeader title="مقالات">
         <Newspaper className="h-5 w-5 text-primary" />
       </MobilePageHeader>
       

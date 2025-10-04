@@ -139,7 +139,7 @@ function PageContent() {
 export default function CompetitionsPage() {
     return (
         <>
-            <MobilePageHeader title="المباريات العمومية" sticky={false} href="/">
+            <MobilePageHeader title="المباريات العمومية" sticky={false}>
                 <Landmark className="h-5 w-5 text-primary" />
             </MobilePageHeader>
             <DesktopPageHeader
