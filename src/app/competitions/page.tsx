@@ -1,4 +1,4 @@
-'use client';
+فرصيةيةclient';
 
 import { Landmark } from 'lucide-react';
 import { Suspense, useEffect, useState, useCallback } from 'react';
@@ -15,7 +15,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'المباريات العمومية - آخر إعلانات التوظيف في القطاع العام',
-  description: 'تصفح أحدث إعلانات مباريات التوظيف في القطاع العام بالمغرب والدول العربية. فرص في الوزارات، الجماعات المحلية، والمؤسسات العمومية.',
+  description: 'تصفح أحدث إعلانات مباريات التوظيف في القطاع العام بالمغرب. فرص في الوزارات، الجماعات المحلية، والمؤسسات العمومية.',
 };
 
 const ITEMS_PER_PAGE = 16;
