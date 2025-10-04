@@ -26,7 +26,7 @@ const appDescription = "تعرّف أفضل عروض العمل وفرص اله�
 export const metadata: Metadata = {
 title: {
 default: "توظيفك – اكتشف أحدث الوظائف وفرص الهجرة والمباريات العمومية",
-template: %s | ${appName}
+template: `%s | ${appName}`
 },
 description: appDescription,
 robots: 'index, follow',
