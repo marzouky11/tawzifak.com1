@@ -60,44 +60,39 @@ export function HomeCarousel() {
   const [currentSlide, setCurrentSlide] = React.useState(0);
   const [loadedImages, setLoadedImages] = React.useState<Set<string>>(new Set());
 
-  // تحميل الصور بالتسلسل
   React.useEffect(() => {
     const loadImagesSequentially = async () => {
       for (let i = 0; i < slidesData.length; i++) {
         const slide = slidesData[i];
         
-        // تحميل الصورة الأولى فوراً
         if (i === 0) {
           await preloadImage(slide.desktopSrc);
           await preloadImage(slide.mobileSrc);
         } else {
-          // تحميل الصور التالية بعد تأخير
           setTimeout(async () => {
             await preloadImage(slide.desktopSrc);
             await preloadImage(slide.mobileSrc);
-          }, i * 1000); // تأخير 1 ثانية بين كل صورة
+          }, i * 1000);
         }
       }
     };
 
     const preloadImage = (src: string): Promise<void> => {
       return new Promise((resolve) => {
-        const img = new Image();
+        const img = new window.Image();
         img.src = src;
         img.onload = () => {
           setLoadedImages(prev => new Set(prev).add(src));
           resolve();
         };
-        img.onerror = resolve; // تجاهل الأخطاء والمضي قدماً
+        img.onerror = resolve;
       });
     };
 
     loadImagesSequentially();
   }, []);
 
-  // مؤقت السلايدر
   React.useEffect(() => {
-    // ابدأ المؤقت فقط بعد تحميل الصورة الأولى
     if (loadedImages.size >= 2) {
       const timer = setInterval(() => {
         setCurrentSlide((prev) => (prev + 1) % slidesData.length);
@@ -106,13 +101,11 @@ export function HomeCarousel() {
     }
   }, [loadedImages.size]);
 
-  // تحقق إذا كانت الصورة الحالية محملة
   const isSlideLoaded = (slideIndex: number) => {
     const slide = slidesData[slideIndex];
     return loadedImages.has(slide.desktopSrc) && loadedImages.has(slide.mobileSrc);
   };
 
-  // عرض الهيكل العظمي فقط للصورة الأولى إذا لم تحمل بعد
   if (!isSlideLoaded(0) && loadedImages.size === 0) {
     return <Skeleton className="w-full h-64 md:h-80 rounded-2xl" />;
   }
@@ -127,7 +120,6 @@ export function HomeCarousel() {
             index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
           )}
         >
-          {/* عرض الهيكل العظمي للشرائح غير المحملة */}
           {!isSlideLoaded(index) ? (
             <div className="w-full h-full bg-gradient-to-r from-gray-200 to-gray-300 animate-pulse" />
           ) : (
@@ -138,7 +130,7 @@ export function HomeCarousel() {
                   alt={slide.alt}
                   fill
                   sizes="100vw"
-                  priority={index === 0} // الأولوية للصورة الأولى فقط
+                  priority={index === 0}
                   className="object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-transparent flex items-center p-12">
@@ -165,7 +157,7 @@ export function HomeCarousel() {
                   alt={slide.alt}
                   fill
                   sizes="100vw"
-                  priority={index === 0} // الأولوية للصورة الأولى فقط
+                  priority={index === 0}
                   className="object-cover"
                 />
                 <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-center p-4">
@@ -188,4 +180,4 @@ export function HomeCarousel() {
       ))}
     </div>
   );
-                     }
+                  }
