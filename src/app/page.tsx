@@ -7,7 +7,7 @@ import { getJobs, getTestimonials, getCompetitions, getImmigrationPosts } from '
 import React, { Suspense } from 'react';
 import { Newspaper, Briefcase, Users, ArrowLeft, Landmark, Plane } from 'lucide-react';
 import { HomePageFilters } from './home-page-filters';
-import { HomeCarousel } from './home-carousel';
+import HomeCarousel from './home-carousel';
 import { HomeExtraSections } from './home-extra-sections';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
