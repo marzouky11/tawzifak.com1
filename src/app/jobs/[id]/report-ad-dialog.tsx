@@ -101,12 +101,15 @@ export function ReportAdDialog({ adId }: ReportAdDialogProps) {
       <AlertDialogContent>
         <Form {...form}>
           <form ref={formRef} onSubmit={form.handleSubmit(onSubmit)}>
+            {/* عنوان ووصف في الوسط */}
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-right">الإبلاغ عن إعلان</AlertDialogTitle>
-              <AlertDialogDescription className="text-right">
+              <AlertDialogTitle className="text-center">الإبلاغ عن إعلان</AlertDialogTitle>
+              <AlertDialogDescription className="text-center">
                 سبب إبلاغك يساعدنا في الحفاظ على بيئة آمنة وموثوقة للجميع. لن تتم مشاركة معلوماتك مع المعلن.
               </AlertDialogDescription>
             </AlertDialogHeader>
+
+            {/* خانات الاختيار */}
             <div className="py-4 space-y-4">
               <FormField
                 control={form.control}
@@ -134,6 +137,8 @@ export function ReportAdDialog({ adId }: ReportAdDialogProps) {
                   </FormItem>
                 )}
               />
+
+              {/* تفاصيل إضافية */}
               <FormField
                 control={form.control}
                 name="details"
@@ -151,6 +156,8 @@ export function ReportAdDialog({ adId }: ReportAdDialogProps) {
                 )}
               />
             </div>
+
+            {/* أزرار الإلغاء والإرسال */}
             <AlertDialogFooter className="justify-end">
               <AlertDialogCancel type="button" onClick={() => { setIsOpen(false); form.reset(); }} className="active:scale-95 transition-transform">إلغاء</AlertDialogCancel>
               <Button type="submit" disabled={isSubmitting} className="active:scale-95 transition-transform">
@@ -163,4 +170,4 @@ export function ReportAdDialog({ adId }: ReportAdDialogProps) {
       </AlertDialogContent>
     </AlertDialog>
   );
-  }
+      }
