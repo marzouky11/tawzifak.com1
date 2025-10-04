@@ -82,7 +82,6 @@ export function HomeCarousel() {
             index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
           )}
         >
-          {/* نسخة سطح المكتب */}
           <div className="hidden md:block w-full h-full relative">
             <Image
               src={slide.desktopSrc}
@@ -110,7 +109,6 @@ export function HomeCarousel() {
             </div>
           </div>
 
-          {/* نسخة الهاتف */}
           <div className="md:hidden w-full h-full relative">
             <Image
               src={slide.mobileSrc}
@@ -138,4 +136,4 @@ export function HomeCarousel() {
       ))}
     </div>
   );
-}
+          }
