@@ -7,16 +7,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/auth-context";
 
-interface Slide {
-  title: string;
-  description: string;
-  image: string;
-  buttonText: string;
-  buttonLink: string;
-  buttonClass: string;
-}
-
-const slidesData: Slide[] = [
+const slidesData = [
   {
     title: "منصتك الأولى للتوظيف",
     description: "ابحث عن وظائف وفرص عمل تناسب مهاراتك في أي وقت ومكان.",
@@ -48,18 +39,15 @@ export default function HomeCarousel() {
   const [paused, setPaused] = React.useState(false);
   const { user } = useAuth();
 
-  // 🧠 تحميل آخر سلايد من التخزين المحلي
   React.useEffect(() => {
     const savedSlide = localStorage.getItem("currentSlide");
     if (savedSlide) setCurrent(Number(savedSlide));
   }, []);
 
-  // 💾 حفظ السلايد الحالي عند تغييره
   React.useEffect(() => {
     localStorage.setItem("currentSlide", current.toString());
   }, [current]);
 
-  // 🔁 تحريك تلقائي يتوقف عند التفاعل ويستأنف بعد 8 ثوانٍ
   React.useEffect(() => {
     if (paused) return;
     const timer = setInterval(() => {
@@ -68,11 +56,10 @@ export default function HomeCarousel() {
     return () => clearInterval(timer);
   }, [paused]);
 
-  // ⏸️ وظيفة توقف مؤقت مع استئناف لاحق
-  const handleUserInteraction = (index?: number) => {
+  const handleUserInteraction = (index) => {
     if (typeof index === "number") setCurrent(index);
     setPaused(true);
-    setTimeout(() => setPaused(false), 6000); // استئناف بعد 8 ثواني
+    setTimeout(() => setPaused(false), 6000);
   };
 
   return (
@@ -94,7 +81,6 @@ export default function HomeCarousel() {
             alt={slide.title}
             fill
             className="object-cover"
-            // ✅ الصورة الأولى فقط تُحمّل فوراً، والباقي Lazy
             priority={index === 0}
             loading={index === 0 ? "eager" : "lazy"}
             sizes="100vw"
@@ -120,7 +106,6 @@ export default function HomeCarousel() {
         </div>
       ))}
 
-      {/* 🔘 مؤشرات التنقل */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
         {slidesData.map((_, index) => (
           <button
@@ -135,4 +120,4 @@ export default function HomeCarousel() {
       </div>
     </div>
   );
-            }
+}
