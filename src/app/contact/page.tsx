@@ -1,6 +1,3 @@
-
-'use client';
-
 import React, { useEffect } from 'react';
 import { MobilePageHeader } from '@/components/layout/mobile-page-header';
 import { Card, CardContent } from '@/components/ui/card';
