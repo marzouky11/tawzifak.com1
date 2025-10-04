@@ -56,7 +56,7 @@ export default function HomeCarousel() {
     return () => clearInterval(timer);
   }, [paused]);
 
-  const handleUserInteraction = (index) => {
+  const handleUserInteraction = (index: number) => {
     if (typeof index === "number") setCurrent(index);
     setPaused(true);
     setTimeout(() => setPaused(false), 6000);
