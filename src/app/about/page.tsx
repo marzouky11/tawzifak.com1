@@ -1,6 +1,3 @@
-
-'use client';
-
 import { MobilePageHeader } from '@/components/layout/mobile-page-header';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Info } from 'lucide-react';
