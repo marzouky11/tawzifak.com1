@@ -12,6 +12,12 @@ import { useSearchParams } from 'next/navigation';
 import { getJobs } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'عروض العمل - آخر الوظائف الشاغرة',
+  description: 'تصفح أحدث عروض العمل والوظائف الشاغرة في مختلف المجالات والقطاعات. ابحث عن فرص عمل تناسب مهاراتك وخبراتك.',
+};
 
 const ITEMS_PER_PAGE = 16;
 const CACHE_KEY_PREFIX = 'jobs_cache_';

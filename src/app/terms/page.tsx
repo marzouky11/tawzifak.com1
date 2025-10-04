@@ -6,6 +6,13 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { FileText } from 'lucide-react';
 import { DesktopPageHeader } from '@/components/layout/desktop-page-header';
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'شروط الاستخدام - قواعد وضوابط منصة توظيفك',
+  description: 'تعرف على شروط وأحكام استخدام منصة توظيفك. نوضح لك مسؤوليات المستخدم، قواعد نشر الإعلانات، وحدود مسؤوليتنا لضمان بيئة آمنة وعادلة للجميع.',
+};
+
 
 export default function TermsOfServicePage() {
   return (

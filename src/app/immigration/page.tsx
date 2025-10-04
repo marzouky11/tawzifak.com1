@@ -11,6 +11,13 @@ import { useSearchParams } from 'next/navigation';
 import { getImmigrationPosts } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'فرص الهجرة - عمل، دراسة، وتدريب في الخارج',
+  description: 'استكشف أحدث إعلانات وفرص الهجرة إلى الخارج. برامج عمل، دراسة، تدريب، وعمل موسمي في دول مثل كندا، أوروبا، والخليج.',
+};
+
 
 const ITEMS_PER_PAGE = 16;
 const CACHE_KEY_PREFIX = 'immigration_cache_';

@@ -5,6 +5,12 @@ import { MobilePageHeader } from '@/components/layout/mobile-page-header';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Info } from 'lucide-react';
 import { DesktopPageHeader } from '@/components/layout/desktop-page-header';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'من نحن - قصة ورؤية منصة توظيفك',
+  description: 'تعرف على قصة تأسيس منصة توظيفك، رؤيتنا في بناء مستقبل مهني أفضل في العالم العربي، ومهمتنا في تمكين الأفراد والشركات من خلال ربط الكفاءات بالفرص.',
+};
 
 export default function AboutUsPage() {
   return (

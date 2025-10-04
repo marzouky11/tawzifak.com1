@@ -11,6 +11,13 @@ import { useSearchParams } from 'next/navigation';
 import { getJobs } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'باحثون عن عمل - تصفح ملفات المرشحين',
+  description: 'هل تبحث عن موظفين أو عمال؟ استعرض ملفات الباحثين عن عمل في مختلف المجالات والمهن، وتواصل مع الكفاءات التي تحتاجها لمشروعك.',
+};
+
 
 const ITEMS_PER_PAGE = 16;
 const CACHE_KEY_PREFIX = 'workers_cache_';

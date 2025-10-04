@@ -7,6 +7,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Mail } from 'lucide-react';
 import { DesktopPageHeader } from '@/components/layout/desktop-page-header';
 import { ContactForm } from './contact-form';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'اتصل بنا - تواصل مع فريق توظيفك',
+  description: 'لديك سؤال، اقتراح، أو تحتاج إلى مساعدة؟ تواصل مع فريق دعم منصة توظيفك. نحن هنا للاستماع إليك والرد على جميع استفساراتك.',
+};
+
 
 export default function ContactUsPage() {
   

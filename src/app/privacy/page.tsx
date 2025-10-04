@@ -6,6 +6,12 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Shield } from 'lucide-react';
 import { DesktopPageHeader } from '@/components/layout/desktop-page-header';
 import Link from 'next/link';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'سياسة الخصوصية - كيف نحمي بياناتك في توظيفك',
+  description: 'تعرف على سياسة الخصوصية في منصة توظيفك. نوضح لك كيفية جمع واستخدام وحماية معلوماتك الشخصية لضمان تجربة آمنة وموثوقة.',
+};
 
 export default function PrivacyPolicyPage() {
   return (

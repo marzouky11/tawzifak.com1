@@ -11,6 +11,12 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'مقالات لنموك المهني - نصائح وإرشادات',
+  description: 'مجموعة من المقالات المختارة لمساعدتك على تطوير مهاراتك، النجاح في مسيرتك المهنية، ومواكبة آخر تطورات سوق العمل والربح من الإنترنت.',
+};
 
 const ARTICLES_PER_PAGE = 8;
 const CACHE_KEY = 'articles_cache';

@@ -9,6 +9,12 @@ import type { Testimonial } from '@/lib/types';
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'آراء المستخدمين - ماذا يقولون عن منصة توظيفك',
+  description: 'اكتشف آراء وتجارب المستخدمين مع منصة توظيفك. نحن نقدر جميع الملاحظات ونسعى دائمًا لتحسين خدماتنا بناءً على تجاربكم.',
+};
 
 const TESTIMONIALS_PER_PAGE = 8;
 const CACHE_KEY = 'testimonials_cache';
