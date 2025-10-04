@@ -85,7 +85,7 @@ export function HomeCarousel() {
           setLoadedImages(prev => new Set(prev).add(src));
           resolve();
         };
-        img.onerror = resolve;
+        img.onerror = () => resolve();
       });
     };
 
@@ -180,4 +180,4 @@ export function HomeCarousel() {
       ))}
     </div>
   );
-                  }
+                    }
