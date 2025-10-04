@@ -57,56 +57,18 @@ const slidesData = [
 
 export function HomeCarousel() {
   const { user, loading: authLoading } = useAuth();
+  const [isMounted, setIsMounted] = React.useState(false);
   const [currentSlide, setCurrentSlide] = React.useState(0);
-  const [loadedImages, setLoadedImages] = React.useState<Set<string>>(new Set());
 
   React.useEffect(() => {
-    const loadImagesSequentially = async () => {
-      for (let i = 0; i < slidesData.length; i++) {
-        const slide = slidesData[i];
-        
-        if (i === 0) {
-          await preloadImage(slide.desktopSrc);
-          await preloadImage(slide.mobileSrc);
-        } else {
-          setTimeout(async () => {
-            await preloadImage(slide.desktopSrc);
-            await preloadImage(slide.mobileSrc);
-          }, i * 1000);
-        }
-      }
-    };
-
-    const preloadImage = (src: string): Promise<void> => {
-      return new Promise((resolve) => {
-        const img = new window.Image();
-        img.src = src;
-        img.onload = () => {
-          setLoadedImages(prev => new Set(prev).add(src));
-          resolve();
-        };
-        img.onerror = () => resolve();
-      });
-    };
-
-    loadImagesSequentially();
+    setIsMounted(true);
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slidesData.length);
+    }, 5000);
+    return () => clearInterval(timer);
   }, []);
 
-  React.useEffect(() => {
-    if (loadedImages.size >= 2) {
-      const timer = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % slidesData.length);
-      }, 5000);
-      return () => clearInterval(timer);
-    }
-  }, [loadedImages.size]);
-
-  const isSlideLoaded = (slideIndex: number) => {
-    const slide = slidesData[slideIndex];
-    return loadedImages.has(slide.desktopSrc) && loadedImages.has(slide.mobileSrc);
-  };
-
-  if (!isSlideLoaded(0) && loadedImages.size === 0) {
+  if (!isMounted || authLoading) {
     return <Skeleton className="w-full h-64 md:h-80 rounded-2xl" />;
   }
 
@@ -120,64 +82,58 @@ export function HomeCarousel() {
             index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
           )}
         >
-          {!isSlideLoaded(index) ? (
-            <div className="w-full h-full bg-gradient-to-r from-gray-200 to-gray-300 animate-pulse" />
-          ) : (
-            <>
-              <div className="hidden md:block w-full h-full relative">
-                <Image
-                  src={slide.desktopSrc}
-                  alt={slide.alt}
-                  fill
-                  sizes="100vw"
-                  priority={index === 0}
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-transparent flex items-center p-12">
-                  <div className="w-[45%] text-white space-y-4">
-                    <h2 className="text-5xl font-bold leading-tight drop-shadow-md">{slide.title}</h2>
-                    <p className="text-lg text-white/90 drop-shadow-sm">{slide.description}</p>
-                    <Button
-                      asChild
-                      size="lg"
-                      className={cn(
-                        "text-white font-semibold transition-transform hover:scale-105",
-                        slide.buttonClass
-                      )}
-                    >
-                      <Link href={slide.buttonLink}>{slide.buttonText}</Link>
-                    </Button>
-                  </div>
-                </div>
+          <div className="hidden md:block w-full h-full relative">
+            <Image
+              src={slide.desktopSrc}
+              alt={slide.alt}
+              fill
+              sizes="100vw"
+              priority
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-transparent flex items-center p-12">
+              <div className="w-[45%] text-white space-y-4">
+                <h2 className="text-5xl font-bold leading-tight drop-shadow-md">{slide.title}</h2>
+                <p className="text-lg text-white/90 drop-shadow-sm">{slide.description}</p>
+                <Button
+                  asChild
+                  size="lg"
+                  className={cn(
+                    "text-white font-semibold transition-transform hover:scale-105",
+                    slide.buttonClass
+                  )}
+                >
+                  <Link href={slide.buttonLink}>{slide.buttonText}</Link>
+                </Button>
               </div>
+            </div>
+          </div>
 
-              <div className="md:hidden w-full h-full relative">
-                <Image
-                  src={slide.mobileSrc}
-                  alt={slide.alt}
-                  fill
-                  sizes="100vw"
-                  priority={index === 0}
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-center p-4">
-                  <div className="text-white space-y-2">
-                    <h2 className="text-2xl font-bold leading-tight drop-shadow-md">{slide.title}</h2>
-                    <p className="text-sm text-white/90 drop-shadow-sm">{slide.description}</p>
-                    <Button
-                      asChild
-                      size="sm"
-                      className={cn("text-white font-semibold mt-2", slide.buttonClass)}
-                    >
-                      <Link href={slide.buttonLink}>{slide.buttonText}</Link>
-                    </Button>
-                  </div>
-                </div>
+          <div className="md:hidden w-full h-full relative">
+            <Image
+              src={slide.mobileSrc}
+              alt={slide.alt}
+              fill
+              sizes="100vw"
+              priority
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-center p-4">
+              <div className="text-white space-y-2">
+                <h2 className="text-2xl font-bold leading-tight drop-shadow-md">{slide.title}</h2>
+                <p className="text-sm text-white/90 drop-shadow-sm">{slide.description}</p>
+                <Button
+                  asChild
+                  size="sm"
+                  className={cn("text-white font-semibold mt-2", slide.buttonClass)}
+                >
+                  <Link href={slide.buttonLink}>{slide.buttonText}</Link>
+                </Button>
               </div>
-            </>
-          )}
+            </div>
+          </div>
         </div>
       ))}
     </div>
   );
-                    }
+}
