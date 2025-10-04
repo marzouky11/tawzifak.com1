@@ -21,21 +21,12 @@ export async function generateMetadata({ params }: JobDetailPageProps): Promise<
     };
   }
 
-  // Prevent indexing of job seeker profiles
+  // Allow indexing of job seeker profiles
   return {
     title: job.title,
     robots: {
-      index: false,
-      follow: false,
-      nocache: true,
-      googleBot: {
-        index: false,
-        follow: false,
-        noimageindex: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'none',
-        'max-snippet': -1,
-      },
+      index: true,
+      follow: true,
     },
   };
 }
