@@ -95,7 +95,7 @@ export function ContactForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+        <Button type="submit" size="lg" className="w-full active:scale-95 transition-transform" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
           إرسال الرسالة
         </Button>

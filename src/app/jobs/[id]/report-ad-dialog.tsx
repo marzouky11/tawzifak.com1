@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef } from 'react';
@@ -152,8 +153,8 @@ export function ReportAdDialog({ adId }: ReportAdDialogProps) {
                />
             </div>
             <AlertDialogFooter>
-              <AlertDialogCancel type="button" onClick={() => { setIsOpen(false); form.reset(); }}>إلغاء</AlertDialogCancel>
-              <Button type="submit" disabled={isSubmitting}>
+              <AlertDialogCancel type="button" onClick={() => { setIsOpen(false); form.reset(); }} className="active:scale-95 transition-transform">إلغاء</AlertDialogCancel>
+              <Button type="submit" disabled={isSubmitting} className="active:scale-95 transition-transform">
                 {isSubmitting && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
                 إرسال البلاغ
               </Button>

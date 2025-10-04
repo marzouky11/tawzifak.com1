@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -51,7 +52,7 @@ export function DeleteArticleButton({ articleId, articleTitle }: DeleteArticleBu
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive">
+        <Button variant="destructive" className="active:scale-95 transition-transform">
           <Trash2 className="ml-2 h-4 w-4" />
           حذف المقال
         </Button>
@@ -64,8 +65,8 @@ export function DeleteArticleButton({ articleId, articleTitle }: DeleteArticleBu
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>إلغاء</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+          <AlertDialogCancel className="active:scale-95 transition-transform">إلغاء</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDelete} disabled={isDeleting} className="active:scale-95 transition-transform">
             {isDeleting && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
             تأكيد الحذف
           </AlertDialogAction>

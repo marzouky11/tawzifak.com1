@@ -143,7 +143,7 @@ export default function AdminUsersPage() {
                           <Button 
                             variant="ghost" 
                             size="icon" 
-                            className="text-destructive hover:bg-destructive/10"
+                            className="text-destructive hover:bg-destructive/10 active:scale-95 transition-transform"
                             onClick={() => setUserToDelete(user)}
                             disabled={user.isAdmin}
                             title={user.isAdmin ? "لا يمكن حذف حساب مشرف" : "حذف المستخدم"}
@@ -176,8 +176,8 @@ export default function AdminUsersPage() {
             </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setUserToDelete(null)}>إلغاء</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteUser} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">تأكيد الحذف</AlertDialogAction>
+            <AlertDialogCancel onClick={() => setUserToDelete(null)} className="active:scale-95 transition-transform">إلغاء</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteUser} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground active:scale-95 transition-transform">تأكيد الحذف</AlertDialogAction>
             </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

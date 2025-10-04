@@ -97,7 +97,7 @@ export function LoginForm() {
                 </p>
               </div>
 
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full active:scale-95 transition-transform" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {loading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
               </Button>

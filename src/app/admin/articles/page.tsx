@@ -151,8 +151,8 @@ export default function AdminArticlesPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel ref={cancelButtonRef} onClick={() => setArticleToDelete(null)}>إلغاء</AlertDialogCancel>
-            <AlertDialogAction ref={deleteButtonRef} onClick={handleDelete} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">تأكيد الحذف</AlertDialogAction>
+            <AlertDialogCancel ref={cancelButtonRef} onClick={() => setArticleToDelete(null)} className="active:scale-95 transition-transform">إلغاء</AlertDialogCancel>
+            <AlertDialogAction ref={deleteButtonRef} onClick={handleDelete} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground active:scale-95 transition-transform">تأكيد الحذف</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
