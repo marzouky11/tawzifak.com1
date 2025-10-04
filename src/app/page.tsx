@@ -99,7 +99,7 @@ return (
 
 function ArticlesSection() {
 const articleSectionColor = '#00897B';
-const articlePrimaryLight = ${articleSectionColor}1A;
+const articlePrimaryLight = `${articleSectionColor}1A`;
 
 return (
 <section>
