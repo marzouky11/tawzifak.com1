@@ -1,11 +1,13 @@
 
+'use client';
+
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { JobCard } from '@/components/job-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { getJobs, getTestimonials, getCompetitions, getImmigrationPosts } from '@/lib/data';
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { Newspaper, Briefcase, Users, ArrowLeft, Landmark, Plane } from 'lucide-react';
 import { HomePageFilters } from './home-page-filters';
 import { HomeCarousel } from './home-carousel';
@@ -17,35 +19,7 @@ import { CompetitionCard } from '@/components/competition-card';
 import { ImmigrationCard } from '@/components/immigration-card';
 import { cn } from '@/lib/utils';
 import type { Job, Competition, ImmigrationPost, Testimonial } from '@/lib/types';
-import { headers } from 'next/headers';
-
-export const revalidate = 3600; // Revalidate every hour
-
-
-const appName = 'توظيفك';
-const appDescription = "تعرّف أفضل عروض العمل وفرص الهجرة القانونية والمباريات العمومية بسهولة وموثوقية. اعثر على الفرص التي تناسب مهاراتك وطموحاتك المهنية بسرعة وفعالية وابدأ رحلتك نحو مستقبل مهني ناجح.";
-
-export const metadata: Metadata = {
-  title: {
-    default: "توظيفك – اكتشف أحدث الوظائف وفرص الهجرة والمباريات العمومية",
-    template: `%s | ${appName}`
-  },
-  description: appDescription,
-  robots: 'index, follow',
-  alternates: {
-    canonical: '/',
-  },
-  icons: {
-    icon: [
-      { url: "/favicon.ico", type: "image/x-icon", sizes: "any" },
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-    ],
-    apple: [
-      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-    ],
-  },
-};
+import { useIsMobile } from '@/hooks/use-mobile';
 
 
 function JobFiltersSkeleton() {
@@ -155,49 +129,60 @@ interface HomePageData {
     };
 }
 
-async function getHomePageData(isMobile: boolean): Promise<HomePageData> {
-    const counts = {
-        jobOffers: isMobile ? 4 : 8,
-        jobSeekers: isMobile ? 2 : 4,
-        competitions: isMobile ? 2 : 4,
-        immigrationPosts: isMobile ? 4 : 8,
-        testimonials: isMobile ? 1 : 4,
-    };
+export default function HomePage() {
+  const [data, setData] = useState<HomePageData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    async function getHomePageData(isMobile: boolean | undefined): Promise<void> {
+        setLoading(true);
+
+        const counts = {
+            jobOffers: isMobile ? 4 : 8,
+            jobSeekers: isMobile ? 2 : 4,
+            competitions: isMobile ? 2 : 4,
+            immigrationPosts: isMobile ? 4 : 8,
+            testimonials: isMobile ? 1 : 4,
+        };
+        
+        const [
+            jobOffersData,
+            jobSeekersData,
+            competitionsData,
+            immigrationPostsData,
+            testimonialsData,
+        ] = await Promise.all([
+            getJobs({ postType: 'seeking_worker', count: counts.jobOffers }),
+            getJobs({ postType: 'seeking_job', count: counts.jobSeekers }),
+            getCompetitions({ count: counts.competitions }),
+            getImmigrationPosts({ count: counts.immigrationPosts }),
+            getTestimonials(), // Fetch all, but will be sliced in the component
+        ]);
+
+        setData({
+            jobOffers: jobOffersData.data,
+            jobSeekers: jobSeekersData.data,
+            competitions: competitionsData.data,
+            immigrationPosts: immigrationPostsData.data,
+            testimonials: testimonialsData.slice(0, counts.testimonials),
+            stats: {
+                jobs: jobOffersData.totalCount,
+                competitions: competitionsData.totalCount,
+                immigration: immigrationPostsData.totalCount,
+                seekers: jobSeekersData.totalCount,
+            }
+        });
+        setLoading(false);
+    }
     
-    const [
-        jobOffersData,
-        jobSeekersData,
-        competitionsData,
-        immigrationPostsData,
-        testimonialsData,
-    ] = await Promise.all([
-        getJobs({ postType: 'seeking_worker', count: counts.jobOffers }),
-        getJobs({ postType: 'seeking_job', count: counts.jobSeekers }),
-        getCompetitions({ count: counts.competitions }),
-        getImmigrationPosts({ count: counts.immigrationPosts }),
-        getTestimonials(), // Fetch all, but will be sliced in the component
-    ]);
+    // The isMobile hook can return undefined on initial render.
+    // We only fetch data once we know the screen size.
+    if (isMobile !== undefined) {
+      getHomePageData(isMobile);
+    }
 
-    return {
-        jobOffers: jobOffersData.data,
-        jobSeekers: jobSeekersData.data,
-        competitions: competitionsData.data,
-        immigrationPosts: immigrationPostsData.data,
-        testimonials: testimonialsData.slice(0, counts.testimonials),
-        stats: {
-            jobs: jobOffersData.totalCount,
-            competitions: competitionsData.totalCount,
-            immigration: immigrationPostsData.totalCount,
-            seekers: jobSeekersData.totalCount,
-        }
-    };
-}
-
-
-export default async function HomePage() {
-  const userAgent = headers().get('user-agent') || '';
-  const isMobile = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
-  const data = await getHomePageData(isMobile);
+  }, [isMobile]);
 
   return (
     <>
@@ -213,100 +198,103 @@ export default async function HomePage() {
         <div className="space-y-12">
             <HomeCarousel />
             
-            <Suspense fallback={<SectionSkeleton />}>
-                <Section 
-                    icon={Briefcase}
-                    title="عروض العمل"
-                    description="اكتشف آخر فرص الشغل التي أضافها أصحاب العمل في مختلف المجالات."
-                    href="/jobs"
-                    iconColor="#0D47A1"
-                >
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {data.jobOffers.map((job) => (
-                           <div key={job.id}>
-                                <JobCard job={job} />
-                            </div>
-                        ))}
-                    </div>
-                </Section>
-            </Suspense>
-            
-            {data.immigrationPosts.length > 0 && (
+            {loading || !data ? (
                 <>
+                    <SectionSkeleton />
                     <Separator />
-                    <Suspense fallback={<SectionSkeleton />}>
-                         <Section 
-                            icon={Plane}
-                            title="فرص الهجرة"
-                            description="اكتشف أحدث فرص الهجرة للعمل، الدراسة، أو التدريب حول العالم."
-                            href="/immigration"
-                            iconColor="#0ea5e9"
-                        >
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                              {data.immigrationPosts.map((post) => (
-                                 <div key={post.id}>
-                                    <ImmigrationCard post={post} />
-                                </div>
-                              ))}
-                            </div>
-                        </Section>
-                    </Suspense>
+                    <SectionSkeleton />
+                    <Separator />
+                    <SectionSkeleton />
                 </>
-            )}
+            ) : (
+                <>
+                    <Section 
+                        icon={Briefcase}
+                        title="عروض العمل"
+                        description="اكتشف آخر فرص الشغل التي أضافها أصحاب العمل في مختلف المجالات."
+                        href="/jobs"
+                        iconColor="#0D47A1"
+                    >
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {data.jobOffers.map((job) => (
+                               <div key={job.id}>
+                                    <JobCard job={job} />
+                                </div>
+                            ))}
+                        </div>
+                    </Section>
+                
+                    {data.immigrationPosts.length > 0 && (
+                        <>
+                            <Separator />
+                            <Section 
+                                icon={Plane}
+                                title="فرص الهجرة"
+                                description="اكتشف أحدث فرص الهجرة للعمل، الدراسة، أو التدريب حول العالم."
+                                href="/immigration"
+                                iconColor="#0ea5e9"
+                            >
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                  {data.immigrationPosts.map((post) => (
+                                     <div key={post.id}>
+                                        <ImmigrationCard post={post} />
+                                    </div>
+                                  ))}
+                                </div>
+                            </Section>
+                        </>
+                    )}
 
-            {data.competitions.length > 0 && (
-                <>
-                    <Separator />
-                    <Suspense fallback={<SectionSkeleton />}>
-                        <Section 
-                          icon={Landmark}
-                          title="المباريات العمومية"
-                          description="تصفح آخر مباريات التوظيف في القطاع العام."
-                          href="/competitions"
-                          iconColor="#14532d"
-                        >
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                              {data.competitions.map((comp, index) => (
-                                 <div key={comp.id} className={cn(index >= 2 && 'hidden sm:block', index >= 4 && 'lg:hidden')}>
-                                    <CompetitionCard competition={comp} />
+                    {data.competitions.length > 0 && (
+                        <>
+                            <Separator />
+                            <Section 
+                              icon={Landmark}
+                              title="المباريات العمومية"
+                              description="تصفح آخر مباريات التوظيف في القطاع العام."
+                              href="/competitions"
+                              iconColor="#14532d"
+                            >
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                  {data.competitions.map((comp, index) => (
+                                     <div key={comp.id} className={cn(index >= 2 && 'hidden sm:block')}>
+                                        <CompetitionCard competition={comp} />
+                                    </div>
+                                  ))}
                                 </div>
-                              ))}
-                            </div>
-                        </Section>
-                    </Suspense>
+                            </Section>
+                        </>
+                    )}
+                    
+                    <Separator />
+                    <Section
+                        icon={Users}
+                        title="باحثون عن عمل"
+                        description="تصفح ملفات المرشحين والمهنيين المستعدين للانضمام إلى فريقك."
+                        href="/workers"
+                        iconColor="#424242"
+                    >
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {data.jobSeekers.map((job, index) => (
+                                <div key={job.id} className={cn(index >= 2 && 'hidden sm:block')}>
+                                    <JobCard job={job} />
+                                </div>
+                            ))}
+                        </div>
+                    </Section>
+                    
+                    <Separator />
+                    <ArticlesSection />
+                    
+                    <HomeExtraSections
+                        testimonials={data.testimonials}
+                        stats={data.stats}
+                    />
                 </>
             )}
-            
-            <Separator />
-            <Suspense fallback={<SectionSkeleton />}>
-                <Section
-                    icon={Users}
-                    title="باحثون عن عمل"
-                    description="تصفح ملفات المرشحين والمهنيين المستعدين للانضمام إلى فريقك."
-                    href="/workers"
-                    iconColor="#424242"
-                >
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {data.jobSeekers.map((job, index) => (
-                            <div key={job.id} className={cn(index >= 2 && 'hidden sm:block', index >= 4 && 'lg:hidden')}>
-                                <JobCard job={job} />
-                            </div>
-                        ))}
-                    </div>
-                </Section>
-            </Suspense>
-            
-            <Separator />
-            <ArticlesSection />
-            
-            <Suspense>
-                <HomeExtraSections
-                    testimonials={data.testimonials}
-                    stats={data.stats}
-                />
-            </Suspense>
         </div>
       </div>
     </>
   );
 }
+
