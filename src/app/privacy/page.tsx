@@ -1,3 +1,4 @@
+
 'use client';
 
 import { MobilePageHeader } from '@/components/layout/mobile-page-header';
@@ -9,7 +10,7 @@ import Link from 'next/link';
 export default function PrivacyPolicyPage() {
   return (
     <>
-      <MobilePageHeader title="سياسة الخصوصية" href="/">
+      <MobilePageHeader title="سياسة الخصوصية">
         <Shield className="h-5 w-5 text-primary" />
       </MobilePageHeader>
       <DesktopPageHeader
