@@ -1,154 +1,138 @@
+"use client";
 
-'use client';
+import React from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/auth-context";
 
-import * as React from 'react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { useAuth } from '@/context/auth-context';
-import { Skeleton } from '@/components/ui/skeleton';
-import Image from 'next/image';
+interface Slide {
+  title: string;
+  description: string;
+  image: string;
+  buttonText: string;
+  buttonLink: string;
+  buttonClass: string;
+}
 
-const slidesData = [
+const slidesData: Slide[] = [
   {
-    key: 'jobs',
-    desktopSrc: "/web1.png",
-    mobileSrc: "/Sliderphone1.jpg",
-    alt: "وظائف مميزة",
-    title: "وظائف مميزة بانتظارك",
-    description: "استكشف الفرص المناسبة لمهاراتك واهتماماتك",
+    title: "منصتك الأولى للتوظيف",
+    description: "ابحث عن وظائف وفرص عمل تناسب مهاراتك في أي وقت ومكان.",
+    image: "/images/slide1.jpg",
     buttonText: "استكشف الآن",
     buttonLink: "/jobs",
-    buttonClass: "bg-[#0D47A1] hover:bg-[#0D47A1]/90"
+    buttonClass: "bg-blue-600 hover:bg-blue-700 text-white",
   },
   {
-    key: 'immigration',
-    desktopSrc: "/web2.png",
-    mobileSrc: "/Sliderphone2.png",
-    alt: "فرص الهجرة",
-    title: "فرص الهجرة حول العالم",
-    description: "اكتشف أحدث فرص الهجرة للعمل والدراسة",
-    buttonText: "استكشف الآن",
-    buttonLink: "/immigration",
-    buttonClass: "bg-[#0ea5e9] hover:bg-[#0ea5e9]/90"
+    title: "اكتشف فرصًا جديدة كل يوم",
+    description: "نوفر لك أحدث العروض في كل المجالات داخل وخارج الوطن.",
+    image: "/images/slide2.jpg",
+    buttonText: "عرض العروض",
+    buttonLink: "/offers",
+    buttonClass: "bg-green-600 hover:bg-green-700 text-white",
   },
   {
-    key: 'competitions',
-    desktopSrc: "/web5.png",
-    mobileSrc: "/Sliderphone5.jpg",
-    alt: "المباريات العمومية",
-    title: "المباريات العمومية",
-    description: "اكتشف آخر مباريات التوظيف في القطاع العام",
-    buttonText: "استكشف الآن",
-    buttonLink: "/competitions",
-    buttonClass: "bg-[#14532d] hover:bg-[#14532d]/90"
+    title: "ابدأ مسيرتك المهنية الآن",
+    description: "قم بإنشاء حساب لتبدأ التقديم على آلاف الوظائف المتاحة.",
+    image: "/images/slide3.jpg",
+    buttonText: "إنشاء حساب",
+    buttonLink: "/register",
+    buttonClass: "bg-purple-600 hover:bg-purple-700 text-white",
   },
-  {
-    key: 'workers',
-    desktopSrc: "/web3.png",
-    mobileSrc: "/Sliderphone3.png",
-    alt: "باحثون عن عمل",
-    title: "باحثون عن عمل",
-    description: "تصفح ملفات الباحثين عن عمل في مختلف المجالات",
-    buttonText: "استكشف الآن",
-    buttonLink: "/workers",
-    buttonClass: "bg-[#424242] hover:bg-[#424242]/90"
-  }
 ];
 
-export function HomeCarousel() {
-  const { user, loading: authLoading } = useAuth();
-  const [isMounted, setIsMounted] = React.useState(false);
-  const [currentSlide, setCurrentSlide] = React.useState(0);
-  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
+export default function HomeCarousel() {
+  const [current, setCurrent] = React.useState(0);
+  const [paused, setPaused] = React.useState(false);
+  const { user } = useAuth();
 
+  // 🧠 تحميل آخر سلايد من التخزين المحلي
   React.useEffect(() => {
-    setIsMounted(true);
-    
-    const startTimer = () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-      timerRef.current = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % slidesData.length);
-      }, 5000);
-    };
-
-    startTimer();
-
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
+    const savedSlide = localStorage.getItem("currentSlide");
+    if (savedSlide) setCurrent(Number(savedSlide));
   }, []);
 
-  if (!isMounted || authLoading) {
-    return <Skeleton className="w-full h-64 md:h-80 rounded-2xl" />;
-  }
+  // 💾 حفظ السلايد الحالي عند تغييره
+  React.useEffect(() => {
+    localStorage.setItem("currentSlide", current.toString());
+  }, [current]);
+
+  // 🔁 تحريك تلقائي يتوقف عند التفاعل ويستأنف بعد 8 ثوانٍ
+  React.useEffect(() => {
+    if (paused) return;
+    const timer = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % slidesData.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [paused]);
+
+  // ⏸️ وظيفة توقف مؤقت مع استئناف لاحق
+  const handleUserInteraction = (index?: number) => {
+    if (typeof index === "number") setCurrent(index);
+    setPaused(true);
+    setTimeout(() => setPaused(false), 6000); // استئناف بعد 8 ثواني
+  };
 
   return (
-    <div className="w-full rounded-2xl overflow-hidden shadow-lg relative h-64 md:h-80">
+    <div
+      className="relative w-full h-[80vh] overflow-hidden rounded-2xl"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
       {slidesData.map((slide, index) => (
         <div
-          key={slide.key}
+          key={index}
           className={cn(
-            "absolute inset-0 w-full h-full transition-opacity duration-1000",
-            index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
+            "absolute inset-0 transition-opacity duration-700 ease-in-out",
+            index === current ? "opacity-100 z-10" : "opacity-0 z-0"
           )}
         >
-          <div className="hidden md:block w-full h-full relative">
-            <Image
-              src={slide.desktopSrc}
-              alt={slide.alt}
-              fill
-              sizes="100vw"
-              priority
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-transparent flex items-center p-12">
-              <div className="w-[45%] text-white space-y-4">
-                <h2 className="text-5xl font-bold leading-tight drop-shadow-md">{slide.title}</h2>
-                <p className="text-lg text-white/90 drop-shadow-sm">{slide.description}</p>
-                <Button
-                  asChild
-                  size="lg"
-                  className={cn(
-                    "text-white font-semibold transition-transform hover:scale-105",
-                    slide.buttonClass
-                  )}
-                >
-                  <Link href={slide.buttonLink}>{slide.buttonText}</Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="md:hidden w-full h-full relative">
-            <Image
-              src={slide.mobileSrc}
-              alt={slide.alt}
-              fill
-              sizes="100vw"
-              priority
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-center p-4">
-              <div className="text-white space-y-2">
-                <h2 className="text-2xl font-bold leading-tight drop-shadow-md">{slide.title}</h2>
-                <p className="text-sm text-white/90 drop-shadow-sm">{slide.description}</p>
-                <Button
-                  asChild
-                  size="sm"
-                  className={cn("text-white font-semibold mt-2", slide.buttonClass)}
-                >
-                  <Link href={slide.buttonLink}>{slide.buttonText}</Link>
-                </Button>
-              </div>
-            </div>
+          <Image
+            src={slide.image}
+            alt={slide.title}
+            fill
+            className="object-cover"
+            // ✅ الصورة الأولى فقط تُحمّل فوراً، والباقي Lazy
+            priority={index === 0}
+            loading={index === 0 ? "eager" : "lazy"}
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-center text-white p-6">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 drop-shadow-md">
+              {slide.title}
+            </h2>
+            <p className="text-lg md:text-xl mb-6 text-white/90">
+              {slide.description}
+            </p>
+            <Link href={slide.buttonLink}>
+              <Button
+                className={cn(
+                  "px-6 py-3 text-lg rounded-full shadow-lg transition-transform hover:scale-105",
+                  slide.buttonClass
+                )}
+              >
+                {slide.buttonText}
+              </Button>
+            </Link>
           </div>
         </div>
       ))}
+
+      {/* 🔘 مؤشرات التنقل */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+        {slidesData.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => handleUserInteraction(index)}
+            className={cn(
+              "w-3 h-3 rounded-full transition-all duration-300",
+              index === current ? "bg-white w-6" : "bg-white/50"
+            )}
+          />
+        ))}
+      </div>
     </div>
   );
-}
+            }
