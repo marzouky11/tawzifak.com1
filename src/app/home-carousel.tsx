@@ -12,7 +12,7 @@ const slidesData = [
   {
     key: 'jobs',
     desktopSrc: "/web1.png",
-    mobileSrc: "/Sliderphone1.jpg",
+    mobileSrc: "/phone1.webp",
     alt: "وظائف مميزة",
     title: "وظائف مميزة بانتظارك",
     description: "استكشف الفرص المناسبة لمهاراتك واهتماماتك",
@@ -23,7 +23,7 @@ const slidesData = [
   {
     key: 'immigration',
     desktopSrc: "/web2.png",
-    mobileSrc: "/Sliderphone2.png",
+    mobileSrc: "/phone2.webp",
     alt: "فرص الهجرة",
     title: "فرص الهجرة حول العالم",
     description: "اكتشف أحدث فرص الهجرة للعمل والدراسة",
@@ -34,7 +34,7 @@ const slidesData = [
   {
     key: 'competitions',
     desktopSrc: "/web5.png",
-    mobileSrc: "/Sliderphone5.jpg",
+    mobileSrc: "/phone3.webp",
     alt: "المباريات العمومية",
     title: "المباريات العمومية",
     description: "اكتشف آخر مباريات التوظيف في القطاع العام",
@@ -45,7 +45,7 @@ const slidesData = [
   {
     key: 'workers',
     desktopSrc: "/web3.png",
-    mobileSrc: "/Sliderphone3.png",
+    mobileSrc: "/phone4.webp",
     alt: "باحثون عن عمل",
     title: "باحثون عن عمل",
     description: "تصفح ملفات الباحثين عن عمل في مختلف المجالات",
@@ -136,4 +136,4 @@ export function HomeCarousel() {
       ))}
     </div>
   );
-          }
+}
