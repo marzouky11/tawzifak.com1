@@ -6,8 +6,9 @@ import { DesktopPageHeader } from '@/components/layout/desktop-page-header';
 import { PageContent } from './page-content';
 
 export const metadata: Metadata = {
-  title: 'عروض العمل - آخر الوظائف الشاغرة',
-  description: 'تصفح أحدث عروض العمل والوظائف الشاغرة في مختلف المجالات والقطاعات. ابحث عن فرص عمل تناسب مهاراتك وخبراتك.',
+  title: 'عروض العمل - وظائف جديدة في المغرب',
+  description: 'اكتشف أحدث الوظائف الجديدة في المغرب مع فرص عمل محدثة يوميًا. تصفح عروض التوظيف المتوفرة في مختلف المدن المغربية واختر الوظيفة التي تناسب مهاراتك وطموحاتك.
+',
 };
 
 function JobListSkeleton() {
