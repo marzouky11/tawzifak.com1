@@ -39,7 +39,7 @@ export default function ArticlesPage() {
         description="نقدم لك مجموعة من المقالات المختارة بعناية لمساعدتك على تطوير مهاراتك، والنجاح في مسيرتك المهنية، ومواكبة آخر تطورات سوق العمل."
       />
         
-      <div className="container mx-auto max-w-7xl px-4 pb-8">
+      <div className="container mx-auto max-w-5xl px-4 pb-8">
         <Suspense fallback={<ArticlesListSkeleton />}>
           <PageContent />
         </Suspense>
