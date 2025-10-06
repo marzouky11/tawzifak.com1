@@ -116,7 +116,7 @@ export function ImmigrationDesktopDetails({ post, similarPosts }: ImmigrationDes
     
 
     return (
-        <div className="container mx-auto max-w-7xl px-4 pb-8 space-y-6">
+        <div className="container mx-auto max-w-5xl px-4 pb-8 space-y-6">
             <Card className="overflow-hidden shadow-lg border-2" style={{ borderColor: sectionColor }}>
                  <CardHeader className="p-6" style={{ backgroundColor: `${sectionColor}1A`}}>
                     <div className="flex items-center gap-4 mb-2">
