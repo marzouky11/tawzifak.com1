@@ -107,7 +107,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 // تحويل أي رابط موجود بصيغة "نص" (url:الرابط) إلى رابط قابل للنقر
 const linkify = (text: string) => {
-  const regex = /"([^"]+)"\s*\(url:([^\s)]+)\)/g;
+  // دعم الصيغتين: القديمة (الرابط مباشرة) والجديدة ("النص" (url:الرابط))
+  const regex = /(?:("([^"]+)"\s*\(url:([^\s)]+)\))|((https?:\/\/[^\s]+)))/g;
   let lastIndex = 0;
   const elements: React.ReactNode[] = [];
 
@@ -116,15 +117,26 @@ const linkify = (text: string) => {
     if (match.index > lastIndex) {
       elements.push(text.slice(lastIndex, match.index));
     }
-    const displayText = match[1];
-    const url = match[2];
+
+    let displayText, url;
+
+    if (match[1]) {
+      // الصيغة الجديدة: "النص" (url:الرابط)
+      displayText = match[2];
+      url = match[3];
+    } else {
+      // الصيغة القديمة: الرابط مباشرة
+      displayText = match[4];
+      url = match[4];
+    }
+
     elements.push(
       <a 
         key={lastIndex} 
         href={url} 
         target="_blank" 
         rel="noopener noreferrer" 
-        className="text-blue-600 font-medium text-lg hover:text-blue-800 break-all no-underline"
+        className="text-blue-600 font-medium text-[17px] hover:text-blue-800 no-underline break-words inline-block"
       >
         {displayText}
       </a>
@@ -282,4 +294,4 @@ export async function generateStaticParams() {
   const allArticles = [...staticArticles, ...dbArticles];
 
   return allArticles.map(article => ({ slug: article.slug }));
-}
+      }
