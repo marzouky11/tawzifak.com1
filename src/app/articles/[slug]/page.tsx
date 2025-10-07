@@ -136,7 +136,7 @@ const linkify = (text: string) => {
         href={url} 
         target="_blank" 
         rel="noopener noreferrer" 
-        className="text-blue-600 font-medium text-[17px] hover:text-blue-800 no-underline break-words inline-block"
+        className="text-blue-600 font-medium text-[17px] hover:text-blue-800 no-underline break-words"
       >
         {displayText}
       </a>
@@ -294,4 +294,4 @@ export async function generateStaticParams() {
   const allArticles = [...staticArticles, ...dbArticles];
 
   return allArticles.map(article => ({ slug: article.slug }));
-      }
+}
