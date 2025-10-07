@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { JobCard } from '@/components/job-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { getJobs, getCompetitions, getImmigrationPosts, getTestimonials } from '@/lib/data';
+import { getJobs, getTestimonials, getCompetitions, getImmigrationPosts } from '@/lib/data';
 import React, { Suspense } from 'react';
 import { Newspaper, Briefcase, Users, ArrowLeft, Landmark, Plane } from 'lucide-react';
 import { HomePageFilters } from './home-page-filters';
@@ -152,7 +152,6 @@ interface HomePageData {
   };
 }
 
-// تحسين الأداء: جلب الوظائف والهجرة أولاً فقط عند تحميل الصفحة
 async function getHomePageData(isMobile: boolean): Promise<HomePageData> {
   const counts = {
     jobOffers: isMobile ? 4 : 8,
@@ -162,30 +161,32 @@ async function getHomePageData(isMobile: boolean): Promise<HomePageData> {
     testimonials: isMobile ? 1 : 4,
   };
 
-  const [jobOffersData, jobSeekersData, immigrationPostsData] = await Promise.all([
-    getJobs({ postType: 'seeking_worker', count: counts.jobOffers }),
-    getJobs({ postType: 'seeking_job', count: counts.jobSeekers }),
-    getImmigrationPosts({ count: counts.immigrationPosts }),
-  ]);
+  const [  
+    jobOffersData,  
+    jobSeekersData,  
+    competitionsData,  
+    immigrationPostsData,  
+    testimonialsData,  
+  ] = await Promise.all([  
+    getJobs({ postType: 'seeking_worker', count: counts.jobOffers }),  
+    getJobs({ postType: 'seeking_job', count: counts.jobSeekers }),  
+    getCompetitions({ count: counts.competitions }),  
+    getImmigrationPosts({ count: counts.immigrationPosts }),  
+    getTestimonials(),  
+  ]);  
 
-  // لجلب باقي البيانات لاحقاً عند الحاجة (Lazy load)
-  const [competitionsData, testimonialsData] = await Promise.all([
-    getCompetitions({ count: counts.competitions }),
-    getTestimonials(),
-  ]);
-
-  return {
-    jobOffers: jobOffersData.data,
-    jobSeekers: jobSeekersData.data,
-    competitions: competitionsData.data,
-    immigrationPosts: immigrationPostsData.data,
-    testimonials: testimonialsData.slice(0, counts.testimonials),
-    stats: {
-      jobs: jobOffersData.totalCount,
-      competitions: competitionsData.totalCount,
-      immigration: immigrationPostsData.totalCount,
-      seekers: jobSeekersData.totalCount,
-    },
+  return {  
+    jobOffers: jobOffersData.data,  
+    jobSeekers: jobSeekersData.data,  
+    competitions: competitionsData.data,  
+    immigrationPosts: immigrationPostsData.data,  
+    testimonials: testimonialsData.slice(0, counts.testimonials),  
+    stats: {  
+      jobs: jobOffersData.totalCount,  
+      competitions: competitionsData.totalCount,  
+      immigration: immigrationPostsData.totalCount,  
+      seekers: jobSeekersData.totalCount,  
+    }  
   };
 }
 
@@ -198,110 +199,110 @@ export default async function HomePage() {
     <>
       <HomeHeaderMobile />
 
-      <div className="container mt-4">
-        <Suspense fallback={<JobFiltersSkeleton />}>
-          <HomePageFilters />
-        </Suspense>
-      </div>
+      <div className="container mt-4">  
+        <Suspense fallback={<JobFiltersSkeleton />}>  
+          <HomePageFilters />  
+        </Suspense>  
+      </div>  
+      
+      <div className="container mt-6 md:mt-8 mb-12">  
+        <div className="space-y-12">  
+          <HomeCarousel />  
+            
+          <Suspense fallback={<SectionSkeleton />}>  
+            <Section   
+              icon={Briefcase}  
+              title="عروض العمل"  
+              description="اكتشف آخر فرص الشغل التي أضافها أصحاب العمل في مختلف المجالات."  
+              href="/jobs"  
+              iconColor="#0D47A1"  
+            >  
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">  
+                {data.jobOffers.map((job) => (  
+                  <div key={job.id}>  
+                    <JobCard job={job} />  
+                  </div>  
+                ))}  
+              </div>  
+            </Section>  
+          </Suspense>  
+            
+          {data.immigrationPosts.length > 0 && (  
+            <>  
+              <Separator />  
+              <Suspense fallback={<SectionSkeleton />}>  
+                <Section   
+                  icon={Plane}  
+                  title="فرص الهجرة"  
+                  description="اكتشف أحدث فرص الهجرة للعمل، الدراسة، أو التدريب حول العالم."  
+                  href="/immigration"  
+                  iconColor="#0ea5e9"  
+                >  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">  
+                    {data.immigrationPosts.map((post) => (  
+                      <div key={post.id}>  
+                        <ImmigrationCard post={post} />  
+                      </div>  
+                    ))}  
+                  </div>  
+                </Section>  
+              </Suspense>  
+            </>  
+          )}  
 
-      <div className="container mt-6 md:mt-8 mb-12">
-        <div className="space-y-12">
-          <HomeCarousel />
-
-          <Suspense fallback={<SectionSkeleton />}>
-            <Section
-              icon={Briefcase}
-              title="عروض العمل"
-              description="اكتشف آخر فرص الشغل التي أضافها أصحاب العمل في مختلف المجالات."
-              href="/jobs"
-              iconColor="#0D47A1"
-            >
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {data.jobOffers.map((job) => (
-                  <div key={job.id}>
-                    <JobCard job={job} />
-                  </div>
-                ))}
-              </div>
-            </Section>
-          </Suspense>
-
-          {data.immigrationPosts.length > 0 && (
-            <>
-              <Separator />
-              <Suspense fallback={<SectionSkeleton />}>
-                <Section
-                  icon={Plane}
-                  title="فرص الهجرة"
-                  description="اكتشف أحدث فرص الهجرة للعمل، الدراسة، أو التدريب حول العالم."
-                  href="/immigration"
-                  iconColor="#0ea5e9"
-                >
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {data.immigrationPosts.map((post) => (
-                      <div key={post.id}>
-                        <ImmigrationCard post={post} />
-                      </div>
-                    ))}
-                  </div>
-                </Section>
-              </Suspense>
-            </>
-          )}
-
-          {data.competitions.length > 0 && (
-            <>
-              <Separator />
-              <Suspense fallback={<SectionSkeleton />}>
-                <Section
-                  icon={Landmark}
-                  title="المباريات العمومية"
-                  description="تصفح آخر مباريات التوظيف في القطاع العام."
-                  href="/competitions"
-                  iconColor="#14532d"
-                >
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {data.competitions.map((comp, index) => (
-                      <div key={comp.id} className={cn(index >= 2 && 'hidden sm:block', index >= 4 && 'lg:hidden')}>
-                        <CompetitionCard competition={comp} />
-                      </div>
-                    ))}
-                  </div>
-                </Section>
-              </Suspense>
-            </>
-          )}
-
-          <Separator />
-          <Suspense fallback={<SectionSkeleton />}>
-            <Section
-              icon={Users}
-              title="باحثون عن عمل"
-              description="تصفح ملفات المرشحين والمهنيين المستعدين للانضمام إلى فريقك."
-              href="/workers"
-              iconColor="#424242"
-            >
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {data.jobSeekers.map((job, index) => (
-                  <div key={job.id} className={cn(index >= 2 && 'hidden sm:block', index >= 4 && 'lg:hidden')}>
-                    <JobCard job={job} />
-                  </div>
-                ))}
-              </div>
-            </Section>
-          </Suspense>
-
-          <Separator />
-          <ArticlesSection />
-
-          <Suspense>
-            <HomeExtraSections
-              testimonials={data.testimonials}
-              stats={data.stats}
-            />
-          </Suspense>
-        </div>
-      </div>
+          {data.competitions.length > 0 && (  
+            <>  
+              <Separator />  
+              <Suspense fallback={<SectionSkeleton />}>  
+                <Section   
+                  icon={Landmark}  
+                  title="المباريات العمومية"  
+                  description="تصفح آخر مباريات التوظيف في القطاع العام."  
+                  href="/competitions"  
+                  iconColor="#14532d"  
+                >  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">  
+                    {data.competitions.map((comp, index) => (  
+                      <div key={comp.id} className={cn(index >= 2 && 'hidden sm:block', index >= 4 && 'lg:hidden')}>  
+                        <CompetitionCard competition={comp} />  
+                      </div>  
+                    ))}  
+                  </div>  
+                </Section>  
+              </Suspense>  
+            </>  
+          )}  
+            
+          <Separator />  
+          <Suspense fallback={<SectionSkeleton />}>  
+            <Section  
+              icon={Users}  
+              title="باحثون عن عمل"  
+              description="تصفح ملفات المرشحين والمهنيين المستعدين للانضمام إلى فريقك."  
+              href="/workers"  
+              iconColor="#424242"  
+            >  
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">  
+                {data.jobSeekers.map((job, index) => (  
+                  <div key={job.id} className={cn(index >= 2 && 'hidden sm:block', index >= 4 && 'lg:hidden')}>  
+                    <JobCard job={job} />  
+                  </div>  
+                ))}  
+              </div>  
+            </Section>  
+          </Suspense>  
+            
+          <Separator />  
+          <ArticlesSection />  
+            
+          <Suspense>  
+            <HomeExtraSections  
+              testimonials={data.testimonials}  
+              stats={data.stats}  
+            />  
+          </Suspense>  
+        </div>  
+      </div>  
     </>
   );
-       }
+      }
