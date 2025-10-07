@@ -105,16 +105,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-// تحويل أي رابط موجود في النص إلى رابط قابل للنقر
+// تحويل أي رابط موجود بصيغة "نص" (url:الرابط) إلى رابط قابل للنقر
 const linkify = (text: string) => {
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  return text.split(urlRegex).map((part, idx) => {
-    if (part.match(urlRegex)) {
-      return <a key={idx} href={part} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all">{part}</a>;
-    } else {
-      return part;
+  const regex = /"([^"]+)"\s*\(url:([^\s)]+)\)/g;
+  let lastIndex = 0;
+  const elements: React.ReactNode[] = [];
+
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      elements.push(text.slice(lastIndex, match.index));
     }
-  });
+    const displayText = match[1];
+    const url = match[2];
+    elements.push(
+      <a key={lastIndex} href={url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all">
+        {displayText}
+      </a>
+    );
+    lastIndex = regex.lastIndex;
+  }
+  if (lastIndex < text.length) {
+    elements.push(text.slice(lastIndex));
+  }
+  return elements;
 };
 
 // دالة renderContent لدعم العناوين والقوائم والفقرات
@@ -262,4 +276,4 @@ export async function generateStaticParams() {
   const allArticles = [...staticArticles, ...dbArticles];
 
   return allArticles.map(article => ({ slug: article.slug }));
-      }
+  }
