@@ -119,7 +119,13 @@ const linkify = (text: string) => {
     const displayText = match[1];
     const url = match[2];
     elements.push(
-      <a key={lastIndex} href={url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all">
+      <a 
+        key={lastIndex} 
+        href={url} 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        className="text-blue-600 font-medium text-lg hover:text-blue-800 break-all no-underline"
+      >
         {displayText}
       </a>
     );
@@ -276,4 +282,4 @@ export async function generateStaticParams() {
   const allArticles = [...staticArticles, ...dbArticles];
 
   return allArticles.map(article => ({ slug: article.slug }));
-  }
+}
