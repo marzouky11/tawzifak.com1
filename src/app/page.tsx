@@ -217,7 +217,10 @@ export default async function HomePage() {
               href="/jobs"  
               iconColor="#0D47A1"  
             >  
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">  
+              <div className={cn(
+                "grid gap-4",
+                isMobile ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+              )}>  
                 {data.jobOffers.map((job) => (  
                   <div key={job.id}>  
                     <JobCard job={job} />  
@@ -238,7 +241,10 @@ export default async function HomePage() {
                   href="/immigration"  
                   iconColor="#0ea5e9"  
                 >  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">  
+                  <div className={cn(
+                    "grid gap-4",
+                    isMobile ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+                  )}>  
                     {data.immigrationPosts.map((post) => (  
                       <div key={post.id}>  
                         <ImmigrationCard post={post} />  
@@ -261,7 +267,10 @@ export default async function HomePage() {
                   href="/competitions"  
                   iconColor="#14532d"  
                 >  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">  
+                  <div className={cn(
+                    "grid gap-4",
+                    isMobile ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+                  )}>  
                     {data.competitions.map((comp) => (  
                       <div key={comp.id}>  
                         <CompetitionCard competition={comp} />  
@@ -282,7 +291,10 @@ export default async function HomePage() {
               href="/workers"  
               iconColor="#424242"  
             >  
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">  
+              <div className={cn(
+                "grid gap-4",
+                isMobile ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+              )}>  
                 {data.jobSeekers.map((job) => (  
                   <div key={job.id}>  
                     <JobCard job={job} />  
@@ -305,4 +317,4 @@ export default async function HomePage() {
       </div>  
     </>
   );
-  }
+              }
