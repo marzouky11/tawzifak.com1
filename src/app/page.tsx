@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 import type { Job, Competition, ImmigrationPost, Testimonial } from '@/lib/types';
 import { headers } from 'next/headers';
 
-export const revalidate = 3600; // Revalidate every hour
+export const revalidate = 3600;
 
 const appName = 'توظيفك';
 const appDescription = "تعرّف أفضل عروض العمل وفرص الهجرة القانونية والمباريات العمومية بسهولة وموثوقية. اعثر على الفرص التي تناسب مهاراتك وطموحاتك المهنية بسرعة وفعالية وابدأ رحلتك نحو مستقبل مهني ناجح.";
@@ -262,8 +262,8 @@ export default async function HomePage() {
                   iconColor="#14532d"  
                 >  
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">  
-                    {data.competitions.map((comp, index) => (  
-                      <div key={comp.id} className={cn(index >= 2 && 'hidden sm:block', index >= 4 && 'lg:hidden')}>  
+                    {data.competitions.map((comp) => (  
+                      <div key={comp.id}>  
                         <CompetitionCard competition={comp} />  
                       </div>  
                     ))}  
@@ -283,8 +283,8 @@ export default async function HomePage() {
               iconColor="#424242"  
             >  
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">  
-                {data.jobSeekers.map((job, index) => (  
-                  <div key={job.id} className={cn(index >= 2 && 'hidden sm:block', index >= 4 && 'lg:hidden')}>  
+                {data.jobSeekers.map((job) => (  
+                  <div key={job.id}>  
                     <JobCard job={job} />  
                   </div>  
                 ))}  
@@ -305,4 +305,4 @@ export default async function HomePage() {
       </div>  
     </>
   );
-      }
+  }
