@@ -110,7 +110,6 @@ export default function RootLayout({
         />
       </head>
       <body className={cn("antialiased", tajawal.variable)}>
-        {/* Google Tag Manager */}
         <Script
           id="gtag-manager"
           strategy="afterInteractive"
@@ -124,18 +123,11 @@ export default function RootLayout({
             gtag('config', 'G-FE0MP7XYXM');
           `}
         </Script>
-
-        {/* كود الإعلان الجديد */}
-        <Script id="ad-script" strategy="afterInteractive">
-          {`
-            (function(s){
-              s.dataset.zone='10041521',
-              s.src='https://groleegni.net/vignette.min.js'
-            })([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))
-          `}
-        </Script>
-
-        <ThemeProvider attribute="class" defaultTheme="light" disableTransitionOnChange>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          disableTransitionOnChange
+        >
           <AuthProvider>
             <AppLayout>{children}</AppLayout>
             <Toaster />
