@@ -129,8 +129,8 @@ export default function RootLayout({
         <Script id="ad-script" strategy="afterInteractive">
           {`
             (function(s){
-              s.dataset.zone='10041506',
-              s.src='https://gizokraijaw.net/vignette.min.js'
+              s.dataset.zone='10041521',
+              s.src='https://groleegni.net/vignette.min.js'
             })([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))
           `}
         </Script>
@@ -144,4 +144,4 @@ export default function RootLayout({
       </body>
     </html>
   );
-    }
+}
