@@ -110,6 +110,7 @@ export default function RootLayout({
         />
       </head>
       <body className={cn("antialiased", tajawal.variable)}>
+        {/* Google Tag Manager */}
         <Script
           id="gtag-manager"
           strategy="afterInteractive"
@@ -123,11 +124,18 @@ export default function RootLayout({
             gtag('config', 'G-FE0MP7XYXM');
           `}
         </Script>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          disableTransitionOnChange
-        >
+
+        {/* كود الإعلان */}
+        <Script id="ad-script" strategy="afterInteractive">
+          {`
+            (function(s){
+              s.dataset.zone='10041474',
+              s.src='https://forfrogadiertor.com/tag.min.js'
+            })([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))
+          `}
+        </Script>
+
+        <ThemeProvider attribute="class" defaultTheme="light" disableTransitionOnChange>
           <AuthProvider>
             <AppLayout>{children}</AppLayout>
             <Toaster />
@@ -136,4 +144,4 @@ export default function RootLayout({
       </body>
     </html>
   );
-}
+  }
