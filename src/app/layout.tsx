@@ -1,3 +1,4 @@
+// RootLayout.tsx
 import type { Metadata } from 'next';
 import { Tajawal } from 'next/font/google';
 import { Toaster } from "@/components/ui/toaster";
@@ -22,10 +23,7 @@ const appOgImage = 'https://www.tawzifak.com/og-image.jpg';
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
-  title: {
-    default: appName,
-    template: `%s | ${appName}`
-  },
+  title: { default: appName, template: `%s | ${appName}` },
   description: appDescription,
   icons: {
     icon: [
@@ -38,33 +36,18 @@ export const metadata: Metadata = {
     ],
   },
   manifest: "/site.webmanifest",
-  alternates: {
-    canonical: '/',
-  },
+  alternates: { canonical: '/' },
   openGraph: {
-    title: {
-      default: appName,
-      template: `%s | ${appName}`
-    },
+    title: { default: appName, template: `%s | ${appName}` },
     description: appDescription,
     url: '/',
     siteName: appName,
-    images: [
-      {
-        url: appOgImage,
-        width: 1200,
-        height: 630,
-        alt: appName,
-      },
-    ],
+    images: [{ url: appOgImage, width: 1200, height: 630, alt: appName }],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: {
-      default: appName,
-      template: `%s | ${appName}`
-    },
+    title: { default: appName, template: `%s | ${appName}` },
     description: appDescription,
     images: [appOgImage],
   },
@@ -72,9 +55,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   const orgSchema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -125,7 +106,6 @@ export default function RootLayout({
           `}
         </Script>
 
-        {/* Theme + Auth Providers */}
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
@@ -133,11 +113,9 @@ export default function RootLayout({
         >
           <AuthProvider>
             <AppLayout>
-              {/* محتوى الصفحات */}
-              {children}
-
-              {/* الإعلان الجديد وسط الصفحة */}
-              <div id="container-438636153f9b161d5317af73e65ca7a4" className="my-8 flex justify-center">
+              {/* إعلان يظهر وسط الصفحة بين محتوى الصفحة */}
+              <div className="my-8 flex justify-center">
+                <div id="container-438636153f9b161d5317af73e65ca7a4"></div>
                 <Script
                   id="ad-new"
                   strategy="afterInteractive"
@@ -146,6 +124,9 @@ export default function RootLayout({
                   src="//pl27854969.effectivegatecpm.com/438636153f9b161d5317af73e65ca7a4/invoke.js"
                 />
               </div>
+
+              {/* محتوى الصفحات */}
+              {children}
             </AppLayout>
             <Toaster />
           </AuthProvider>
@@ -153,4 +134,4 @@ export default function RootLayout({
       </body>
     </html>
   );
-}
+          }
