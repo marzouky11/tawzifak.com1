@@ -1,4 +1,3 @@
-// RootLayout.tsx
 import type { Metadata } from 'next';
 import { Tajawal } from 'next/font/google';
 import { Toaster } from "@/components/ui/toaster";
@@ -23,7 +22,10 @@ const appOgImage = 'https://www.tawzifak.com/og-image.jpg';
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
-  title: { default: appName, template: `%s | ${appName}` },
+  title: {
+    default: appName,
+    template: `%s | ${appName}`
+  },
   description: appDescription,
   icons: {
     icon: [
@@ -36,18 +38,33 @@ export const metadata: Metadata = {
     ],
   },
   manifest: "/site.webmanifest",
-  alternates: { canonical: '/' },
+  alternates: {
+    canonical: '/',
+  },
   openGraph: {
-    title: { default: appName, template: `%s | ${appName}` },
+    title: {
+      default: appName,
+      template: `%s | ${appName}`
+    },
     description: appDescription,
     url: '/',
     siteName: appName,
-    images: [{ url: appOgImage, width: 1200, height: 630, alt: appName }],
+    images: [
+      {
+        url: appOgImage,
+        width: 1200,
+        height: 630,
+        alt: appName,
+      },
+    ],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: { default: appName, template: `%s | ${appName}` },
+    title: {
+      default: appName,
+      template: `%s | ${appName}`
+    },
     description: appDescription,
     images: [appOgImage],
   },
@@ -55,7 +72,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   const orgSchema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -80,7 +99,7 @@ export default function RootLayout({
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
         <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
-
+        
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
@@ -91,7 +110,6 @@ export default function RootLayout({
         />
       </head>
       <body className={cn("antialiased", tajawal.variable)}>
-        {/* Google Tag Manager */}
         <Script
           id="gtag-manager"
           strategy="afterInteractive"
@@ -105,32 +123,13 @@ export default function RootLayout({
             gtag('config', 'G-FE0MP7XYXM');
           `}
         </Script>
-
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
           disableTransitionOnChange
         >
           <AuthProvider>
-            <AppLayout>
-              {/* محتوى الصفحة قبل الإعلان */}
-              <div>قسم من الصفحة أو نص ترحيبي</div>
-
-              {/* الإعلان كجزء من محتوى الصفحة */}
-              <div className="my-8 flex justify-center">
-                <div id="container-438636153f9b161d5317af73e65ca7a4"></div>
-                <Script
-                  id="ad-new"
-                  strategy="afterInteractive"
-                  async
-                  data-cfasync="false"
-                  src="//pl27854969.effectivegatecpm.com/438636153f9b161d5317af73e65ca7a4/invoke.js"
-                />
-              </div>
-
-              {/* باقي محتوى الصفحة */}
-              {children}
-            </AppLayout>
+            <AppLayout>{children}</AppLayout>
             <Toaster />
           </AuthProvider>
         </ThemeProvider>
