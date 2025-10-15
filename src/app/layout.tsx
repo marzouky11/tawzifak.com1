@@ -132,28 +132,24 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <AppLayout>{children}</AppLayout>
+            <AppLayout>
+              {/* محتوى الصفحات */}
+              {children}
+
+              {/* الإعلان الجديد وسط الصفحة */}
+              <div id="container-438636153f9b161d5317af73e65ca7a4" className="my-8 flex justify-center">
+                <Script
+                  id="ad-new"
+                  strategy="afterInteractive"
+                  async
+                  data-cfasync="false"
+                  src="//pl27854969.effectivegatecpm.com/438636153f9b161d5317af73e65ca7a4/invoke.js"
+                />
+              </div>
+            </AppLayout>
             <Toaster />
           </AuthProvider>
         </ThemeProvider>
-
-        {/* إعلان 300x250 */}
-        <Script id="ad-atOptions" strategy="afterInteractive">
-          {`
-            atOptions = {
-              'key' : 'dcb16cb5e2477343c5e4df56c007d60a',
-              'format' : 'iframe',
-              'height' : 250,
-              'width' : 300,
-              'params' : {}
-            };
-          `}
-        </Script>
-        <Script
-          id="ad-script"
-          strategy="afterInteractive"
-          src="//www.highperformanceformat.com/dcb16cb5e2477343c5e4df56c007d60a/invoke.js"
-        />
       </body>
     </html>
   );
