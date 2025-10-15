@@ -99,7 +99,7 @@ export default function RootLayout({
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
         <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
-        
+
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
@@ -110,6 +110,7 @@ export default function RootLayout({
         />
       </head>
       <body className={cn("antialiased", tajawal.variable)}>
+        {/* Google Tag Manager */}
         <Script
           id="gtag-manager"
           strategy="afterInteractive"
@@ -123,6 +124,8 @@ export default function RootLayout({
             gtag('config', 'G-FE0MP7XYXM');
           `}
         </Script>
+
+        {/* Theme + Auth Providers */}
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
@@ -133,6 +136,24 @@ export default function RootLayout({
             <Toaster />
           </AuthProvider>
         </ThemeProvider>
+
+        {/* إعلان 300x250 */}
+        <Script id="ad-atOptions" strategy="afterInteractive">
+          {`
+            atOptions = {
+              'key' : 'dcb16cb5e2477343c5e4df56c007d60a',
+              'format' : 'iframe',
+              'height' : 250,
+              'width' : 300,
+              'params' : {}
+            };
+          `}
+        </Script>
+        <Script
+          id="ad-script"
+          strategy="afterInteractive"
+          src="//www.highperformanceformat.com/dcb16cb5e2477343c5e4df56c007d60a/invoke.js"
+        />
       </body>
     </html>
   );
