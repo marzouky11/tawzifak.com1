@@ -113,7 +113,10 @@ export default function RootLayout({
         >
           <AuthProvider>
             <AppLayout>
-              {/* إعلان يظهر وسط الصفحة بين محتوى الصفحة */}
+              {/* محتوى الصفحة قبل الإعلان */}
+              <div>قسم من الصفحة أو نص ترحيبي</div>
+
+              {/* الإعلان كجزء من محتوى الصفحة */}
               <div className="my-8 flex justify-center">
                 <div id="container-438636153f9b161d5317af73e65ca7a4"></div>
                 <Script
@@ -125,7 +128,7 @@ export default function RootLayout({
                 />
               </div>
 
-              {/* محتوى الصفحات */}
+              {/* باقي محتوى الصفحة */}
               {children}
             </AppLayout>
             <Toaster />
@@ -134,4 +137,4 @@ export default function RootLayout({
       </body>
     </html>
   );
-          }
+}
