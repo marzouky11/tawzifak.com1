@@ -99,7 +99,6 @@ export default function RootLayout({
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
         <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
-        
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
@@ -108,6 +107,23 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }}
         />
+        <Script
+          src="https://cmp.gatekeeperconsent.com/min.js"
+          data-cfasync="false"
+          strategy="beforeInteractive"
+        />
+        <Script
+          src="https://the.gatekeeperconsent.com/cmp.min.js"
+          data-cfasync="false"
+          strategy="beforeInteractive"
+        />
+        <Script async src="//www.ezojs.com/ezoic/sa.min.js" strategy="beforeInteractive" />
+        <Script id="ezoic-inline" strategy="beforeInteractive">
+          {`
+            window.ezstandalone = window.ezstandalone || {};
+            ezstandalone.cmd = ezstandalone.cmd || [];
+          `}
+        </Script>
       </head>
       <body className={cn("antialiased", tajawal.variable)}>
         <Script
@@ -136,4 +152,4 @@ export default function RootLayout({
       </body>
     </html>
   );
-}
+  }
