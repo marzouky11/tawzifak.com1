@@ -70,11 +70,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   const orgSchema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -99,24 +95,17 @@ export default function RootLayout({
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
         <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }} />
-
-        <Script src="https://cmp.gatekeeperconsent.com/min.js" data-cfasync="false" strategy="afterInteractive" />
-        <Script src="https://the.gatekeeperconsent.com/cmp.min.js" data-cfasync="false" strategy="afterInteractive" />
-        <Script async src="//www.ezojs.com/ezoic/sa.min.js" strategy="afterInteractive" />
-        <Script id="ezoic-inline" strategy="afterInteractive">
+        <Script src="https://g.ezoic.net/ezoic/cmp.min.js" strategy="beforeInteractive" />
+        <Script id="ezoic-init" strategy="beforeInteractive">
           {`
             window.ezstandalone = window.ezstandalone || {};
             ezstandalone.cmd = ezstandalone.cmd || [];
           `}
         </Script>
-
-        <Script
-          id="gtag-manager"
-          strategy="afterInteractive"
-          src="https://www.googletagmanager.com/gtag/js?id=G-FE0MP7XYXM"
-        />
+        <Script src="https://g.ezoic.net/ezoic/sa.min.js" strategy="beforeInteractive" />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }} />
+        <Script id="gtag-manager" strategy="afterInteractive" src="https://www.googletagmanager.com/gtag/js?id=G-FE0MP7XYXM" />
         <Script id="gtag-inline" strategy="afterInteractive">
           {`
             window.dataLayer = window.dataLayer || [];
