@@ -95,16 +95,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
         <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
-        <Script src="https://g.ezoic.net/ezoic/cmp.min.js" strategy="beforeInteractive" />
+
+        <Script src="https://cmp.gatekeeperconsent.com/min.js" strategy="beforeInteractive" />
+        <Script src="https://the.gatekeeperconsent.com/cmp.min.js" strategy="beforeInteractive" />
         <Script id="ezoic-init" strategy="beforeInteractive">
-          {`
-            window.ezstandalone = window.ezstandalone || {};
-            ezstandalone.cmd = ezstandalone.cmd || [];
-          `}
+          {`window.ezstandalone = window.ezstandalone || {}; ezstandalone.cmd = ezstandalone.cmd || [];`}
         </Script>
-        <Script src="https://g.ezoic.net/ezoic/sa.min.js" strategy="beforeInteractive" />
+        <Script src="https://www.ezojs.com/ezoic/sa.min.js" strategy="beforeInteractive" />
+
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }} />
+
         <Script id="gtag-manager" strategy="afterInteractive" src="https://www.googletagmanager.com/gtag/js?id=G-FE0MP7XYXM" />
         <Script id="gtag-inline" strategy="afterInteractive">
           {`
@@ -116,6 +117,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </Script>
       </head>
       <body className={cn("antialiased", tajawal.variable)}>
+        <div id="ezoic-placeholder" style={{ display: 'none' }}></div>
         <ThemeProvider attribute="class" defaultTheme="light" disableTransitionOnChange>
           <AuthProvider>
             <AppLayout>{children}</AppLayout>
@@ -125,4 +127,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </body>
     </html>
   );
-}
+    }
