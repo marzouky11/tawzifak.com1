@@ -70,7 +70,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   const orgSchema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
@@ -95,18 +99,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
         <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
-
-        <Script src="https://cmp.gatekeeperconsent.com/min.js" strategy="beforeInteractive" />
-        <Script src="https://the.gatekeeperconsent.com/cmp.min.js" strategy="beforeInteractive" />
-        <Script id="ezoic-init" strategy="beforeInteractive">
-          {`window.ezstandalone = window.ezstandalone || {}; ezstandalone.cmd = ezstandalone.cmd || [];`}
-        </Script>
-        <Script src="https://www.ezojs.com/ezoic/sa.min.js" strategy="beforeInteractive" />
-
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }} />
-
-        <Script id="gtag-manager" strategy="afterInteractive" src="https://www.googletagmanager.com/gtag/js?id=G-FE0MP7XYXM" />
+        
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }}
+        />
+      </head>
+      <body className={cn("antialiased", tajawal.variable)}>
+        <Script
+          id="gtag-manager"
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtag/js?id=G-FE0MP7XYXM"
+        />
         <Script id="gtag-inline" strategy="afterInteractive">
           {`
             window.dataLayer = window.dataLayer || [];
@@ -115,10 +123,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             gtag('config', 'G-FE0MP7XYXM');
           `}
         </Script>
-      </head>
-      <body className={cn("antialiased", tajawal.variable)}>
-        <div id="ezoic-placeholder" style={{ display: 'none' }}></div>
-        <ThemeProvider attribute="class" defaultTheme="light" disableTransitionOnChange>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          disableTransitionOnChange
+        >
           <AuthProvider>
             <AppLayout>{children}</AppLayout>
             <Toaster />
@@ -127,4 +136,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </body>
     </html>
   );
-    }
+}
