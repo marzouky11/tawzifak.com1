@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -37,14 +37,11 @@ export function ProfileForm({ user }: ProfileFormProps) {
   const { toast } = useToast();
   const { user: authUser, userData } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isPasswordSubmitting, setIsPasswordSubmitting] = useState(false);
   const [showCrop, setShowCrop] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
-  const [cropData, setCropData] = useState<string | null>(null);
-  const cropRef = useRef<HTMLCanvasElement>(null);
-
-  const profileFormRef = useRef<HTMLFormElement>(null);
-  const passwordFormRef = useRef<HTMLFormElement>(null);
+  const [croppedImage, setCroppedImage] = useState<string | null>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const profileForm = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
@@ -54,11 +51,6 @@ export function ProfileForm({ user }: ProfileFormProps) {
       phone: user?.phone || '',
       photoURL: user?.photoURL || null,
     },
-  });
-
-  const passwordForm = useForm<z.infer<typeof passwordSchema>>({
-    resolver: zodResolver(passwordSchema),
-    defaultValues: { currentPassword: '', newPassword: '', confirmPassword: '' },
   });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,24 +66,21 @@ export function ProfileForm({ user }: ProfileFormProps) {
   };
 
   const cropImage = () => {
-    if (!cropRef.current || !imageSrc) return;
-    const canvas = cropRef.current;
-    const ctx = canvas.getContext('2d');
+    const img = imgRef.current;
+    const canvas = canvasRef.current;
+    if (!img || !canvas) return;
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    const img = new Image();
-    img.src = imageSrc;
-    img.onload = () => {
-      const size = Math.min(img.width, img.height);
-      const sx = (img.width - size) / 2;
-      const sy = (img.height - size) / 2;
-      canvas.width = 200;
-      canvas.height = 200;
-      ctx.drawImage(img, sx, sy, size, size, 0, 0, 200, 200);
-      const cropped = canvas.toDataURL('image/jpeg');
-      setCropData(cropped);
-      profileForm.setValue('photoURL', cropped, { shouldValidate: true, shouldDirty: true });
-      setShowCrop(false);
-    };
+    const size = Math.min(img.naturalWidth, img.naturalHeight);
+    const sx = (img.naturalWidth - size) / 2;
+    const sy = (img.naturalHeight - size) / 2;
+    canvas.width = 200;
+    canvas.height = 200;
+    ctx.drawImage(img, sx, sy, size, size, 0, 0, 200, 200);
+    const cropped = canvas.toDataURL("image/jpeg");
+    setCroppedImage(cropped);
+    profileForm.setValue("photoURL", cropped, { shouldDirty: true });
+    setShowCrop(false);
   };
 
   async function onProfileSubmit(values: z.infer<typeof profileSchema>) {
@@ -109,31 +98,12 @@ export function ProfileForm({ user }: ProfileFormProps) {
     }
   }
 
-  async function onPasswordSubmit(values: z.infer<typeof passwordSchema>) {
-    if (!authUser || !authUser.email) return;
-    setIsPasswordSubmitting(true);
-    try {
-      const credential = EmailAuthProvider.credential(authUser.email, values.currentPassword);
-      await reauthenticateWithCredential(authUser, credential);
-      await updatePassword(authUser, values.newPassword);
-      toast({ title: "تم تغيير كلمة المرور بنجاح" });
-      passwordForm.reset();
-    } catch (error: any) {
-      let errorMessage = "فشل تغيير كلمة المرور.";
-      if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') errorMessage = "كلمة المرور الحالية غير صحيحة.";
-      toast({ variant: "destructive", title: "خطأ", description: errorMessage });
-    } finally {
-      setIsPasswordSubmitting(false);
-      passwordFormRef.current?.querySelector<HTMLButtonElement>('button[type="submit"]')?.blur();
-    }
-  }
-
-  const photoURL = cropData || profileForm.watch('photoURL');
+  const photoURL = croppedImage || profileForm.watch('photoURL');
 
   return (
     <div className="space-y-8">
       <Form {...profileForm}>
-        <form ref={profileFormRef} onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
+        <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
           <h2 className="text-xl font-bold">المعلومات الشخصية</h2>
           <FormField control={profileForm.control} name="photoURL" render={() => (
             <FormItem>
@@ -152,6 +122,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
               </FormControl>
             </FormItem>
           )} />
+
           <FormField control={profileForm.control} name="name" render={({ field }) => (
             <FormItem>
               <FormLabel>الاسم الكامل</FormLabel>
@@ -173,6 +144,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
               <FormMessage />
             </FormItem>
           )} />
+
           <Button type="submit" size="lg" className="w-full" disabled={isSubmitting || !profileForm.formState.isDirty}>
             {isSubmitting && <Loader2 className="ml-2 h-4 w-4 animate-spin" />}
             حفظ التغييرات
@@ -183,8 +155,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
       {showCrop && imageSrc && (
         <div className="fixed inset-0 bg-black/70 flex flex-col items-center justify-center z-50">
           <div className="bg-white p-4 rounded-lg space-y-4">
-            <canvas ref={cropRef} className="hidden" />
-            <img src={imageSrc} alt="To crop" className="max-w-xs max-h-xs object-contain" />
+            <img ref={imgRef} src={imageSrc} alt="To crop" className="max-w-xs max-h-[300px] object-contain border" />
+            <canvas ref={canvasRef} className="hidden" />
             <div className="flex justify-center gap-4">
               <Button onClick={cropImage}>قص الصورة</Button>
               <Button variant="ghost" onClick={() => setShowCrop(false)}>إلغاء</Button>
@@ -194,4 +166,4 @@ export function ProfileForm({ user }: ProfileFormProps) {
       )}
     </div>
   );
-  }
+        }
