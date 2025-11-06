@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast"
 import type { User } from '@/lib/types';
 import { updateUserProfile } from '@/lib/data';
 import { useAuth } from '@/context/auth-context';
-import { Loader2, Lock, Image as ImageIcon, Crop, X, Square } from 'lucide-react';
+import { Loader2, Lock, Image as ImageIcon, Crop, X, ZoomIn, ZoomOut, RotateCw } from 'lucide-react';
 import { reauthenticateWithCredential, EmailAuthProvider, updatePassword } from 'firebase/auth';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -48,10 +48,11 @@ export function ProfileForm({ user }: ProfileFormProps) {
   const [isPasswordSubmitting, setIsPasswordSubmitting] = useState(false);
   const [showCropModal, setShowCropModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [crop, setCrop] = useState({ x: 0, y: 0, width: 100, height: 100 });
+  const [crop, setCrop] = useState({ x: 50, y: 50, size: 100 });
+  const [zoom, setZoom] = useState(1);
+  const [rotation, setRotation] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [cropSize, setCropSize] = useState(150);
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   
@@ -84,44 +85,41 @@ export function ProfileForm({ user }: ProfileFormProps) {
       reader.addEventListener('load', () => {
         setSelectedImage(reader.result as string);
         setShowCropModal(true);
-        setCrop({ x: 0, y: 0, width: 100, height: 100 });
+        setCrop({ x: 50, y: 50, size: 100 });
+        setZoom(1);
+        setRotation(0);
       });
       reader.readAsDataURL(file);
     }
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (!containerRef.current) return;
-    
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
+    e.preventDefault();
     setIsDragging(true);
-    setDragStart({ x, y });
+    setDragStart({ x: e.clientX - crop.x, y: e.clientY - crop.y });
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !containerRef.current) return;
+    if (!isDragging) return;
     
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    const dx = x - dragStart.x;
-    const dy = y - dragStart.y;
+    const newX = e.clientX - dragStart.x;
+    const newY = e.clientY - dragStart.y;
     
     setCrop(prev => ({
       ...prev,
-      x: Math.max(0, Math.min(prev.x + dx, 200 - cropSize)),
-      y: Math.max(0, Math.min(prev.y + dy, 200 - cropSize))
+      x: Math.max(0, Math.min(newX, 200 - prev.size)),
+      y: Math.max(0, Math.min(newY, 200 - prev.size))
     }));
-    
-    setDragStart({ x, y });
   };
 
   const handleMouseUp = () => {
     setIsDragging(false);
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    setZoom(prev => Math.max(0.5, Math.min(3, prev + delta)));
   };
 
   const handleCropImage = () => {
@@ -132,23 +130,45 @@ export function ProfileForm({ user }: ProfileFormProps) {
     if (!ctx) return;
 
     const img = imageRef.current;
-    const scaleX = img.naturalWidth / img.width;
-    const scaleY = img.naturalHeight / img.height;
+    const containerSize = 200;
+    const cropSizePixels = (crop.size / containerSize) * Math.min(img.naturalWidth, img.naturalHeight) * zoom;
 
-    canvas.width = cropSize;
-    canvas.height = cropSize;
+    canvas.width = 150;
+    canvas.height = 150;
+
+    // حساب مركز الصورة المعروضة
+    const displayedWidth = img.naturalWidth * zoom;
+    const displayedHeight = img.naturalHeight * zoom;
+    const offsetX = (displayedWidth - containerSize) / 2;
+    const offsetY = (displayedHeight - containerSize) / 2;
+
+    // حساب الإحداثيات الحقيقية في الصورة الأصلية
+    const sourceX = (crop.x + offsetX) / zoom;
+    const sourceY = (crop.y + offsetY) / zoom;
+    const sourceSize = cropSizePixels / zoom;
+
+    ctx.save();
+    
+    // تطبيق الدوران
+    if (rotation !== 0) {
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate((rotation * Math.PI) / 180);
+      ctx.translate(-canvas.width / 2, -canvas.height / 2);
+    }
 
     ctx.drawImage(
       img,
-      crop.x * scaleX,
-      crop.y * scaleY,
-      cropSize * scaleX,
-      cropSize * scaleY,
+      sourceX,
+      sourceY,
+      sourceSize,
+      sourceSize,
       0,
       0,
-      cropSize,
-      cropSize
+      canvas.width,
+      canvas.height
     );
+
+    ctx.restore();
 
     const croppedImageUrl = canvas.toDataURL('image/jpeg', 0.9);
     profileForm.setValue('photoURL', croppedImageUrl, { shouldValidate: true, shouldDirty: true });
@@ -156,13 +176,17 @@ export function ProfileForm({ user }: ProfileFormProps) {
     setSelectedImage(null);
   };
 
-  const handleSizeChange = (newSize: number) => {
-    setCropSize(newSize);
-    setCrop(prev => ({
-      ...prev,
-      x: Math.max(0, Math.min(prev.x, 200 - newSize)),
-      y: Math.max(0, Math.min(prev.y, 200 - newSize))
-    }));
+  const handleSizeChange = (delta: number) => {
+    setCrop(prev => {
+      const newSize = Math.max(50, Math.min(150, prev.size + delta));
+      const newX = Math.max(0, Math.min(prev.x, 200 - newSize));
+      const newY = Math.max(0, Math.min(prev.y, 200 - newSize));
+      return { ...prev, size: newSize, x: newX, y: newY };
+    });
+  };
+
+  const rotateImage = () => {
+    setRotation((prev) => (prev + 90) % 360);
   };
 
   async function onProfileSubmit(values: z.infer<typeof profileSchema>) {
@@ -242,74 +266,111 @@ export function ProfileForm({ user }: ProfileFormProps) {
               </Button>
             </div>
             <div className="p-4">
-              <div className="text-sm text-gray-600 mb-4">
-                اسحب المربع لاختيار الجزء المراد قصه من الصورة
+              <div className="text-sm text-gray-600 mb-4 text-center">
+                اسحب المربع لتحريكه - استخدم عجلة الماوس للتصغير/التكبير
               </div>
               
-              <div 
-                ref={containerRef}
-                className="relative w-[200px] h-[200px] mx-auto border-2 border-gray-300 rounded-lg overflow-hidden cursor-move"
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-              >
-                {selectedImage && (
-                  <img
-                    ref={imageRef}
-                    src={selectedImage}
-                    alt="للقص"
-                    className="w-full h-full object-cover"
-                    onLoad={() => {
-                      setCrop({ x: 25, y: 25, width: cropSize, height: cropSize });
-                    }}
-                  />
-                )}
-                
+              <div className="flex flex-col items-center gap-4">
                 <div 
-                  className="absolute border-2 border-white shadow-lg bg-transparent"
-                  style={{
-                    left: `${crop.x}px`,
-                    top: `${crop.y}px`,
-                    width: `${cropSize}px`,
-                    height: `${cropSize}px`,
-                    cursor: isDragging ? 'grabbing' : 'grab'
-                  }}
+                  ref={containerRef}
+                  className="relative w-[200px] h-[200px] border-2 border-gray-300 rounded-lg overflow-hidden bg-gray-100"
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={handleMouseUp}
+                  onWheel={handleWheel}
                 >
-                  <div className="absolute -top-1 -left-1 w-3 h-3 bg-white border-2 border-blue-500 rounded-sm"></div>
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-white border-2 border-blue-500 rounded-sm"></div>
-                  <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-white border-2 border-blue-500 rounded-sm"></div>
-                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-white border-2 border-blue-500 rounded-sm"></div>
+                  {selectedImage && (
+                    <img
+                      ref={imageRef}
+                      src={selectedImage}
+                      alt="للقص"
+                      className="w-full h-full object-contain"
+                      style={{
+                        transform: `scale(${zoom}) rotate(${rotation}deg)`,
+                        transition: 'transform 0.1s ease'
+                      }}
+                    />
+                  )}
+                  
+                  <div 
+                    className={`absolute border-2 border-white shadow-lg bg-transparent cursor-move ${
+                      isDragging ? 'border-blue-400' : 'border-white'
+                    }`}
+                    style={{
+                      left: `${crop.x}px`,
+                      top: `${crop.y}px`,
+                      width: `${crop.size}px`,
+                      height: `${crop.size}px`,
+                    }}
+                  >
+                    <div className="absolute inset-0 border border-blue-300"></div>
+                    <div className="absolute -top-1 -left-1 w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 rounded-full"></div>
+                  </div>
                 </div>
-              </div>
 
-              <div className="mt-4">
-                <label className="text-sm font-medium mb-2 block">حجم القص:</label>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant={cropSize === 120 ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handleSizeChange(120)}
-                  >
-                    صغير
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={cropSize === 150 ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handleSizeChange(150)}
-                  >
-                    متوسط
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={cropSize === 180 ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handleSizeChange(180)}
-                  >
-                    كبير
-                  </Button>
+                <div className="flex flex-col gap-3 w-full max-w-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">حجم المربع:</span>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleSizeChange(-10)}
+                        disabled={crop.size <= 50}
+                      >
+                        <ZoomOut className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleSizeChange(10)}
+                        disabled={crop.size >= 150}
+                      >
+                        <ZoomIn className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">التكبير:</span>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setZoom(prev => Math.max(0.5, prev - 0.1))}
+                      >
+                        <ZoomOut className="h-4 w-4" />
+                      </Button>
+                      <span className="text-sm w-12 text-center">{(zoom * 100).toFixed(0)}%</span>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setZoom(prev => Math.min(3, prev + 0.1))}
+                      >
+                        <ZoomIn className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">الدوران:</span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={rotateImage}
+                    >
+                      <RotateCw className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -329,7 +390,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 className="flex-1"
               >
                 <Crop className="ml-2 h-4 w-4" />
-                قص الصورة
+                حفظ الصورة
               </Button>
             </div>
           </div>
@@ -434,8 +495,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
                     </Button>
                 </form>
             </Form>
-        </CollapsibleContent>
+         </CollapsibleContent>
       </Collapsible>
     </div>
-  );
-  }
+    
+        
