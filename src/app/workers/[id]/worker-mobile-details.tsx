@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +15,6 @@ import { SaveAdButton } from '@/app/jobs/[id]/save-ad-button';
 import { cn } from '@/lib/utils';
 import { UserAvatar } from '@/components/user-avatar';
 
-
 const workTypeTranslations: { [key in WorkType]: string } = {
   full_time: 'دوام كامل',
   part_time: 'دوام جزئي',
@@ -30,7 +28,7 @@ const InfoItem = ({ icon: Icon, label, value, color }: { icon: React.ElementType
       <div className="flex flex-col gap-1 p-3 bg-muted/50 rounded-lg text-center h-full">
         <Icon className="h-6 w-6 mx-auto mb-1" style={{ color }} />
         <dt className="text-xs text-muted-foreground">{label}</dt>
-        <dd className="font-semibold text-sm">{String(value)}</dd>
+        <dd className="font-semibold text-sm line-clamp-2 break-words">{String(value)}</dd>
       </div>
     );
 };
@@ -117,22 +115,46 @@ export function WorkerMobileDetails({ job, similarJobs }: WorkerMobileDetailsPro
             <div className="space-y-6">
                 <Card className="overflow-hidden shadow-lg border" style={{ borderColor: sectionColor }}>
                     <CardHeader className="bg-muted/30 p-4">
-                        <div className="flex items-center gap-4">
-                             <UserAvatar name={job.ownerName} color={job.ownerAvatarColor} photoURL={job.ownerPhotoURL} className="h-16 w-16 text-2xl flex-shrink-0"/>
-                            <div>
-                                <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">
+                        {/* تحسين تخطيط الهيدر لمنع خروج النصوص */}
+                        <div className="flex items-start gap-3">
+                            {/* الصورة - ثابتة الحجم */}
+                            <div className="flex-shrink-0">
+                                <UserAvatar 
+                                    name={job.ownerName} 
+                                    color={job.ownerAvatarColor} 
+                                    photoURL={job.ownerPhotoURL} 
+                                    className="h-16 w-16 text-2xl"
+                                />
+                            </div>
+                            
+                            {/* المحتوى النصي - يأخذ المساحة المتبقية */}
+                            <div className="flex-1 min-w-0">
+                                <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200 break-words leading-tight">
                                     {job.title || 'عنوان غير متوفر'}
                                 </h1>
+                                
+                                {/* معلومات إضافية تحت العنوان */}
+                                <div className="mt-2 flex flex-col gap-1 text-sm text-muted-foreground">
+                                    <div className="flex items-center gap-1.5">
+                                        <CalendarDays className="h-4 w-4 flex-shrink-0" />
+                                        <span className="break-words">نُشر: {job.postedAt}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <UserIcon className="h-4 w-4 flex-shrink-0" />
+                                        <span className="break-words line-clamp-1" title={job.ownerName}>
+                                            {job.ownerName}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </CardHeader>
-                     <Separator/>
+                    
+                    <Separator/>
+                    
                     <CardContent className="p-4 space-y-6">
-                        <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-                            <CalendarDays className="h-4 w-4" />
-                            <span>نُشر: {job.postedAt}</span>
-                        </div>
-                         <div className="grid grid-cols-2 gap-3">
+                        {/* شبكة المعلومات */}
+                        <div className="grid grid-cols-2 gap-3">
                             <InfoItem icon={UserIcon} label="صاحب الإعلان" value={job.ownerName} color={primaryColor} />
                             {categoryName && <InfoItem icon={LayoutGrid} label="الفئة" value={categoryName} color={primaryColor} />}
                             <InfoItem icon={MapPin} label="الموقع" value={`${job.country}, ${job.city}`} color={primaryColor} />
@@ -217,4 +239,4 @@ export function WorkerMobileDetails({ job, similarJobs }: WorkerMobileDetailsPro
             </div>
         </div>
     );
-}
+                  }
