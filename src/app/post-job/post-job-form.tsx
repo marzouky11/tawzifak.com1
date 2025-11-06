@@ -387,36 +387,88 @@ export function PostJobForm({ categories, job, preselectedType }: PostJobFormPro
     </div>
   );
 
-  const step1ContentSeeker = (
-    <div className="space-y-6">
-        <FormField control={form.control} name="ownerPhotoURL" render={({ field }) => (
-            <FormItem>
-                <FormLabelIcon icon={ImageIcon} label="الصورة الشخصية (اختياري)" />
-                <FormControl>
-                    <div className="flex items-center gap-4">
-                        <UserAvatar 
-                            name={userData?.name} 
-                            color={userData?.avatarColor} 
-                            photoURL={ownerPhotoURL}
-                            className="h-20 w-20 text-2xl"
-                        />
-                        <Input id="picture" type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
-                        <div className="flex flex-col gap-2">
-                            <Button type="button" variant="outline" className="active:scale-95 transition-transform" onClick={() => document.getElementById('picture')?.click()}>
-                                تحميل صورة
-                            </Button>
-                           {ownerPhotoURL && (
-                            <Button type="button" variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 active:scale-95 transition-transform" onClick={() => form.setValue('ownerPhotoURL', '', { shouldDirty: true })}>
-                                إزالة الصورة
-                            </Button>
-                           )}
-                        </div>
-                    </div>
-                </FormControl>
-                <FormMessage />
-            </FormItem>
-        )} />
-        <FormField control={form.control} name="title" render={({ field }) => (
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.src = reader.result as string;
+    img.onload = () => {
+      const size = Math.min(img.width, img.height);
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      const x = (img.width - size) / 2;
+      const y = (img.height - size) / 2;
+
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.clip();
+
+      ctx.drawImage(img, x, y, size, size, 0, 0, size, size);
+      const croppedData = canvas.toDataURL('image/png');
+      form.setValue('ownerPhotoURL', croppedData, { shouldValidate: true, shouldDirty: true });
+    };
+  };
+  reader.readAsDataURL(file);
+};
+
+const step1ContentSeeker = (
+  <div className="space-y-6">
+    <FormField
+      control={form.control}
+      name="ownerPhotoURL"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabelIcon icon={ImageIcon} label="الصورة الشخصية (اختياري)" />
+          <FormControl>
+            <div className="flex items-center gap-4">
+              <UserAvatar
+                name={userData?.name}
+                color={userData?.avatarColor}
+                photoURL={field.value || ownerPhotoURL}
+                className="h-20 w-20 text-2xl"
+              />
+              <Input
+                id="picture"
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <div className="flex flex-col gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="active:scale-95 transition-transform"
+                  onClick={() => document.getElementById('picture')?.click()}
+                >
+                  تحميل صورة
+                </Button>
+                {field.value && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:bg-destructive/10 active:scale-95 transition-transform"
+                    onClick={() => form.setValue('ownerPhotoURL', '', { shouldDirty: true })}
+                  >
+                    إزالة الصورة
+                  </Button>
+                )}
+              </div>
+            </div>
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    /> 
+    <FormField control={form.control} name="title" render={({ field }) => (
             <FormItem><FormLabelIcon icon={FileText} label="عنوان الإعلان" /><FormControl><Input placeholder={"مثال: مصمم جرافيك يبحث عن فرصة..."} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
         <div className="space-y-4">
