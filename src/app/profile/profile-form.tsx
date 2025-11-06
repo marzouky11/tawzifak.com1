@@ -49,6 +49,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
   const { user: authUser, userData } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPasswordSubmitting, setIsPasswordSubmitting] = useState(false);
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
 
   const profileFormRef = useRef<HTMLFormElement>(null);
   const passwordFormRef = useRef<HTMLFormElement>(null);
@@ -75,6 +76,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
+      setIsProcessingImage(true);
+      
       const reader = new FileReader();
       reader.onload = () => {
         const img = new Image();
@@ -85,7 +88,10 @@ export function ProfileForm({ user }: ProfileFormProps) {
           canvas.width = size;
           canvas.height = size;
           const ctx = canvas.getContext('2d');
-          if (!ctx) return;
+          if (!ctx) {
+            setIsProcessingImage(false);
+            return;
+          }
 
           const x = (img.width - size) / 2;
           const y = (img.height - size) / 2;
@@ -96,7 +102,21 @@ export function ProfileForm({ user }: ProfileFormProps) {
           ctx.drawImage(img, x, y, size, size, 0, 0, size, size);
           const croppedData = canvas.toDataURL('image/png');
           profileForm.setValue('photoURL', croppedData, { shouldValidate: true, shouldDirty: true });
+          
+          setIsProcessingImage(false);
+          toast({
+            title: "تم تحميل الصورة بنجاح",
+            description: "تم قص الصورة تلقائياً للحفاظ على التناسب.",
+          });
         };
+      };
+      reader.onerror = () => {
+        setIsProcessingImage(false);
+        toast({
+          variant: "destructive",
+          title: "خطأ في تحميل الصورة",
+          description: "حدث خطأ أثناء معالجة الصورة."
+        });
       };
       reader.readAsDataURL(file);
     }
@@ -164,12 +184,19 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 <FormLabel>الصورة الشخصية (اختياري)</FormLabel>
                 <FormControl>
                   <div className="flex items-center gap-4">
-                    <UserAvatar
-                      name={userData?.name}
-                      color={userData?.avatarColor}
-                      photoURL={photoURL}
-                      className="h-20 w-20 text-3xl"
-                    />
+                    <div className="relative">
+                      <UserAvatar
+                        name={userData?.name}
+                        color={userData?.avatarColor}
+                        photoURL={photoURL}
+                        className="h-20 w-20 text-3xl"
+                      />
+                      {isProcessingImage && (
+                        <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                          <Loader2 className="h-6 w-6 animate-spin text-white" />
+                        </div>
+                      )}
+                    </div>
                     <Input id="picture" type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
                     <div className="flex flex-col gap-2">
                       <Button
@@ -177,10 +204,18 @@ export function ProfileForm({ user }: ProfileFormProps) {
                         variant="outline"
                         className="active:scale-95 transition-transform"
                         onClick={() => document.getElementById('picture')?.click()}
+                        disabled={isProcessingImage}
                       >
-                        تغيير الصورة
+                        {isProcessingImage ? (
+                          <>
+                            <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                            جاري المعالجة...
+                          </>
+                        ) : (
+                          'تغيير الصورة'
+                        )}
                       </Button>
-                      {photoURL && (
+                      {photoURL && !isProcessingImage && (
                         <Button
                           type="button"
                           variant="ghost"
@@ -250,4 +285,4 @@ export function ProfileForm({ user }: ProfileFormProps) {
       </Form>
     </div>
   );
-}
+    }
