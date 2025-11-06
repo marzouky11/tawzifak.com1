@@ -302,40 +302,41 @@ export function PostJobForm({ categories, job, preselectedType }: PostJobFormPro
     }
   }
 
+  function handleFile(file: File) {
   const reader = new FileReader();
-reader.addEventListener('load', async () => {
-  const imageSrc = reader.result as string;
-  try {
-    const img = new Image();
-    img.src = imageSrc;
-    await new Promise((resolve) => (img.onload = resolve));
+  reader.addEventListener('load', async () => {
+    const imageSrc = reader.result as string;
+    try {
+      const img = new Image();
+      img.src = imageSrc;
+      await new Promise((resolve) => (img.onload = resolve));
 
-    const cropWidth = 300;
-    const cropHeight = 300;
-    const cropX = (img.width - cropWidth) / 2;
-    const cropY = (img.height - cropHeight) / 2;
+      const cropWidth = 300;
+      const cropHeight = 300;
+      const cropX = (img.width - cropWidth) / 2;
+      const cropY = (img.height - cropHeight) / 2;
 
-    const croppedImage = await getCroppedImg(imageSrc, {
-      x: cropX,
-      y: cropY,
-      width: cropWidth,
-      height: cropHeight,
-    });
+      const croppedImage = await getCroppedImg(imageSrc, {
+        x: cropX,
+        y: cropY,
+        width: cropWidth,
+        height: cropHeight,
+      });
 
-    form.setValue('ownerPhotoURL', croppedImage, {
-      shouldValidate: true,
-      shouldDirty: true,
-    });
-  } catch (error) {
-    toast({
-      variant: "destructive",
-      title: "فشل في معالجة الصورة",
-      description: "حدث خطأ أثناء قص الصورة."
-    });
+      form.setValue('ownerPhotoURL', croppedImage, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "فشل في معالجة الصورة",
+        description: "حدث خطأ أثناء قص الصورة."
+      });
+    }
+  });
+  reader.readAsDataURL(file);
   }
-});
-reader.readAsDataURL(file);
-};
 
 const FormLabelIcon = ({icon: Icon, label}: {icon: React.ElementType, label: string}) => (
   <FormLabel className="flex items-center gap-2 text-base md:text-lg">
