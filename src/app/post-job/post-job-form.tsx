@@ -302,37 +302,39 @@ export function PostJobForm({ categories, job, preselectedType }: PostJobFormPro
     }
   }
 
-  const ownerPhotoURL = form.watch('ownerPhotoURL');
+  const reader = new FileReader();
+reader.addEventListener('load', async () => {
+  const imageSrc = reader.result as string;
+  try {
+    const img = new Image();
+    img.src = imageSrc;
+    await new Promise((resolve) => (img.onload = resolve));
 
-const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-  const file = event.target.files?.[0];
-  if (!file) return;
+    const cropWidth = 300;
+    const cropHeight = 300;
+    const cropX = (img.width - cropWidth) / 2;
+    const cropY = (img.height - cropHeight) / 2;
 
-  if (file.size > MAX_IMAGE_SIZE_BYTES) {
+    const croppedImage = await getCroppedImg(imageSrc, {
+      x: cropX,
+      y: cropY,
+      width: cropWidth,
+      height: cropHeight,
+    });
+
+    form.setValue('ownerPhotoURL', croppedImage, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  } catch (error) {
     toast({
       variant: "destructive",
-      title: "حجم الصورة كبير جدًا",
-      description: `الحد الأقصى لحجم الصورة هو ${MAX_IMAGE_SIZE_MB} ميجابايت.`
+      title: "فشل في معالجة الصورة",
+      description: "حدث خطأ أثناء قص الصورة."
     });
-    return;
   }
-
-  const reader = new FileReader();
-  reader.addEventListener('load', async () => {
-    const imageSrc = reader.result as string;
-    try {
-      // قص الصورة تلقائياً من الوسط
-      const croppedImage = await getCroppedImg(imageSrc, { width: 300, height: 300 });
-      form.setValue('ownerPhotoURL', croppedImage, { shouldValidate: true, shouldDirty: true });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "فشل في معالجة الصورة",
-        description: "حدث خطأ أثناء قص الصورة."
-      });
-    }
-  });
-  reader.readAsDataURL(file);
+});
+reader.readAsDataURL(file);
 };
 
 const FormLabelIcon = ({icon: Icon, label}: {icon: React.ElementType, label: string}) => (
