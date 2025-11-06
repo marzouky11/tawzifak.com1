@@ -322,7 +322,7 @@ export function PostJobForm({ categories, job, preselectedType }: PostJobFormPro
         const imageSrc = reader.result as string;
         try {
             // قص الصورة تلقائياً
-            const croppedImage = await getCroppedImg(imageSrc);
+            const croppedImage = await getCroppedImg(imageSrc, { x: 0, y: 0, width: 300, height: 300 });
 form.setValue('ownerPhotoURL', croppedImage, { shouldValidate: true, shouldDirty: true });
         } catch (error) {
             toast({
