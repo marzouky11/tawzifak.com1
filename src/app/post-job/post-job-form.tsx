@@ -322,8 +322,8 @@ export function PostJobForm({ categories, job, preselectedType }: PostJobFormPro
         const imageSrc = reader.result as string;
         try {
             // قص الصورة تلقائياً
-            const croppedImage = await getCroppedImg(imageSrc, { x:0, y:0, width:300, height:300 }); // يمكنك تعديل المقاسات
-            form.setValue('ownerPhotoURL', croppedImage, { shouldValidate: true, shouldDirty: true });
+            const croppedImage = await getCroppedImg(imageSrc);
+form.setValue('ownerPhotoURL', croppedImage, { shouldValidate: true, shouldDirty: true });
         } catch (error) {
             toast({
                 variant: "destructive",
