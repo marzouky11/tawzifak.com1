@@ -304,47 +304,46 @@ export function PostJobForm({ categories, job, preselectedType }: PostJobFormPro
 
   const ownerPhotoURL = form.watch('ownerPhotoURL');
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
 
-    if (file.size > MAX_IMAGE_SIZE_BYTES) {
-        toast({
-            variant: "destructive",
-            title: "حجم الصورة كبير جدًا",
-            description: `الحد الأقصى لحجم الصورة هو ${MAX_IMAGE_SIZE_MB} ميجابايت.`
-        });
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.addEventListener('load', async () => {
-        const imageSrc = reader.result as string;
-        try {
-            // قص الصورة تلقائياً
-            const croppedImage = await getCroppedImg(imageSrc, { x: 0, y: 0, width: 300, height: 300 });
-form.setValue('ownerPhotoURL', croppedImage, { shouldValidate: true, shouldDirty: true });
-        } catch (error) {
-            toast({
-                variant: "destructive",
-                title: "فشل في معالجة الصورة",
-                description: "حدث خطأ أثناء قص الصورة."
-            });
-        }
+  if (file.size > MAX_IMAGE_SIZE_BYTES) {
+    toast({
+      variant: "destructive",
+      title: "حجم الصورة كبير جدًا",
+      description: `الحد الأقصى لحجم الصورة هو ${MAX_IMAGE_SIZE_MB} ميجابايت.`
     });
-    reader.readAsDataURL(file);
-};
-  
-  const FormLabelIcon = ({icon: Icon, label}: {icon: React.ElementType, label: string}) => (
-    <FormLabel className="flex items-center gap-2 text-base md:text-lg">
-      <Icon 
-        className='h-4 w-4'
-        style={{ color: getThemeColor() }}
-      />
-      {label}
-    </FormLabel>
-  )
+    return;
+  }
 
+  const reader = new FileReader();
+  reader.addEventListener('load', async () => {
+    const imageSrc = reader.result as string;
+    try {
+      // قص الصورة تلقائياً من الوسط
+      const croppedImage = await getCroppedImg(imageSrc, { width: 300, height: 300 });
+      form.setValue('ownerPhotoURL', croppedImage, { shouldValidate: true, shouldDirty: true });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "فشل في معالجة الصورة",
+        description: "حدث خطأ أثناء قص الصورة."
+      });
+    }
+  });
+  reader.readAsDataURL(file);
+};
+
+const FormLabelIcon = ({icon: Icon, label}: {icon: React.ElementType, label: string}) => (
+  <FormLabel className="flex items-center gap-2 text-base md:text-lg">
+    <Icon 
+      className='h-4 w-4'
+      style={{ color: getThemeColor() }}
+    />
+    {label}
+  </FormLabel>
+)
   const steps = [
     { id: 1, name: "المعلومات الأساسية", description: "نوع الإعلان وتفاصيله الرئيسية.", icon: FileText },
     { id: 2, name: "التفاصيل", description: "معلومات إضافية عن الوظيفة أو خبرتك.", icon: FileSignature },
