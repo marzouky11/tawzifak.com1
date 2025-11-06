@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -26,7 +25,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { UserAvatar } from '@/components/user-avatar';
-import { getCroppedImg } from '@/lib/cropImage';
 
 const MAX_IMAGE_SIZE_MB = 2;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
@@ -46,7 +44,6 @@ const formSchema = z.object({
   ownerPhotoURL: z.string().optional().nullable(),
   country: z.string().min(1, { message: 'الدولة مطلوبة.' }),
   city: z.string().min(1, { message: 'المدينة مطلوبة.' }),
-  
   companyName: z.string().optional(),
   experience: z.string().optional(),
   description: z.string().optional(),
@@ -83,6 +80,70 @@ interface PostJobFormProps {
   job?: Job | null;
   preselectedType?: PostType;
 }
+
+// دالة لقص الصورة تلقائياً
+const getCroppedImg = (imageSrc: string, crop: { x: number; y: number; width: number; height: number }): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.src = imageSrc;
+    
+    image.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      if (!ctx) {
+        reject(new Error('لا يمكن إنشاء canvas'));
+        return;
+      }
+
+      // تحديد أبعاد القص النهائية
+      const outputSize = 300; // حجم الصورة النهائي
+      canvas.width = outputSize;
+      canvas.height = outputSize;
+
+      // حساب نسب القص للحفاظ على التناسب
+      const sourceAspect = image.width / image.height;
+      const outputAspect = outputSize / outputSize;
+      let drawWidth = image.width;
+      let drawHeight = image.height;
+      let offsetX = 0;
+      let offsetY = 0;
+
+      if (sourceAspect > outputAspect) {
+        // الصورة أوسع من المطلوب
+        drawHeight = image.height;
+        drawWidth = image.height * outputAspect;
+        offsetX = (image.width - drawWidth) / 2;
+      } else {
+        // الصورة أطول من المطلوب
+        drawWidth = image.width;
+        drawHeight = image.width / outputAspect;
+        offsetY = (image.height - drawHeight) / 2;
+      }
+
+      // رسم الصورة مع القص المركزي
+      ctx.drawImage(
+        image,
+        offsetX,
+        offsetY,
+        drawWidth,
+        drawHeight,
+        0,
+        0,
+        outputSize,
+        outputSize
+      );
+
+      // تحويل إلى base64
+      const croppedImage = canvas.toDataURL('image/jpeg', 0.9);
+      resolve(croppedImage);
+    };
+
+    image.onerror = () => {
+      reject(new Error('فشل تحميل الصورة'));
+    };
+  });
+};
 
 const StepsIndicator = ({ currentStep, steps, onStepClick, themeColor }: { currentStep: number; steps: { id: number; name: string, description: string; icon: React.ElementType }[]; onStepClick: (step: number) => void; themeColor: string; }) => {
   return (
@@ -131,15 +192,13 @@ const StepsIndicator = ({ currentStep, steps, onStepClick, themeColor }: { curre
     </div>
   );
 };
-
-
-
 export function PostJobForm({ categories, job, preselectedType }: PostJobFormProps) {
   const { toast } = useToast();
   const { user, userData } = useAuth();
   const router = useRouter();
   const isEditing = !!job;
   const [currentStep, setCurrentStep] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -282,7 +341,6 @@ export function PostJobForm({ categories, job, preselectedType }: PostJobFormPro
           applyUrl: values.applyUrl,
           howToApply: values.howToApply,
         };
-
         const { id } = await postJob(newJobData);
         toast({
           title: "تم النشر بنجاح!",
@@ -302,51 +360,54 @@ export function PostJobForm({ categories, job, preselectedType }: PostJobFormPro
     }
   }
 
-  function handleFile(file: File) {
-  const reader = new FileReader();
-  reader.addEventListener('load', async () => {
-    const imageSrc = reader.result as string;
-    try {
-      const img = new Image();
-      img.src = imageSrc;
-      await new Promise((resolve) => (img.onload = resolve));
+  const ownerPhotoURL = form.watch('ownerPhotoURL');
 
-      const cropWidth = 300;
-      const cropHeight = 300;
-      const cropX = (img.width - cropWidth) / 2;
-      const cropY = (img.height - cropHeight) / 2;
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-      const croppedImage = await getCroppedImg(imageSrc, {
-        x: cropX,
-        y: cropY,
-        width: cropWidth,
-        height: cropHeight,
-      });
-
-      form.setValue('ownerPhotoURL', croppedImage, {
-        shouldValidate: true,
-        shouldDirty: true,
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "فشل في معالجة الصورة",
-        description: "حدث خطأ أثناء قص الصورة."
-      });
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+        toast({
+            variant: "destructive",
+            title: "حجم الصورة كبير جدًا",
+            description: `الحد الأقصى لحجم الصورة هو ${MAX_IMAGE_SIZE_MB} ميجابايت.`
+        });
+        return;
     }
-  });
-  reader.readAsDataURL(file);
-  }
 
-const FormLabelIcon = ({icon: Icon, label}: {icon: React.ElementType, label: string}) => (
-  <FormLabel className="flex items-center gap-2 text-base md:text-lg">
-    <Icon 
-      className='h-4 w-4'
-      style={{ color: getThemeColor() }}
-    />
-    {label}
-  </FormLabel>
-)
+    const reader = new FileReader();
+    reader.addEventListener('load', async () => {
+        const imageSrc = reader.result as string;
+        try {
+            // قص الصورة تلقائياً إلى 300x300 بكسل
+            const croppedImage = await getCroppedImg(imageSrc, { x: 0, y: 0, width: 300, height: 300 });
+            form.setValue('ownerPhotoURL', croppedImage, { shouldValidate: true, shouldDirty: true });
+            toast({
+                title: "تم تحميل الصورة بنجاح",
+                description: "تم قص الصورة تلقائياً للحفاظ على التناسب.",
+            });
+        } catch (error) {
+            console.error('Error cropping image:', error);
+            toast({
+                variant: "destructive",
+                title: "فشل في معالجة الصورة",
+                description: "حدث خطأ أثناء معالجة الصورة."
+            });
+        }
+    });
+    reader.readAsDataURL(file);
+  };
+  
+  const FormLabelIcon = ({icon: Icon, label}: {icon: React.ElementType, label: string}) => (
+    <FormLabel className="flex items-center gap-2 text-base md:text-lg">
+      <Icon 
+        className='h-4 w-4'
+        style={{ color: getThemeColor() }}
+      />
+      {label}
+    </FormLabel>
+  )
+
   const steps = [
     { id: 1, name: "المعلومات الأساسية", description: "نوع الإعلان وتفاصيله الرئيسية.", icon: FileText },
     { id: 2, name: "التفاصيل", description: "معلومات إضافية عن الوظيفة أو خبرتك.", icon: FileSignature },
@@ -392,7 +453,7 @@ const FormLabelIcon = ({icon: Icon, label}: {icon: React.ElementType, label: str
                 <FormField control={form.control} name="city" render={({ field }) => (
                     <FormItem><FormLabel>المدينة</FormLabel><FormControl><Input placeholder="مثال: الرباط" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
-            </div>
+                    </div>
         </div>
         <FormField control={form.control} name="openPositions" render={({ field }) => (<FormItem><FormLabelIcon icon={Users2Icon} label="عدد المناصب (اختياري)" /><FormControl><Input type="number" placeholder="مثال: 3" {...field} value={field.value ?? ''} onChange={e => field.onChange(e.target.value === '' ? '' : +e.target.value)} /></FormControl><FormMessage /></FormItem>)} />
         <FormField control={form.control} name="workType" render={({ field }) => (
@@ -415,13 +476,31 @@ const FormLabelIcon = ({icon: Icon, label}: {icon: React.ElementType, label: str
                             photoURL={ownerPhotoURL}
                             className="h-20 w-20 text-2xl"
                         />
-                        <Input id="picture" type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+                        <Input 
+                            id="picture" 
+                            type="file" 
+                            accept="image/*" 
+                            onChange={handleFileChange} 
+                            className="hidden" 
+                            ref={fileInputRef}
+                        />
                         <div className="flex flex-col gap-2">
-                            <Button type="button" variant="outline" className="active:scale-95 transition-transform" onClick={() => document.getElementById('picture')?.click()}>
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                className="active:scale-95 transition-transform" 
+                                onClick={() => fileInputRef.current?.click()}
+                            >
                                 تحميل صورة
                             </Button>
                            {ownerPhotoURL && (
-                            <Button type="button" variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 active:scale-95 transition-transform" onClick={() => form.setValue('ownerPhotoURL', '', { shouldDirty: true })}>
+                            <Button 
+                                type="button" 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-destructive hover:bg-destructive/10 active:scale-95 transition-transform" 
+                                onClick={() => form.setValue('ownerPhotoURL', '', { shouldDirty: true })}
+                            >
                                 إزالة الصورة
                             </Button>
                            )}
@@ -476,7 +555,7 @@ const FormLabelIcon = ({icon: Icon, label}: {icon: React.ElementType, label: str
                 <FormMessage />
             </FormItem>
             )} />
-        </div>
+             </div>
         <div className="space-y-4">
             <FormLabelIcon icon={MapPin} label="الموقع" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -515,7 +594,6 @@ const FormLabelIcon = ({icon: Icon, label}: {icon: React.ElementType, label: str
         )}
     </div>
   );
-
   const step3Content = (
       <div className="space-y-6">
             <h3 className="font-semibold flex items-center gap-2 text-base md:text-lg"><Info className="h-5 w-5" style={{color: getThemeColor()}} />طرق التواصل</h3>
@@ -560,71 +638,51 @@ const FormLabelIcon = ({icon: Icon, label}: {icon: React.ElementType, label: str
                      {step2Content}
                      <Separator />
                      {step3Content}
-                     <Button
-                        type="submit"
-                        disabled={isSubmitting}
-                        style={{ backgroundColor: getThemeColor() }}
-                        className="text-primary-foreground w-full !mt-12 active:scale-95 transition-transform"
-                        size="lg"
-                    >
-                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                        تحديث الإعلان
-                    </Button>
                  </div>
             ) : (
                 <>
-                    <div className="p-6 md:p-8">
-                        <StepsIndicator currentStep={currentStep} steps={steps} onStepClick={handleStepClick} themeColor={getThemeColor()} />
-                    </div>
-                    
-                    <Separator className="mx-auto w-[calc(100%-3rem)]" />
-
-                    <div className="p-6 flex-grow">
+                    <div className="p-6 md:p-8 flex-grow">
+                        <div className="mb-8">
+                            <StepsIndicator currentStep={currentStep} steps={steps} onStepClick={handleStepClick} themeColor={getThemeColor()} />
+                        </div>
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={currentStep}
-                                initial={{ y: 10, opacity: 0 }}
-                                animate={{ y: 0, opacity: 1 }}
-                                exit={{ y: -10, opacity: 0 }}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
                                 transition={{ duration: 0.2 }}
-                                className="space-y-8"
                             >
                                 {stepsContent[currentStep]}
                             </motion.div>
                         </AnimatePresence>
                     </div>
-
-                    <div className="flex gap-4 items-center justify-between p-6 border-t bg-muted/50 rounded-b-lg mt-auto">
-                        {currentStep > 0 ? (
-                            <Button type="button" variant="outline" onClick={prevStep} className="active:scale-95 transition-transform">
-                                <ArrowRight className="ml-2 h-4 w-4" />
-                                السابق
-                            </Button>
-                        ) : <div />}
-
-                        {currentStep < stepsContent.length - 1 && (
-                            <Button type="button" onClick={nextStep} style={{ backgroundColor: getThemeColor() }} className="text-primary-foreground active:scale-95 transition-transform">
-                                التالي
-                                <ArrowLeft className="mr-2 h-4 w-4" />
-                            </Button>
-                        )}
-
-                        {currentStep === stepsContent.length - 1 && (
-                            <Button
-                                type="submit"
-                                disabled={isSubmitting}
-                                style={{ backgroundColor: getThemeColor() }}
-                                className="text-primary-foreground active:scale-95 transition-transform"
-                            >
-                                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                                نشر الإعلان
-                            </Button>
-                        )}
-                    </div>
                 </>
             )}
-            </form>
+            <div className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-6 md:p-8">
+                <div className="flex justify-between gap-4">
+                    {isEditing ? (
+                        <Button type="submit" disabled={isSubmitting} className="flex-1 md:flex-none" style={{backgroundColor: getThemeColor()}}>
+                            {isSubmitting ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : null}
+                            {isSubmitting ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+                        </Button>
+                    ) : (
+                        <>
+                            <Button type="button" variant="outline" onClick={prevStep} disabled={currentStep === 0} className={cn("flex items-center gap-2", currentStep === 0 ? 'opacity-0 pointer-events-none' : '')}>
+                                <ArrowRight className="h-4 w-4" />
+                                السابق
+                            </Button>
+                            <Button type="button" onClick={nextStep} disabled={isSubmitting} className="flex items-center gap-2" style={{backgroundColor: getThemeColor()}}>
+                                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                                {currentStep === steps.length - 1 ? (isSubmitting ? 'جاري النشر...' : 'نشر الإعلان') : 'التالي'}
+                                {currentStep < steps.length - 1 && <ArrowLeft className="h-4 w-4" />}
+                            </Button>
+                        </>
+                    )}
+                </div>
+            </div>
+           </form>
         </Form>
-      </>
+    </>
   );
 }
