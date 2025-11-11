@@ -68,8 +68,8 @@ const commonLinks = (
             href="/terms"
         />
         <SettingItem
-            icon={Facebook}
-            label="تابعنا على فيسبوك"
+            icon={Instagram}
+            label="تابعنا على إنستغرام"
             href="https://www.facebook.com/profile.php?id=61578748771269"
         />
       </ul>
