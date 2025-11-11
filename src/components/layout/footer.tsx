@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
-Facebook,
+Instagram,
 LogIn,
 UserPlus,
 Briefcase,
@@ -137,7 +137,7 @@ const DesktopFooter = () => {
                 <li>
                     <a href="https://www.facebook.com/profile.php?id=61578748771269" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 justify-center lg:justify-start text-sm text-muted-foreground hover:text-primary">
                         <Facebook className="h-4 w-4" />
-                        <span>تابعنا على فيسبوك</span>
+                        <span>تابعنا على إنستغرام</span>
                     </a>
                 </li>
             </ul>
