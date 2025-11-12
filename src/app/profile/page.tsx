@@ -8,7 +8,7 @@ import { auth } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { User, LogOut, ChevronLeft, Loader2, Settings as SettingsIcon, Newspaper, HelpCircle, Info, Mail, Shield, FileText, Facebook, UserPlus, LogIn as LogInIcon, MessageSquare, Bookmark, Flag } from 'lucide-react';
+import { User, LogOut, ChevronLeft, Loader2, Settings as SettingsIcon, Newspaper, HelpCircle, Info, Mail, Shield, FileText, Instagram, UserPlus, LogIn as LogInIcon, MessageSquare, Bookmark, Flag } from 'lucide-react';
 import { UserAvatar } from '@/components/user-avatar';
 import { useToast } from '@/hooks/use-toast';
 import { MobilePageHeader } from '@/components/layout/mobile-page-header';
@@ -70,7 +70,7 @@ const commonLinks = (
         <SettingItem
             icon={Instagram}
             label="تابعنا على إنستغرام"
-            href="https://www.facebook.com/profile.php?id=61578748771269"
+            href="https://www.instagram.com/tawzifak_officiel?igsh=N2MyajAwa3U3YmI2"
         />
       </ul>
     </CardContent>
