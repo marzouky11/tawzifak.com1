@@ -135,7 +135,7 @@ const DesktopFooter = () => {
                     <li key={link.href}><Link href={link.href} className="text-sm text-muted-foreground hover:text-primary">{link.label}</Link></li>
                 ))}
                 <li>
-                    <a href="https://www.facebook.com/profile.php?id=61578748771269" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 justify-center lg:justify-start text-sm text-muted-foreground hover:text-primary">
+                    <a href="https://www.instagram.com/tawzifak_officiel?igsh=N2MyajAwa3U3YmI2" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 justify-center lg:justify-start text-sm text-muted-foreground hover:text-primary">
                         <Facebook className="h-4 w-4" />
                         <span>تابعنا على إنستغرام</span>
                     </a>
