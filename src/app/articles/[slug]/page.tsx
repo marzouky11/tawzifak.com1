@@ -72,21 +72,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: article.title,
     description: article.summary,
     metadataBase: new URL(baseUrl),
-    alternates: {
-      canonical: `/articles/${article.slug}`,
-    },
+    alternates: { canonical: `/articles/${article.slug}` },
     robots: 'index, follow',
     openGraph: {
       title: article.title,
       description: article.summary,
-      images: [
-        {
-          url: article.imageUrl,
-          width: 1200,
-          height: 630,
-          alt: article.title,
-        },
-      ],
+      images: [{ url: article.imageUrl, width: 1200, height: 630, alt: article.title }],
       url: `${baseUrl}/articles/${article.slug}`,
       siteName: 'توظيفك',
       type: 'article',
@@ -99,9 +90,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: article.summary,
       images: [article.imageUrl],
     },
-    other: {
-      'application/ld+json': JSON.stringify(articleJsonLd, null, 2)
-    }
+    other: { 'application/ld+json': JSON.stringify(articleJsonLd, null, 2) },
   };
 }
 
@@ -116,13 +105,7 @@ const linkify = (text: string) => {
     if (match[1]) { displayText = match[2]; url = match[3]; }
     else { displayText = match[4]; url = match[4]; }
     elements.push(
-      <a 
-        key={lastIndex} 
-        href={url} 
-        target="_blank" 
-        rel="noopener noreferrer" 
-        className="text-blue-600 font-medium text-[17px] hover:text-blue-800 no-underline break-words"
-      >
+      <a key={lastIndex} href={url} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-medium text-[17px] hover:text-blue-800 no-underline break-words">
         {displayText}
       </a>
     );
@@ -133,7 +116,7 @@ const linkify = (text: string) => {
 };
 
 const renderContent = (content: string) => {
-  const contentBlocks = content.split('\n').map(p => p.trim());
+  const contentBlocks = content.split('\n').map(p => p.trim()).filter(p => p !== '');
   const elements: React.ReactNode[] = [];
   let listItems: string[] = [];
 
@@ -148,23 +131,25 @@ const renderContent = (content: string) => {
     }
   };
 
+  const bannerIndex = Math.floor(Math.random() * (contentBlocks.length - 2)) + 1;
+
   contentBlocks.forEach((line, i) => {
-    const trimmed = line.trim();
-    if (!trimmed) { flushList(`ul-${i}`); return; }
-    if (trimmed.startsWith('### ')) {
+    if (line.startsWith('### ')) {
       flushList(`ul-${i}`);
-      elements.push(<h2 key={`h2-${i}`} className="text-2xl font-bold mt-6 mb-3 text-green-600">{trimmed.replace(/^###\s/, '')}</h2>);
+      elements.push(<h2 key={`h2-${i}`} className="text-2xl font-bold mt-6 mb-3 text-green-600">{line.replace(/^###\s/, '')}</h2>);
       return;
     }
-    if (trimmed.startsWith('#### ')) {
+    if (line.startsWith('#### ')) {
       flushList(`ul-${i}`);
-      elements.push(<h3 key={`h3-${i}`} className="text-lg font-bold mt-4 mb-3 text-gray-800 dark:text-gray-200">{trimmed.replace(/^####\s/, '')}</h3>);
+      elements.push(<h3 key={`h3-${i}`} className="text-lg font-bold mt-4 mb-3 text-gray-800 dark:text-gray-200">{line.replace(/^####\s/, '')}</h3>);
       return;
     }
-    if (trimmed.startsWith('- ')) { listItems.push(trimmed.replace(/^- /, '')); return; }
+    if (line.startsWith('- ')) { listItems.push(line.replace(/^- /, '')); return; }
+
     flushList(`ul-${i}`);
-    elements.push(<p key={`p-${i}`} className="mb-4 text-base md:text-lg leading-relaxed break-words">{linkify(trimmed)}</p>);
-    if (i === 1) {
+    elements.push(<p key={`p-${i}`} className="mb-4 text-base md:text-lg leading-relaxed break-words">{linkify(line)}</p>);
+
+    if (i === bannerIndex) {
       elements.push(
         <div key="banner" className="my-8 w-full rounded-lg overflow-hidden relative">
           <div className="hidden md:block w-full relative">
@@ -245,4 +230,4 @@ export async function generateStaticParams() {
   const dbArticles = await getDbArticles();
   const allArticles = [...staticArticles, ...dbArticles];
   return allArticles.map(article => ({ slug: article.slug }));
-    }
+  }
