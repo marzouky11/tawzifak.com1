@@ -165,18 +165,17 @@ const renderContent = (content: string) => {
     flushList(`ul-${i}`);
     elements.push(<p key={`p-${i}`} className="mb-4 text-base md:text-lg leading-relaxed break-words">{linkify(trimmed)}</p>);
     if (i === Math.floor(contentBlocks.length / 2)) {
-      // إضافة اللافتة في وسط المقالة
       elements.push(
-        <div key="banner" className="my-8 relative w-full rounded-lg overflow-hidden">
-          <div className="hidden md:block w-full h-64 relative">
-            <Image src="https://i.postimg.cc/Qt67RBFq/banar2.jpg" alt="Banner" fill className="object-cover" />
+        <div key="banner" className="my-8 w-full rounded-lg overflow-hidden relative">
+          <div className="hidden md:block w-full relative">
+            <Image src="https://i.postimg.cc/Qt67RBFq/banar2.jpg" alt="Banner" width={1200} height={400} className="w-full h-auto object-contain" />
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 p-4 rounded-lg">
               <h2 className="text-3xl font-bold text-white mb-4 text-center">فرصة عمل في بلجيكا لجني الفواكه</h2>
               <a href="https://bestlocker.eu/iframe/a99e5432-36e0-11f0-ad06-c2a106037d45" target="_blank" rel="noopener noreferrer" className="bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-3 rounded-md text-lg animate-pulse">قدّم الآن</a>
             </div>
           </div>
-          <div className="block md:hidden w-full relative h-auto">
-            <Image src="https://i.postimg.cc/mk0dMpyz/banar.jpg" alt="Banner" width={600} height={300} className="w-full h-auto object-cover" />
+          <div className="block md:hidden w-full relative">
+            <Image src="https://i.postimg.cc/mk0dMpyz/banar.jpg" alt="Banner" width={600} height={300} className="w-full h-auto object-contain" />
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 p-2 rounded-lg">
               <h2 className="text-xl font-bold text-white mb-3 text-center">فرصة عمل في بلجيكا لجني الفواكه</h2>
               <a href="https://bestlocker.eu/iframe/a99e5432-36e0-11f0-ad06-c2a106037d45" target="_blank" rel="noopener noreferrer" className="bg-red-500 hover:bg-red-600 text-white font-semibold px-5 py-2 rounded-md text-base animate-pulse">قدّم الآن</a>
@@ -246,4 +245,4 @@ export async function generateStaticParams() {
   const dbArticles = await getDbArticles();
   const allArticles = [...staticArticles, ...dbArticles];
   return allArticles.map(article => ({ slug: article.slug }));
-        }
+}
