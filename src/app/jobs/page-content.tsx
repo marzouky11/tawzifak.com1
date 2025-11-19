@@ -110,7 +110,21 @@ export function PageContent() {
         ) : jobs.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {jobs.map((job) => <JobCard key={job.id} job={job} />)}
+              {jobs.map((job, index) => (
+                <div key={job.id}>
+                  <JobCard job={job} />
+                  {index === 1 && (
+                    <div className="my-4 col-span-full flex justify-center">
+                      <a href="https://www.example.com" target="_blank" rel="noopener noreferrer">
+                        <img
+                          src="https://i.postimg.cc/Yq5vyvfB/Picsart-25-11-19-17-13-39-416.jpg"
+                          alt="إعلان"
+                        />
+                      </a>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
             {hasMore && (
               <div className="text-center mt-8">
@@ -133,4 +147,4 @@ export function PageContent() {
       </div>
     </>
   );
-                        }
+        }
