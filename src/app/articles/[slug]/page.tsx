@@ -109,23 +109,12 @@ const linkify = (text: string) => {
   const regex = /(?:("([^"]+)"\s*\(url:([^\s)]+)\))|((https?:\/\/[^\s]+)))/g;
   let lastIndex = 0;
   const elements: React.ReactNode[] = [];
-
   let match;
   while ((match = regex.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      elements.push(text.slice(lastIndex, match.index));
-    }
-
+    if (match.index > lastIndex) elements.push(text.slice(lastIndex, match.index));
     let displayText, url;
-
-    if (match[1]) {
-      displayText = match[2];
-      url = match[3];
-    } else {
-      displayText = match[4];
-      url = match[4];
-    }
-
+    if (match[1]) { displayText = match[2]; url = match[3]; }
+    else { displayText = match[4]; url = match[4]; }
     elements.push(
       <a 
         key={lastIndex} 
@@ -139,9 +128,7 @@ const linkify = (text: string) => {
     );
     lastIndex = regex.lastIndex;
   }
-  if (lastIndex < text.length) {
-    elements.push(text.slice(lastIndex));
-  }
+  if (lastIndex < text.length) elements.push(text.slice(lastIndex));
   return elements;
 };
 
@@ -154,9 +141,7 @@ const renderContent = (content: string) => {
     if (listItems.length > 0) {
       elements.push(
         <ul key={key} className="list-disc list-outside ms-6 mb-4 space-y-2">
-          {listItems.map((item, idx) => (
-            <li key={idx} className="break-words">{linkify(item)}</li>
-          ))}
+          {listItems.map((item, idx) => <li key={idx} className="break-words">{linkify(item)}</li>)}
         </ul>
       );
       listItems = [];
@@ -165,98 +150,55 @@ const renderContent = (content: string) => {
 
   contentBlocks.forEach((line, i) => {
     const trimmed = line.trim();
-
-    if (!trimmed) {
-      flushList(`ul-${i}`);
-      return;
-    }
-
+    if (!trimmed) { flushList(`ul-${i}`); return; }
     if (trimmed.startsWith('### ')) {
       flushList(`ul-${i}`);
-      elements.push(
-        <h2 key={`h2-${i}`} className="text-2xl font-bold mt-6 mb-3 text-green-600">
-          {trimmed.replace(/^###\s/, '')}
-        </h2>
-      );
+      elements.push(<h2 key={`h2-${i}`} className="text-2xl font-bold mt-6 mb-3 text-green-600">{trimmed.replace(/^###\s/, '')}</h2>);
       return;
     }
-
     if (trimmed.startsWith('#### ')) {
       flushList(`ul-${i}`);
-      elements.push(
-        <h3 key={`h3-${i}`} className="text-lg font-bold mt-4 mb-3 text-gray-800 dark:text-gray-200">
-          {trimmed.replace(/^####\s/, '')}
-        </h3>
-      );
+      elements.push(<h3 key={`h3-${i}`} className="text-lg font-bold mt-4 mb-3 text-gray-800 dark:text-gray-200">{trimmed.replace(/^####\s/, '')}</h3>);
       return;
     }
-
-    if (trimmed.startsWith('- ')) {
-      listItems.push(trimmed.replace(/^- /, ''));
-      return;
-    }
-
+    if (trimmed.startsWith('- ')) { listItems.push(trimmed.replace(/^- /, '')); return; }
     flushList(`ul-${i}`);
-    elements.push(
-      <p key={`p-${i}`} className="mb-4 text-base md:text-lg leading-relaxed break-words">{linkify(trimmed)}</p>
-    );
+    elements.push(<p key={`p-${i}`} className="mb-4 text-base md:text-lg leading-relaxed break-words">{linkify(trimmed)}</p>);
+    if (i === Math.floor(contentBlocks.length / 2)) {
+      // إضافة اللافتة في وسط المقالة
+      elements.push(
+        <div key="banner" className="my-8 relative w-full rounded-lg overflow-hidden">
+          <div className="hidden md:block w-full h-64 relative">
+            <Image src="https://i.postimg.cc/Qt67RBFq/banar2.jpg" alt="Banner" fill className="object-cover" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 p-4 rounded-lg">
+              <h2 className="text-3xl font-bold text-white mb-4 text-center">فرصة عمل في بلجيكا لجني الفواكه</h2>
+              <a href="https://bestlocker.eu/iframe/a99e5432-36e0-11f0-ad06-c2a106037d45" target="_blank" rel="noopener noreferrer" className="bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-3 rounded-md text-lg animate-pulse">قدّم الآن</a>
+            </div>
+          </div>
+          <div className="block md:hidden w-full relative h-auto">
+            <Image src="https://i.postimg.cc/mk0dMpyz/banar.jpg" alt="Banner" width={600} height={300} className="w-full h-auto object-cover" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 p-2 rounded-lg">
+              <h2 className="text-xl font-bold text-white mb-3 text-center">فرصة عمل في بلجيكا لجني الفواكه</h2>
+              <a href="https://bestlocker.eu/iframe/a99e5432-36e0-11f0-ad06-c2a106037d45" target="_blank" rel="noopener noreferrer" className="bg-red-500 hover:bg-red-600 text-white font-semibold px-5 py-2 rounded-md text-base animate-pulse">قدّم الآن</a>
+            </div>
+          </div>
+        </div>
+      );
+    }
   });
 
   flushList('ul-end');
-
-  elements.push(
-    <div key="banner" className="my-8 relative w-full rounded-lg overflow-hidden">
-      <div className="hidden md:block w-full h-64 relative">
-        <Image
-          src="/banar2.jpg"
-          alt="Banner"
-          fill
-          className="object-cover"
-        />
-      </div>
-      <div className="block md:hidden w-full h-48 relative">
-        <Image
-          src="https://i.postimg.cc/mk0dMpyz/banar.jpg"
-          alt="Banner"
-          fill
-          className="object-cover"
-        />
-      </div>
-
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 p-4 rounded-lg">
-        <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 text-center">
- فرصة عمل في بلجيكا لجني الفواكه
-        </h2>
-        <a
-          href="https://bestlocker.eu/iframe/9fba6d6a-c54d-11f0-9796-c2a106037d45"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-3 rounded-md text-lg"
-        >
-          قدّم الآن
-        </a>
-      </div>
-    </div>
-  );
-
   return elements;
 };
 
 export default async function ArticlePage({ params }: Props) {
   const article = await getArticle(params.slug);
-
-  if (!article) {
-    notFound();
-  }
+  if (!article) notFound();
 
   const staticArticles = getStaticArticles();
   const dbArticles = await getDbArticles();
   const allArticles = [...staticArticles, ...dbArticles];
-
-  const relatedArticles = allArticles
-    .filter(a => a.slug !== article.slug)
-    .sort(() => 0.5 - Math.random())
-    .slice(0, 3);
+  const relatedArticles = allArticles.filter(a => a.slug !== article.slug).sort(() => 0.5 - Math.random()).slice(0, 3);
 
   return (
     <>
@@ -268,9 +210,7 @@ export default async function ArticlePage({ params }: Props) {
           <Card>
             <CardContent className="p-4 md:p-8">
               <header className="mb-6">
-                <h1 className="text-3xl md:text-4xl font-bold leading-tight text-red-600 dark:text-red-500 mb-4">
-                  {article.title}
-                </h1>
+                <h1 className="text-3xl md:text-4xl font-bold leading-tight text-red-600 dark:text-red-500 mb-4">{article.title}</h1>
                 <div className="flex items-center space-x-4 space-x-reverse text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4" />
@@ -278,35 +218,19 @@ export default async function ArticlePage({ params }: Props) {
                   </div>
                 </div>
               </header>
-
               <div className="relative h-64 md:h-80 w-full mb-8 rounded-lg overflow-hidden">
-                <Image
-                  src={article.imageUrl}
-                  alt={article.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  className="object-cover"
-                  priority
-                />
+                <Image src={article.imageUrl} alt={article.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover" priority />
               </div>
-
-              <div className="prose-p:leading-relaxed prose-lg max-w-none dark:prose-invert">
-                {renderContent(article.content)}
-              </div>
+              <div className="prose-p:leading-relaxed prose-lg max-w-none dark:prose-invert">{renderContent(article.content)}</div>
             </CardContent>
           </Card>
         </article>
-
         {relatedArticles.length > 0 && (
           <section className="mt-12">
             <Separator className="my-8" />
-            <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">
-              مقالات قد تعجبك أيضاً
-            </h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">مقالات قد تعجبك أيضاً</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {relatedArticles.map((relatedArticle) => (
-                <ArticleCard key={relatedArticle.slug} article={relatedArticle} />
-              ))}
+              {relatedArticles.map((relatedArticle) => (<ArticleCard key={relatedArticle.slug} article={relatedArticle} />))}
             </div>
           </section>
         )}
@@ -318,11 +242,8 @@ export default async function ArticlePage({ params }: Props) {
 export async function generateStaticParams() {
   const { getArticles: getStaticArticles } = await import('@/lib/articles');
   const { getArticles: getDbArticles } = await import('@/lib/data');
-
   const staticArticles = getStaticArticles();
   const dbArticles = await getDbArticles();
-
   const allArticles = [...staticArticles, ...dbArticles];
-
   return allArticles.map(article => ({ slug: article.slug }));
-}
+        }
