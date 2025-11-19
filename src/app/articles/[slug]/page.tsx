@@ -16,9 +16,7 @@ interface Props {
 
 async function getArticle(slug: string): Promise<Article | null> {
   let article = await getDbArticleBySlug(slug);
-  if (!article) {
-    article = getStaticArticleBySlug(slug) || null;
-  }
+  if (!article) article = getStaticArticleBySlug(slug) || null;
   return article;
 }
 
@@ -45,25 +43,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const articleJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': `${baseUrl}/articles/${article.slug}`,
-    },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `${baseUrl}/articles/${article.slug}` },
     headline: article.title,
     description: article.summary,
     image: article.imageUrl,
-    author: {
-      '@type': 'Person',
-      name: article.author,
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'توظيفك',
-      logo: {
-        '@type': 'ImageObject',
-        url: siteThumbnail,
-      },
-    },
+    author: { '@type': 'Person', name: article.author },
+    publisher: { '@type': 'Organization', name: 'توظيفك', logo: { '@type': 'ImageObject', url: siteThumbnail } },
     datePublished: articleDate.toISOString(),
     dateModified: articleDate.toISOString(),
   };
@@ -84,13 +69,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       publishedTime: articleDate.toISOString(),
       authors: [article.author],
     },
-    twitter: {
-      card: 'summary_large_image',
-      title: article.title,
-      description: article.summary,
-      images: [article.imageUrl],
-    },
-    other: { 'application/ld+json': JSON.stringify(articleJsonLd, null, 2) },
+    twitter: { card: 'summary_large_image', title: article.title, description: article.summary, images: [article.imageUrl] },
+    other: { 'application/ld+json': JSON.stringify(articleJsonLd, null, 2) }
   };
 }
 
@@ -102,7 +82,7 @@ const linkify = (text: string) => {
   while ((match = regex.exec(text)) !== null) {
     if (match.index > lastIndex) elements.push(text.slice(lastIndex, match.index));
     let displayText, url;
-    if (match[1]) { displayText = match[2]; url = match[3]; }
+    if (match[1]) { displayText = match[2]; url = match[3]; } 
     else { displayText = match[4]; url = match[4]; }
     elements.push(
       <a key={lastIndex} href={url} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-medium text-[17px] hover:text-blue-800 no-underline break-words">
@@ -116,7 +96,7 @@ const linkify = (text: string) => {
 };
 
 const renderContent = (content: string) => {
-  const contentBlocks = content.split('\n').map(p => p.trim()).filter(p => p !== '');
+  const contentBlocks = content.split('\n').map(p => p.trim());
   const elements: React.ReactNode[] = [];
   let listItems: string[] = [];
 
@@ -131,40 +111,29 @@ const renderContent = (content: string) => {
     }
   };
 
-  const bannerIndex = Math.floor(Math.random() * (contentBlocks.length - 2)) + 1;
-
   contentBlocks.forEach((line, i) => {
-    if (line.startsWith('### ')) {
+    const trimmed = line.trim();
+    if (!trimmed) { flushList(`ul-${i}`); return; }
+    if (trimmed.startsWith('### ')) {
       flushList(`ul-${i}`);
-      elements.push(<h2 key={`h2-${i}`} className="text-2xl font-bold mt-6 mb-3 text-green-600">{line.replace(/^###\s/, '')}</h2>);
+      elements.push(<h2 key={`h2-${i}`} className="text-2xl font-bold mt-6 mb-3 text-green-600">{trimmed.replace(/^###\s/, '')}</h2>);
       return;
     }
-    if (line.startsWith('#### ')) {
+    if (trimmed.startsWith('#### ')) {
       flushList(`ul-${i}`);
-      elements.push(<h3 key={`h3-${i}`} className="text-lg font-bold mt-4 mb-3 text-gray-800 dark:text-gray-200">{line.replace(/^####\s/, '')}</h3>);
+      elements.push(<h3 key={`h3-${i}`} className="text-lg font-bold mt-4 mb-3 text-gray-800 dark:text-gray-200">{trimmed.replace(/^####\s/, '')}</h3>);
       return;
     }
-    if (line.startsWith('- ')) { listItems.push(line.replace(/^- /, '')); return; }
-
+    if (trimmed.startsWith('- ')) { listItems.push(trimmed.replace(/^- /, '')); return; }
     flushList(`ul-${i}`);
-    elements.push(<p key={`p-${i}`} className="mb-4 text-base md:text-lg leading-relaxed break-words">{linkify(line)}</p>);
-
-    if (i === bannerIndex) {
+    elements.push(<p key={`p-${i}`} className="mb-4 text-base md:text-lg leading-relaxed break-words">{linkify(trimmed)}</p>);
+    if (i === 0) { 
       elements.push(
-        <div key="banner" className="my-8 w-full rounded-lg overflow-hidden relative">
-          <div className="hidden md:block w-full relative">
-            <Image src="https://i.postimg.cc/Qt67RBFq/banar2.jpg" alt="Banner" width={1200} height={400} className="w-full h-auto object-contain" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 p-4 rounded-lg">
-              <h2 className="text-3xl font-bold text-white mb-4 text-center">فرصة عمل في بلجيكا لجني الفواكه</h2>
-              <a href="https://bestlocker.eu/iframe/a99e5432-36e0-11f0-ad06-c2a106037d45" target="_blank" rel="noopener noreferrer" className="bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-3 rounded-md text-lg animate-pulse">قدّم الآن</a>
-            </div>
-          </div>
-          <div className="block md:hidden w-full relative">
-            <Image src="https://i.postimg.cc/mk0dMpyz/banar.jpg" alt="Banner" width={600} height={300} className="w-full h-auto object-contain" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 p-2 rounded-lg">
-              <h2 className="text-xl font-bold text-white mb-3 text-center">فرصة عمل في بلجيكا لجني الفواكه</h2>
-              <a href="https://bestlocker.eu/iframe/a99e5432-36e0-11f0-ad06-c2a106037d45" target="_blank" rel="noopener noreferrer" className="bg-red-500 hover:bg-red-600 text-white font-semibold px-5 py-2 rounded-md text-base animate-pulse">قدّم الآن</a>
-            </div>
+        <div key="banner" className="my-8 relative w-full rounded-lg overflow-hidden">
+          <Image src="https://i.postimg.cc/Qt67RBFq/banar2.jpg" alt="Banner" width={1200} height={400} className="w-full h-auto object-contain" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 p-4 rounded-lg">
+            <h2 className="text-3xl font-bold text-white mb-4 text-center">فرصة عمل في بلجيكا لجني الفواكه</h2>
+            <a href="https://bestlocker.eu/iframe/a99e5432-36e0-11f0-ad06-c2a106037d45" target="_blank" rel="noopener noreferrer" className="bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-3 rounded-md text-lg animate-pulse">قدّم الآن</a>
           </div>
         </div>
       );
@@ -203,7 +172,7 @@ export default async function ArticlePage({ params }: Props) {
                 </div>
               </header>
               <div className="relative h-64 md:h-80 w-full mb-8 rounded-lg overflow-hidden">
-                <Image src={article.imageUrl} alt={article.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover" priority />
+                <Image src={article.imageUrl} alt={article.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-contain" priority />
               </div>
               <div className="prose-p:leading-relaxed prose-lg max-w-none dark:prose-invert">{renderContent(article.content)}</div>
             </CardContent>
@@ -230,4 +199,4 @@ export async function generateStaticParams() {
   const dbArticles = await getDbArticles();
   const allArticles = [...staticArticles, ...dbArticles];
   return allArticles.map(article => ({ slug: article.slug }));
-  }
+    }
