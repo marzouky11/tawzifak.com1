@@ -164,7 +164,7 @@ const renderContent = (content: string) => {
     if (trimmed.startsWith('- ')) { listItems.push(trimmed.replace(/^- /, '')); return; }
     flushList(`ul-${i}`);
     elements.push(<p key={`p-${i}`} className="mb-4 text-base md:text-lg leading-relaxed break-words">{linkify(trimmed)}</p>);
-    if (i === Math.floor(contentBlocks.length / 2)) {
+    if (i === 1) {
       elements.push(
         <div key="banner" className="my-8 w-full rounded-lg overflow-hidden relative">
           <div className="hidden md:block w-full relative">
@@ -245,4 +245,4 @@ export async function generateStaticParams() {
   const dbArticles = await getDbArticles();
   const allArticles = [...staticArticles, ...dbArticles];
   return allArticles.map(article => ({ slug: article.slug }));
-}
+    }
