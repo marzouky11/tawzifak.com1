@@ -14,7 +14,7 @@ const ITEMS_PER_PAGE = 16;
 const CACHE_KEY_PREFIX = 'jobs_cache_';
 
 function JobFiltersSkeleton() {
-    return <div className="h-14 bg-muted rounded-lg w-full animate-pulse" />;
+  return <div className="h-14 bg-muted rounded-lg w-full animate-pulse" />;
 }
 
 export function PageContent() {
@@ -36,8 +36,9 @@ export function PageContent() {
   }, [q, country, city, category, workType]);
 
   const fetchAndSetJobs = useCallback(async (pageNum: number, reset: boolean) => {
-    if (pageNum === 1) setLoading(true); else setLoadingMore(true);
-    
+    if (pageNum === 1) setLoading(true);
+    else setLoadingMore(true);
+
     const { data: newJobs, totalCount } = await getJobs({
       postType: 'seeking_worker',
       searchQuery: q || undefined,
@@ -50,33 +51,34 @@ export function PageContent() {
     });
 
     setJobs(prev => {
-        const updatedJobs = reset ? newJobs : [...prev, ...newJobs];
-        try {
-            sessionStorage.setItem(getCacheKey(), JSON.stringify({
-                items: updatedJobs,
-                page: pageNum,
-                hasMore: (pageNum * ITEMS_PER_PAGE) < totalCount
-            }));
-        } catch (e) { console.error("Failed to save to sessionStorage", e); }
-        return updatedJobs;
+      const updatedJobs = reset ? newJobs : [...prev, ...newJobs];
+      try {
+        sessionStorage.setItem(getCacheKey(), JSON.stringify({
+          items: updatedJobs,
+          page: pageNum,
+          hasMore: (pageNum * ITEMS_PER_PAGE) < totalCount
+        }));
+      } catch (e) { console.error("Failed to save to sessionStorage", e); }
+      return updatedJobs;
     });
     setHasMore((pageNum * ITEMS_PER_PAGE) < totalCount);
-    
-    if (pageNum === 1) setLoading(false); else setLoadingMore(false);
+
+    if (pageNum === 1) setLoading(false);
+    else setLoadingMore(false);
   }, [q, country, city, category, workType, getCacheKey]);
 
   useEffect(() => {
     const cacheKey = getCacheKey();
     try {
-        const cachedData = sessionStorage.getItem(cacheKey);
-        if (cachedData) {
-            const { items, page: cachedPage, hasMore: cachedHasMore } = JSON.parse(cachedData);
-            setJobs(items);
-            setPage(cachedPage);
-            setHasMore(cachedHasMore);
-            setLoading(false);
-            return;
-        }
+      const cachedData = sessionStorage.getItem(cacheKey);
+      if (cachedData) {
+        const { items, page: cachedPage, hasMore: cachedHasMore } = JSON.parse(cachedData);
+        setJobs(items);
+        setPage(cachedPage);
+        setHasMore(cachedHasMore);
+        setLoading(false);
+        return;
+      }
     } catch(e) { console.error("Failed to read from sessionStorage", e); }
 
     setJobs([]);
@@ -90,7 +92,7 @@ export function PageContent() {
     setPage(nextPage);
     fetchAndSetJobs(nextPage, false);
   };
-  
+
   return (
     <>
       <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm md:top-20">
@@ -111,21 +113,21 @@ export function PageContent() {
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {jobs.map((job, index) => (
-                <div key={job.id}>
-                  <JobCard job={job} />
-                  {index === 1 && (
-                    <div className="my-4 col-span-full flex justify-center">
-                      <a href="https://www.example.com" target="_blank" rel="noopener noreferrer">
-                        <img
-                          src="https://i.postimg.cc/Yq5vyvfB/Picsart-25-11-19-17-13-39-416.jpg"
-                          alt="إعلان"
-                        />
-                      </a>
-                    </div>
-                  )}
-                </div>
+                <JobCard key={job.id} job={job} />
               ))}
             </div>
+
+            {jobs.length > 2 && (
+              <div className="flex justify-center my-6">
+                <a href="https://www.example.com" target="_blank" rel="noopener noreferrer">
+                  <img
+                    src="https://i.postimg.cc/Yq5vyvfB/Picsart-25-11-19-17-13-39-416.jpg"
+                    alt="إعلان"
+                  />
+                </a>
+              </div>
+            )}
+
             {hasMore && (
               <div className="text-center mt-8">
                 <Button onClick={loadMore} disabled={loadingMore} size="lg" variant="outline" className="active:scale-95 transition-transform">
@@ -147,4 +149,4 @@ export function PageContent() {
       </div>
     </>
   );
-        }
+      }
