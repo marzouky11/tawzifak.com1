@@ -216,7 +216,7 @@ const renderContent = (content: string) => {
       </div>
       <div className="block md:hidden w-full h-48 relative">
         <Image
-          src="/banar.jpg"
+          src="https://i.postimg.cc/mk0dMpyz/banar.jpg"
           alt="Banner"
           fill
           className="object-cover"
