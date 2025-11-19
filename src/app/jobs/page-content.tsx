@@ -26,24 +26,12 @@ export function PageContent() {
   const category = searchParams.get('category');
   const workType = searchParams.get('workType');
 
-  const getCacheKey = useCallback((pageNum: number) => {
-    return `${CACHE_KEY_PREFIX}${q || ''}_${country || ''}_${city || ''}_${category || ''}_${workType || ''}_page_${pageNum}`;
+  const getCacheKey = useCallback(() => {
+    return `${CACHE_KEY_PREFIX}${q || ''}_${country || ''}_${city || ''}_${category || ''}_${workType || ''}`;
   }, [q, country, city, category, workType]);
 
   const fetchAndSetJobs = useCallback(async (pageNum: number, reset: boolean) => {
     if(pageNum === 1) setLoading(true); else setLoadingMore(true);
-
-    const cacheKey = getCacheKey(pageNum);
-    try {
-      const cachedData = sessionStorage.getItem(cacheKey);
-      if (cachedData) {
-        const { items, hasMore: cachedHasMore } = JSON.parse(cachedData);
-        setJobs(prev => reset ? items : [...prev, ...items]);
-        setHasMore(cachedHasMore);
-        if(pageNum === 1) setLoading(false); else setLoadingMore(false);
-        return;
-      }
-    } catch (e) { console.error("Failed to read cache", e); }
 
     const { data: newJobs, totalCount } = await getJobs({
       postType: 'seeking_worker',
@@ -56,24 +44,42 @@ export function PageContent() {
       limit: ITEMS_PER_PAGE,
     });
 
-    setJobs(prev => reset ? newJobs : [...prev, ...newJobs]);
-    const newHasMore = (pageNum * ITEMS_PER_PAGE) < totalCount;
-    setHasMore(newHasMore);
+    setJobs(prev => {
+      const updatedJobs = reset ? newJobs : [...prev, ...newJobs];
+      try {
+        sessionStorage.setItem(getCacheKey(), JSON.stringify({
+          items: updatedJobs,
+          page: pageNum,
+          hasMore: (pageNum * ITEMS_PER_PAGE) < totalCount
+        }));
+      } catch (e) { console.error("Failed to save to sessionStorage", e); }
+      return updatedJobs;
+    });
 
-    try {
-      sessionStorage.setItem(cacheKey, JSON.stringify({ items: newJobs, hasMore: newHasMore }));
-    } catch(e) { console.error("Failed to save cache", e); }
+    setHasMore((pageNum * ITEMS_PER_PAGE) < totalCount);
 
     if(pageNum === 1) setLoading(false); else setLoadingMore(false);
-
   }, [q, country, city, category, workType, getCacheKey]);
 
   useEffect(() => {
+    const cacheKey = getCacheKey();
+    try {
+      const cachedData = sessionStorage.getItem(cacheKey);
+      if (cachedData) {
+        const { items, page: cachedPage, hasMore: cachedHasMore } = JSON.parse(cachedData);
+        setJobs(items);
+        setPage(cachedPage);
+        setHasMore(cachedHasMore);
+        setLoading(false);
+        return;
+      }
+    } catch(e) { console.error("Failed to read from sessionStorage", e); }
+
     setJobs([]);
     setPage(1);
     setHasMore(true);
     fetchAndSetJobs(1, true);
-  }, [q, country, city, category, workType, fetchAndSetJobs]);
+  }, [q, country, city, category, workType, fetchAndSetJobs, getCacheKey]);
 
   const loadMore = () => {
     const nextPage = page + 1;
@@ -122,4 +128,4 @@ export function PageContent() {
       </div>
     </>
   );
-}
+  }
