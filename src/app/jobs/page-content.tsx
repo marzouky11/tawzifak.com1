@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 16;
-const CACHE_KEY_PREFIX = 'jobs_cache_';
 
 function JobFiltersSkeleton() {
   return <div className="h-14 bg-muted rounded-lg w-full animate-pulse" />;
@@ -31,11 +30,7 @@ export function PageContent() {
   const category = searchParams.get('category');
   const workType = searchParams.get('workType');
 
-  const getCacheKey = useCallback(() => {
-    return `${CACHE_KEY_PREFIX}${q || ''}_${country || ''}_${city || ''}_${category || ''}_${workType || ''}`;
-  }, [q, country, city, category, workType]);
-
-  const fetchAndSetJobs = useCallback(async (pageNum: number, reset: boolean) => {
+  const fetchJobs = useCallback(async (pageNum: number) => {
     if (pageNum === 1) setLoading(true);
     else setLoadingMore(true);
 
@@ -50,52 +45,25 @@ export function PageContent() {
       limit: ITEMS_PER_PAGE,
     });
 
-    setJobs(prev => {
-      const updatedJobs = reset ? newJobs : [...prev, ...newJobs];
-      try {
-        sessionStorage.setItem(getCacheKey(), JSON.stringify({
-          items: updatedJobs,
-          page: pageNum,
-          hasMore: (pageNum * ITEMS_PER_PAGE) < totalCount
-        }));
-      } catch (e) {
-        console.error("Failed to save to sessionStorage", e);
-      }
-      return updatedJobs;
-    });
-
+    setJobs(prev => pageNum === 1 ? newJobs : [...prev, ...newJobs]);
     setHasMore((pageNum * ITEMS_PER_PAGE) < totalCount);
 
     if (pageNum === 1) setLoading(false);
     else setLoadingMore(false);
-  }, [q, country, city, category, workType, getCacheKey]);
+  }, [q, country, city, category, workType]);
 
   useEffect(() => {
-    const cacheKey = getCacheKey();
-    try {
-      const cachedData = sessionStorage.getItem(cacheKey);
-      if (cachedData) {
-        const { items, page: cachedPage, hasMore: cachedHasMore } = JSON.parse(cachedData);
-        setJobs(items);
-        setPage(cachedPage);
-        setHasMore(cachedHasMore);
-        setLoading(false);
-        return;
-      }
-    } catch(e) {
-      console.error("Failed to read from sessionStorage", e);
-    }
-
+    // جلب الصفحة الأولى فقط عند الدخول
     setJobs([]);
     setPage(1);
     setHasMore(true);
-    fetchAndSetJobs(1, true);
-  }, [q, country, city, category, workType, fetchAndSetJobs, getCacheKey]);
+    fetchJobs(1);
+  }, [q, country, city, category, workType, fetchJobs]);
 
   const loadMore = () => {
     const nextPage = page + 1;
     setPage(nextPage);
-    fetchAndSetJobs(nextPage, false);
+    fetchJobs(nextPage);
   };
 
   return (
@@ -118,7 +86,7 @@ export function PageContent() {
         ) : jobs.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {jobs.map((job) => <JobCard key={job.id} job={job} />)}
+              {jobs.map(job => <JobCard key={job.id} job={job} />)}
             </div>
 
             {hasMore && (
@@ -148,4 +116,4 @@ export function PageContent() {
       </div>
     </>
   );
-}
+                  }
