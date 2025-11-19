@@ -1151,8 +1151,8 @@ Wzayef.net
 مهارات التواصل وخدمة العملاء.
 البرمجة أو التصميم أو التسويق الرقمي.
 كل مهارة تضيفها، تزيد من فرصك للقبول.`
-    },
-    {
+    },export const articles = [
+  {
     id: 'marjane-morocco-jobs-2025',
     slug: 'marjane-morocco-jobs-2025',
     title: 'فرص عمل في مرجان المغرب لجميع المستويات 2025',
@@ -1247,7 +1247,8 @@ Wzayef.net
   </a>
 </div>
 `
-};
+  }
+];
     {
         id: 'seasonal-work-spain-for-moroccans-2025',
         slug: 'seasonal-work-spain-for-moroccans-2025',
