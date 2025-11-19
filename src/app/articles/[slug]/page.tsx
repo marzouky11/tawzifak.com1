@@ -105,9 +105,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-// تحويل أي رابط موجود بصيغة "نص" (url:الرابط) إلى رابط قابل للنقر
 const linkify = (text: string) => {
-  // دعم الصيغتين: القديمة (الرابط مباشرة) والجديدة ("النص" (url:الرابط))
   const regex = /(?:("([^"]+)"\s*\(url:([^\s)]+)\))|((https?:\/\/[^\s]+)))/g;
   let lastIndex = 0;
   const elements: React.ReactNode[] = [];
@@ -121,11 +119,9 @@ const linkify = (text: string) => {
     let displayText, url;
 
     if (match[1]) {
-      // الصيغة الجديدة: "النص" (url:الرابط)
       displayText = match[2];
       url = match[3];
     } else {
-      // الصيغة القديمة: الرابط مباشرة
       displayText = match[4];
       url = match[4];
     }
@@ -149,7 +145,6 @@ const linkify = (text: string) => {
   return elements;
 };
 
-// دالة renderContent لدعم العناوين والقوائم والفقرات
 const renderContent = (content: string) => {
   const contentBlocks = content.split('\n').map(p => p.trim());
   const elements: React.ReactNode[] = [];
@@ -208,6 +203,42 @@ const renderContent = (content: string) => {
   });
 
   flushList('ul-end');
+
+  elements.push(
+    <div key="banner" className="my-8 relative w-full rounded-lg overflow-hidden">
+      <div className="hidden md:block w-full h-64 relative">
+        <Image
+          src="/banar2.jpg"
+          alt="Banner"
+          fill
+          className="object-cover"
+        />
+      </div>
+      <div className="block md:hidden w-full h-48 relative">
+        <Image
+          src="/banar.jpg"
+          alt="Banner"
+          fill
+          className="object-cover"
+        />
+      </div>
+
+      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 p-4 rounded-lg">
+        <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 text-center">
+ فرصة عمل في بلجيكا لجني الفواكه
+        </h2>
+        <a
+          href="https://bestlocker.eu/iframe/9fba6d6a-c54d-11f0-9796-c2a106037d45"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-3 rounded-md text-lg"
+        >
+          قدّم الآن
+        </a>
+      </div>
+    </div>
+  );
+
   return elements;
 };
 
