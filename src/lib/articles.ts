@@ -1195,7 +1195,7 @@ Wzayef.net
 - لا يُشترط التوفر على تجربة مهنية سابقة في بعض المناصب.
 ### كيفية التقديم على وظائف مرجان 2025
 #### 1. عبر الموقع الرسمي لمرجان
-- زيارة الموقع: ‏"marjane" (url:https://savebig.pro/a/rPm3TDBKgI4qqL)
+- زيارة الموقع: ‏"marjane" (url:https://www.marjane.ma/ar-MA?srsltid=AfmBOop4LqFo7F4hpjM3K6baAtXS6KZcBTU3Y6Ofn4A4cBS7PtxzRUAG)
 - الانتقال إلى قسم “الوظائف” أو “Recrutement”.
 - تعبئة استمارة التوظيف بالمعلومات المطلوبة.
 - تحميل السيرة الذاتية مرفقة بصورة شخصية وشهاداتك إن وجدت.
