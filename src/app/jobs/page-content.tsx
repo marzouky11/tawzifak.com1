@@ -31,34 +31,38 @@ export function PageContent() {
   }, [q, country, city, category, workType]);
 
   const fetchAndSetJobs = useCallback(async (pageNum: number, reset: boolean) => {
-    if(pageNum === 1) setLoading(true); else setLoadingMore(true);
+    if(pageNum === 1) setLoading(true);
+    else setLoadingMore(true);
 
-    const { data: newJobs, totalCount } = await getJobs({
-      postType: 'seeking_worker',
-      searchQuery: q || undefined,
-      country: country || undefined,
-      city: city || undefined,
-      categoryId: category || undefined,
-      workType: workType as WorkType || undefined,
-      page: pageNum,
-      limit: ITEMS_PER_PAGE,
-    });
+    try {
+      const { data: newJobs, totalCount } = await getJobs({
+        postType: 'seeking_worker',
+        searchQuery: q || undefined,
+        country: country || undefined,
+        city: city || undefined,
+        categoryId: category || undefined,
+        workType: workType as WorkType || undefined,
+        page: pageNum,
+        limit: ITEMS_PER_PAGE,
+      });
 
-    setJobs(prev => {
-      const updatedJobs = reset ? newJobs : [...prev, ...newJobs];
+      setJobs(prev => reset ? newJobs : [...prev, ...newJobs]);
+
+      setHasMore((pageNum * ITEMS_PER_PAGE) < totalCount);
+
       try {
         sessionStorage.setItem(getCacheKey(), JSON.stringify({
-          items: updatedJobs,
+          items: newJobs,
           page: pageNum,
           hasMore: (pageNum * ITEMS_PER_PAGE) < totalCount
         }));
       } catch (e) { console.error("Failed to save to sessionStorage", e); }
-      return updatedJobs;
-    });
 
-    setHasMore((pageNum * ITEMS_PER_PAGE) < totalCount);
-
-    if(pageNum === 1) setLoading(false); else setLoadingMore(false);
+    } catch (err) { console.error("Failed to fetch jobs", err); }
+    finally {
+      if(pageNum === 1) setLoading(false);
+      else setLoadingMore(false);
+    }
   }, [q, country, city, category, workType, getCacheKey]);
 
   useEffect(() => {
@@ -128,4 +132,4 @@ export function PageContent() {
       </div>
     </>
   );
-  }
+}
