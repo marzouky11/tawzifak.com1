@@ -133,7 +133,15 @@ export default function RootLayout({
             <Toaster />
           </AuthProvider>
         </ThemeProvider>
+
+        {/* Pop-up ad script */}
+        <Script
+          data-cfasync="false"
+          async
+          type="text/javascript"
+          src="//az.repunchcell.com/rXKUAGKSSs72z0DV/132459"
+        />
       </body>
     </html>
   );
-}
+    }
