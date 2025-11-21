@@ -30,7 +30,7 @@ export function PageContent() {
     return `${CACHE_KEY_PREFIX}${q || ''}_${country || ''}_${city || ''}_${category || ''}_${workType || ''}`;
   }, [q, country, city, category, workType]);
 
-  const fetchAndSetJobs = useCallback(async (pageNum: number, reset: boolean) => {
+  const fetchJobsPage = useCallback(async (pageNum: number, reset: boolean) => {
     if(pageNum === 1) setLoading(true);
     else setLoadingMore(true);
 
@@ -47,7 +47,6 @@ export function PageContent() {
       });
 
       setJobs(prev => reset ? newJobs : [...prev, ...newJobs]);
-
       setHasMore((pageNum * ITEMS_PER_PAGE) < totalCount);
 
       try {
@@ -82,13 +81,13 @@ export function PageContent() {
     setJobs([]);
     setPage(1);
     setHasMore(true);
-    fetchAndSetJobs(1, true);
-  }, [q, country, city, category, workType, fetchAndSetJobs, getCacheKey]);
+    fetchJobsPage(1, true);
+  }, [q, country, city, category, workType, fetchJobsPage, getCacheKey]);
 
   const loadMore = () => {
     const nextPage = page + 1;
     setPage(nextPage);
-    fetchAndSetJobs(nextPage, false);
+    fetchJobsPage(nextPage, false);
   };
 
   return (
@@ -132,4 +131,4 @@ export function PageContent() {
       </div>
     </>
   );
-}
+                  }
