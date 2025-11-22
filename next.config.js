@@ -72,8 +72,51 @@ const nextConfig = {
           },
         ],
       },
+      // ✅ أضف هذا للكاش الجديد
+      {
+        source: '/jobs',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=300, stale-while-revalidate=60', // 5 دقائق كاش
+          },
+        ],
+      },
+      {
+        source: '/api/jobs',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=600, stale-while-revalidate=300', // 10 دقائق كاش
+          },
+        ],
+      },
+      {
+        source: '/api/ads',
+        headers: [
+          {
+            key: 'Cache-Control', 
+            value: 'public, max-age=600, stale-while-revalidate=300',
+          },
+        ],
+      },
+      {
+        source: '/:path*.html', // كاش لصفحات HTML
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=1800, stale-while-revalidate=600', // 30 دقيقة
+          },
+        ],
+      },
     ]
   },
+  // ✅ أضف هذه الإعدادات لتحسين الأداء
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production', // إزالة console في production
+  },
+  // ✅ تفعيل ضغط Gzip
+  compress: true,
 };
 
 module.exports = nextConfig;
