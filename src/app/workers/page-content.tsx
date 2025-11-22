@@ -28,7 +28,7 @@ export function PageContent() {
   const country = searchParams.get('country');
   const city = searchParams.get('city');
   const category = searchParams.get('category');
-  const workType = searchParams.get('workType');
+  const workType = searchParams.get('job');
 
   const getCacheKey = useCallback(() => {
     return `${CACHE_KEY_PREFIX}${q || ''}_${country || ''}_${city || ''}_${category || ''}_${workType || ''}`;
