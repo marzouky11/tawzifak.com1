@@ -73,6 +73,7 @@ function formatTimeAgo(timestamp: any) {
   }
   return 'الآن';
 }
+    // إذا كنت تريد أقصى سرعة، استخدم هذا:
 export async function getJobs(
   options: {
     postType?: PostType;
@@ -101,24 +102,20 @@ export async function getJobs(
       limit: pageLimit,
     } = options;
 
-    // ✅ جلب 16 إعلان فقط - هذا هو الأهم
     const itemsPerPage = pageLimit || count || 16;
 
     const adsRef = collection(db, 'ads');
     const queryConstraints: any[] = [];
 
-    // ✅ الفلاتر الأساسية
     if (postType) queryConstraints.push(where('postType', '==', postType));
     if (categoryId) queryConstraints.push(where('categoryId', '==', categoryId));
     if (workType) queryConstraints.push(where('workType', '==', workType));
     if (country) queryConstraints.push(where('country', '==', country));
     if (city) queryConstraints.push(where('city', '==', city));
 
-    // ✅ الأهم: ORDER و LIMIT أولاً
     queryConstraints.push(orderBy('createdAt', 'desc'));
-    queryConstraints.push(limit(itemsPerPage));
+    queryConstraints.push(limit(itemsPerPage)); // ✅ الأهم
 
-    // ✅ جلب البيانات مع الـ limit فقط
     const q = query(adsRef, ...queryConstraints);
     const querySnapshot = await getDocs(q);
 
@@ -134,7 +131,7 @@ export async function getJobs(
       } as Job;
     });
 
-    // ✅ البحث النصي فقط (لا يمكن عمله في Firebase)
+    // البحث
     if (searchQuery) {
       const fuse = new Fuse(jobs, {
         keys: ['title', 'description', 'companyName'],
@@ -147,16 +144,8 @@ export async function getJobs(
       jobs = jobs.filter(job => job.id !== excludeId);
     }
 
-    // ✅ العدد الكلي - استعلام منفصل لكن بدون جلب البيانات
-    let totalCount = 0;
-    try {
-      const countQuery = query(adsRef, ...queryConstraints.filter(q => q.type !== 'limit'));
-      const countSnapshot = await getDocs(countQuery);
-      totalCount = countSnapshot.size;
-    } catch (error) {
-      console.error("Error getting total count:", error);
-      totalCount = jobs.length; // استخدام العدد الحالي كبديل
-    }
+    // ✅ تجاهل count مؤقتاً لأقصى سرعة
+    const totalCount = jobs.length;
 
     return { data: jobs, totalCount };
 
@@ -164,7 +153,7 @@ export async function getJobs(
     console.error("Error fetching jobs: ", error);
     return { data: [], totalCount: 0 };
   }
-    }
+  }
 // Helper function for client-side filtering
 function applyClientSideFilters(
   jobs: Job[], 
