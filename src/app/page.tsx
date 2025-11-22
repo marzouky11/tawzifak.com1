@@ -168,8 +168,8 @@ async function getHomePageData(isMobile: boolean): Promise<HomePageData> {
     immigrationPostsData,  
     testimonialsData,  
   ] = await Promise.all([  
-    getJobs({ postType: 'seeking_worker', count: counts.jobOffers }),  
-    getJobs({ postType: 'seeking_job', count: counts.jobSeekers }),  
+    getJobs({ postType: 'seeking_worker', limit: counts.jobOffers }),  
+    getJobs({ postType: 'seeking_job', limit: counts.jobSeekers }),  
     getCompetitions({ count: counts.competitions }),  
     getImmigrationPosts({ count: counts.immigrationPosts }),  
     getTestimonials(),  
