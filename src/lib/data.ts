@@ -73,6 +73,7 @@ function formatTimeAgo(timestamp: any) {
   }
   return 'الآن';
 }
+// استبدل الدالة الحالية بهذا الكود المتقدم:
 export async function getJobs(
   options: {
     postType?: PostType;
@@ -85,8 +86,9 @@ export async function getJobs(
     excludeId?: string;
     page?: number;
     limit?: number;
+    lastVisible?: any; // ✅ جديد
   } = {}
-): Promise<{ data: Job[]; totalCount: number }> {
+): Promise<{ data: Job[]; totalCount: number; lastVisible?: any }> {
   try {
     const {
       postType,
@@ -99,20 +101,34 @@ export async function getJobs(
       excludeId,
       page = 1,
       limit: pageLimit,
+      lastVisible
     } = options;
 
-    // Step 1: Fetch all documents based on filters (excluding pagination)
+    const itemsPerPage = pageLimit || count || 16;
+
     const adsRef = collection(db, 'ads');
     const queryConstraints: QueryConstraint[] = [];
 
     if (postType) queryConstraints.push(where('postType', '==', postType));
     if (categoryId) queryConstraints.push(where('categoryId', '==', categoryId));
     if (workType) queryConstraints.push(where('workType', '==', workType));
+    if (country) queryConstraints.push(where('country', '==', country));
+    if (city) queryConstraints.push(where('city', '==', city));
+
+    queryConstraints.push(orderBy('createdAt', 'desc'));
+    queryConstraints.push(limit(itemsPerPage));
+
+    // ✅ دعم التقسيم
+    if (lastVisible) {
+      queryConstraints.push(startAfter(lastVisible));
+    }
 
     const q = query(adsRef, ...queryConstraints);
     const querySnapshot = await getDocs(q);
 
-    let allJobs: Job[] = querySnapshot.docs.map(doc => {
+    const newLastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+
+    let jobs: Job[] = querySnapshot.docs.map(doc => {
       const data = doc.data();
       const createdAt = data.createdAt.toDate();
       
@@ -124,29 +140,38 @@ export async function getJobs(
       } as Job;
     });
 
-    // Step 2: Apply client-side filtering
-    allJobs = applyClientSideFilters(allJobs, {
-      excludeId,
-      searchQuery,
-      country,
-      city
-    });
+    // البحث
+    if (searchQuery) {
+      const fuse = new Fuse(jobs, {
+        keys: ['title', 'description', 'companyName'],
+        threshold: 0.4,
+      });
+      jobs = fuse.search(searchQuery).map(result => result.item);
+    }
 
-    // Sort by creation date (newest first)
-    allJobs.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
+    if (excludeId) {
+      jobs = jobs.filter(job => job.id !== excludeId);
+    }
 
-    const totalCount = allJobs.length;
+    // العدد الكلي
+    const countConstraints = queryConstraints.filter(q => 
+      !(q as any).type?.includes('limit') && !(q as any).type?.includes('startAfter')
+    );
+    const countQuery = query(adsRef, ...countConstraints);
+    const countSnapshot = await getDocs(countQuery);
+    const totalCount = countSnapshot.size;
 
-    // Step 3: Apply pagination or count limit
-    const data = applyPagination(allJobs, { page, pageLimit, count });
-
-    return { data, totalCount };
+    return { 
+      data: jobs, 
+      totalCount, 
+      lastVisible: newLastVisible // ✅ مهم لزر "عرض المزيد"
+    };
 
   } catch (error) {
     console.error("Error fetching jobs: ", error);
     return { data: [], totalCount: 0 };
   }
-}
+  }
 
 // Helper function for client-side filtering
 function applyClientSideFilters(
