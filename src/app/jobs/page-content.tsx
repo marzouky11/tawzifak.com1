@@ -26,8 +26,7 @@ export function PageContent() {
   const workType = searchParams.get('workType');
 
   const fetchAndSetJobs = useCallback(async (pageNum: number, reset: boolean) => {
-    if (pageNum === 1) setLoading(true); 
-    else setLoadingMore(true);
+    if(pageNum === 1) setLoading(true); else setLoadingMore(true);
 
     const { data: newJobs, totalCount } = await getJobs({
       postType: 'seeking_worker',
@@ -42,9 +41,8 @@ export function PageContent() {
 
     setJobs(prev => reset ? newJobs : [...prev, ...newJobs]);
     setHasMore((pageNum * ITEMS_PER_PAGE) < totalCount);
-    
-    if (pageNum === 1) setLoading(false); 
-    else setLoadingMore(false);
+
+    if(pageNum === 1) setLoading(false); else setLoadingMore(false);
   }, [q, country, city, category, workType]);
 
   useEffect(() => {
@@ -78,19 +76,11 @@ export function PageContent() {
         ) : jobs.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {jobs.map((job) => (
-                <JobCard key={job.id} job={job} />
-              ))}
+              {jobs.map((job) => <JobCard key={job.id} job={job} />)}
             </div>
             {hasMore && (
               <div className="text-center mt-8">
-                <Button 
-                  onClick={loadMore} 
-                  disabled={loadingMore} 
-                  size="lg" 
-                  variant="outline" 
-                  className="active:scale-95 transition-transform"
-                >
+                <Button onClick={loadMore} disabled={loadingMore} size="lg" variant="outline" className="active:scale-95 transition-transform">
                   {loadingMore ? (
                     <>
                       <Loader2 className="ml-2 h-4 w-4 animate-spin" />
@@ -104,9 +94,7 @@ export function PageContent() {
             )}
           </>
         ) : (
-          <p className="col-span-full text-center text-muted-foreground py-10">
-            لا توجد عروض عمل تطابق بحثك.
-          </p>
+          <p className="col-span-full text-center text-muted-foreground py-10">لا توجد عروض عمل تطابق بحثك.</p>
         )}
       </div>
     </>
