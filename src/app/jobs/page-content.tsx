@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { JobCard } from '@/components/job-card';
 import { JobFilters } from '@/components/job-filters';
-import type { Job } from '@/lib/types';
+import type { Job, WorkType } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
 import { getJobs } from '@/lib/data';
 import { Button } from '@/components/ui/button';
@@ -34,7 +34,7 @@ export function PageContent() {
       country: country || undefined,
       city: city || undefined,
       categoryId: category || undefined,
-      workType: workType || undefined,
+      workType: (workType as WorkType) || undefined, // 🔥 أضفت type casting هنا
       page: pageNum,
       limit: ITEMS_PER_PAGE,
     });
@@ -99,4 +99,4 @@ export function PageContent() {
       </div>
     </>
   );
-}
+      }
