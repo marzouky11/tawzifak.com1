@@ -182,10 +182,10 @@ async function getHomePageData(isMobile: boolean): Promise<HomePageData> {
     immigrationPosts: immigrationPostsData.data,  
     testimonials: testimonialsData.slice(0, counts.testimonials),  
     stats: {  
-      jobs: jobOffersData.totalCount,  
-      competitions: competitionsData.totalCount,  
-      immigration: immigrationPostsData.totalCount,  
-      seekers: jobSeekersData.totalCount,  
+      jobs: jobOffersData.data.length,  
+      competitions: competitionsData.data.length,  
+      immigration: immigrationPostsData.data.length,  
+      seekers: jobSeekersData.data.length,  
     }  
   };
 }
