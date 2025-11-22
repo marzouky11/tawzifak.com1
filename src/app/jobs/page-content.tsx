@@ -17,7 +17,7 @@ export function PageContent() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
+  const [lastDoc, setLastDoc] = useState<any>(null);
 
   const q = searchParams.get('q');
   const country = searchParams.get('country');
@@ -25,39 +25,40 @@ export function PageContent() {
   const category = searchParams.get('category');
   const workType = searchParams.get('workType');
 
-  const fetchAndSetJobs = useCallback(async (pageNum: number, reset: boolean) => {
-    if (pageNum === 1) setLoading(true); 
+  const fetchAndSetJobs = useCallback(async (reset: boolean) => {
+    if (reset) setLoading(true);
     else setLoadingMore(true);
 
-    const { data: newJobs, lastDoc } = await getJobs({
+    const { data: newJobs, lastDoc: newLastDoc } = await getJobs({
       postType: 'seeking_worker',
       searchQuery: q || undefined,
       country: country || undefined,
       city: city || undefined,
       categoryId: category || undefined,
       workType: (workType as WorkType) || undefined,
-      page: pageNum,
       limit: ITEMS_PER_PAGE,
+      lastDoc: reset ? null : lastDoc,
     });
 
     setJobs(prev => reset ? newJobs : [...prev, ...newJobs]);
-    setHasMore((pageNum * ITEMS_PER_PAGE) < totalCount);
-    
-    if (pageNum === 1) setLoading(false); 
+    setLastDoc(newLastDoc);
+    setHasMore(newJobs.length === ITEMS_PER_PAGE);
+
+    if (reset) setLoading(false);
     else setLoadingMore(false);
-  }, [q, country, city, category, workType]);
+  }, [q, country, city, category, workType, lastDoc]);
 
   useEffect(() => {
     setJobs([]);
-    setPage(1);
+    setLastDoc(null);
     setHasMore(true);
-    fetchAndSetJobs(1, true);
+    fetchAndSetJobs(true);
   }, [q, country, city, category, workType, fetchAndSetJobs]);
 
   const loadMore = () => {
-    const nextPage = page + 1;
-    setPage(nextPage);
-    fetchAndSetJobs(nextPage, false);
+    if (!loadingMore && hasMore) {
+      fetchAndSetJobs(false);
+    }
   };
 
   return (
@@ -78,17 +79,17 @@ export function PageContent() {
         ) : jobs.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {jobs.map((job) => (
+              {jobs.map(job => (
                 <JobCard key={job.id} job={job} />
               ))}
             </div>
             {hasMore && (
               <div className="text-center mt-8">
-                <Button 
-                  onClick={loadMore} 
-                  disabled={loadingMore} 
-                  size="lg" 
-                  variant="outline" 
+                <Button
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  size="lg"
+                  variant="outline"
                   className="active:scale-95 transition-transform"
                 >
                   {loadingMore ? (
@@ -111,4 +112,4 @@ export function PageContent() {
       </div>
     </>
   );
-    }
+}
