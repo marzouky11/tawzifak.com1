@@ -6,7 +6,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'من نحن - قصة ورؤية منصة توظيفك',
-  description: 'تعرف على قصة تأسيس منصة توظيفك، رؤيتنا في بناء مستقبل مهني أفضل في العالم العربي، ومهمتنا في تمكين الأفراد والشركات من خلال ربط الكفاءات بالفرص.',
+  description: 'اكتشف قصة ورؤية منصة توظيفك، وكيف نسعى لربط الكفاءات بالفرص، تمكين الأفراد والشركات، وبناء مستقبل مهني أفضل في العالم العربي.',
 };
 
 export default function AboutUsPage() {
@@ -18,7 +18,7 @@ export default function AboutUsPage() {
       <DesktopPageHeader
         icon={Info}
         title="من نحن"
-        description="تعرف على رؤيتنا ومهمتنا وقيمنا في منصة توظيفك."
+        description="اكتشف قصة ورؤية منصة توظيفك، وكيف نسعى لربط الكفاءات بالفرص وبناء مستقبل مهني أفضل."
       />
       <div className="container mx-auto max-w-5xl px-4 pb-8">
         <Card>
