@@ -76,141 +76,132 @@ function formatTimeAgo(timestamp: any) {
 
 export async function getJobs(
   options: {
-    postType?: PostType;
-    count?: number;
-    searchQuery?: string;
+    postType?: string;
+    categoryId?: string;
+    workType?: string;
     country?: string;
     city?: string;
-    categoryId?: string;
-    workType?: WorkType;
+    searchQuery?: string;
     excludeId?: string;
-    page?: number;
     limit?: number;
+    lastDoc?: QueryDocumentSnapshot | null;
   } = {}
-): Promise<{ data: Job[]; totalCount: number }> {
+): Promise<{ data: Job[]; lastDoc: QueryDocumentSnapshot | null }> {
   try {
     const {
       postType,
-      count,
-      searchQuery,
-      country,
-      city,
       categoryId,
       workType,
+      country,
+      city,
+      searchQuery,
       excludeId,
-      page = 1,
-      limit: pageLimit,
+      limit: pageLimit = 16,
+      lastDoc = null,
     } = options;
 
-    let allJobs: Job[] = [];
-    
-    // Step 1: Fetch all documents based on filters (excluding pagination)
     const adsRef = collection(db, 'ads');
-    const queryConstraints: QueryConstraint[] = [];
+    const queryConstraints: any[] = [];
 
     if (postType) queryConstraints.push(where('postType', '==', postType));
     if (categoryId) queryConstraints.push(where('categoryId', '==', categoryId));
     if (workType) queryConstraints.push(where('workType', '==', workType));
-    
-    const q = query(adsRef, ...queryConstraints);
+    if (country) queryConstraints.push(where('country', '==', country));
+    if (city) queryConstraints.push(where('city', '==', city));
+
+    let q = query(
+      adsRef,
+      ...queryConstraints,
+      orderBy('createdAt', 'desc'),
+      firestoreLimit(pageLimit)
+    );
+
+    if (lastDoc) {
+      q = query(q, startAfter(lastDoc));
+    }
+
     const querySnapshot = await getDocs(q);
-    
-    allJobs = querySnapshot.docs.map(doc => {
+
+    let allJobs = querySnapshot.docs.map(doc => {
       const data = doc.data();
       const createdAt = data.createdAt.toDate();
       return {
         id: doc.id,
         ...data,
         postedAt: formatTimeAgo(data.createdAt),
-        isNew: (new Date().getTime() - createdAt.getTime()) < 24 * 60 * 60 * 1000,
+        isNew: new Date().getTime() - createdAt.getTime() < 24 * 60 * 60 * 1000,
       } as Job;
     });
 
-    // Step 2: Apply client-side filtering (search, country, city, excludeId)
+    // استبعاد ID إذا محدد
     if (excludeId) {
-        allJobs = allJobs.filter(job => job.id !== excludeId);
+      allJobs = allJobs.filter(job => job.id !== excludeId);
     }
-    
+
+    // البحث النصي
     if (searchQuery) {
-        const fuse = new Fuse(allJobs, {
-            keys: ['title', 'description', 'categoryName', 'country', 'city', 'companyName', 'experience', 'qualifications'],
-            includeScore: true,
-            threshold: 0.4,
-        });
-        allJobs = fuse.search(searchQuery).map(result => result.item);
-    }
-    
-    if (country) {
-        const fuse = new Fuse(allJobs, { keys: ['country'], includeScore: true, threshold: 0.3 });
-        allJobs = fuse.search(country).map(result => result.item);
+      const fuse = new Fuse(allJobs, {
+        keys: ['title', 'description', 'categoryName', 'country', 'city', 'companyName', 'experience', 'qualifications'],
+        includeScore: true,
+        threshold: 0.4,
+      });
+      allJobs = fuse.search(searchQuery).map(result => result.item);
     }
 
-    if (city) {
-        const fuse = new Fuse(allJobs, { keys: ['city'], includeScore: true, threshold: 0.3 });
-        allJobs = fuse.search(city).map(result => result.item);
-    }
-    
-    // Sort by creation date after all filtering
-    allJobs.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
+    const newLastDoc = querySnapshot.docs.length > 0 ? querySnapshot.docs[querySnapshot.docs.length - 1] : null;
 
-    const totalCount = allJobs.length;
-
-    // Step 3: Apply pagination or count limit
-    let data: Job[];
-    if (pageLimit) {
-        const startIndex = (page - 1) * pageLimit;
-        const endIndex = startIndex + pageLimit;
-        data = allJobs.slice(startIndex, endIndex);
-    } else if (count) {
-        data = allJobs.slice(0, count);
-    } else {
-        data = allJobs;
-    }
-
-    return { data, totalCount };
+    return { data: allJobs, lastDoc: newLastDoc };
   } catch (error) {
-    console.error("Error fetching jobs: ", error);
-    return { data: [], totalCount: 0 };
+    console.error('Error fetching jobs:', error);
+    return { data: [], lastDoc: null };
   }
 }
 
+// ====== دالة جلب الوظائف حسب المستخدم ======
 export async function getJobsByUserId(userId: string): Promise<Job[]> {
-    try {
-        const adsRef = collection(db, 'ads');
-        const q = query(adsRef, where('userId', '==', userId), orderBy('createdAt', 'desc'));
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            postedAt: formatTimeAgo(doc.data().createdAt),
-        } as Job));
-    } catch (error) {
-        console.error("Error fetching jobs by user ID: ", error);
-        return [];
-    }
+  try {
+    const adsRef = collection(db, 'ads');
+    const q = query(adsRef, where('userId', '==', userId), orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
+
+    return querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : new Date();
+      return {
+        id: doc.id,
+        ...data,
+        postedAt: formatTimeAgo(data.createdAt),
+        isNew: new Date().getTime() - createdAt.getTime() < 24 * 60 * 60 * 1000,
+      } as Job;
+    });
+  } catch (error) {
+    console.error('Error fetching jobs by user ID:', error);
+    return [];
+  }
 }
 
+// ====== دالة جلب وظيفة واحدة حسب ID ======
 export async function getJobById(id: string): Promise<Job | null> {
   try {
     const docRef = doc(db, 'ads', id);
     const docSnap = await getDoc(docRef);
 
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      return { 
-          id: docSnap.id, 
-          ...data,
-          postedAt: formatTimeAgo(data.createdAt),
-     } as Job;
-    } else {
-      console.log("No such document!");
-      return null;
-    }
+    if (!docSnap.exists()) return null;
+
+    const data = docSnap.data();
+    const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : new Date();
+
+    return {
+      id: docSnap.id,
+      ...data,
+      postedAt: formatTimeAgo(data.createdAt),
+      isNew: new Date().getTime() - createdAt.getTime() < 24 * 60 * 60 * 1000,
+    } as Job;
   } catch (error) {
-    console.error("Error fetching job by ID: ", error);
+    console.error('Error fetching job by ID:', error);
     return null;
   }
-}
+      }
 
 export async function getUserById(id: string): Promise<User | null> {
   try {
