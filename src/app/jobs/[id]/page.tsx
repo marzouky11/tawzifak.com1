@@ -150,7 +150,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
     const { data: similarJobs } = await getJobs({
         categoryId: job.categoryId,
         postType: 'seeking_worker',
-        limit: 3,
+        count: 3,
         excludeId: job.id,
     });
     
@@ -178,3 +178,4 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
         </>
     );
 }
+
