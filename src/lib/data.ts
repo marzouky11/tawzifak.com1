@@ -73,7 +73,6 @@ function formatTimeAgo(timestamp: any) {
   }
   return 'الآن';
 }
-// استبدل الدالة الحالية بهذا الكود المتقدم:
 export async function getJobs(
   options: {
     postType?: PostType;
@@ -86,9 +85,8 @@ export async function getJobs(
     excludeId?: string;
     page?: number;
     limit?: number;
-    lastVisible?: any; // ✅ جديد
   } = {}
-): Promise<{ data: Job[]; totalCount: number; lastVisible?: any }> {
+): Promise<{ data: Job[]; totalCount: number }> {
   try {
     const {
       postType,
@@ -101,32 +99,28 @@ export async function getJobs(
       excludeId,
       page = 1,
       limit: pageLimit,
-      lastVisible
     } = options;
 
+    // ✅ جلب 16 إعلان فقط - هذا هو الأهم
     const itemsPerPage = pageLimit || count || 16;
 
     const adsRef = collection(db, 'ads');
-    const queryConstraints: QueryConstraint[] = [];
+    const queryConstraints: any[] = [];
 
+    // ✅ الفلاتر الأساسية
     if (postType) queryConstraints.push(where('postType', '==', postType));
     if (categoryId) queryConstraints.push(where('categoryId', '==', categoryId));
     if (workType) queryConstraints.push(where('workType', '==', workType));
     if (country) queryConstraints.push(where('country', '==', country));
     if (city) queryConstraints.push(where('city', '==', city));
 
+    // ✅ الأهم: ORDER و LIMIT أولاً
     queryConstraints.push(orderBy('createdAt', 'desc'));
     queryConstraints.push(limit(itemsPerPage));
 
-    // ✅ دعم التقسيم
-    if (lastVisible) {
-      queryConstraints.push(startAfter(lastVisible));
-    }
-
+    // ✅ جلب البيانات مع الـ limit فقط
     const q = query(adsRef, ...queryConstraints);
     const querySnapshot = await getDocs(q);
-
-    const newLastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
 
     let jobs: Job[] = querySnapshot.docs.map(doc => {
       const data = doc.data();
@@ -140,7 +134,7 @@ export async function getJobs(
       } as Job;
     });
 
-    // البحث
+    // ✅ البحث النصي فقط (لا يمكن عمله في Firebase)
     if (searchQuery) {
       const fuse = new Fuse(jobs, {
         keys: ['title', 'description', 'companyName'],
@@ -153,26 +147,24 @@ export async function getJobs(
       jobs = jobs.filter(job => job.id !== excludeId);
     }
 
-    // العدد الكلي
-    const countConstraints = queryConstraints.filter(q => 
-      !(q as any).type?.includes('limit') && !(q as any).type?.includes('startAfter')
-    );
-    const countQuery = query(adsRef, ...countConstraints);
-    const countSnapshot = await getDocs(countQuery);
-    const totalCount = countSnapshot.size;
+    // ✅ العدد الكلي - استعلام منفصل لكن بدون جلب البيانات
+    let totalCount = 0;
+    try {
+      const countQuery = query(adsRef, ...queryConstraints.filter(q => q.type !== 'limit'));
+      const countSnapshot = await getDocs(countQuery);
+      totalCount = countSnapshot.size;
+    } catch (error) {
+      console.error("Error getting total count:", error);
+      totalCount = jobs.length; // استخدام العدد الحالي كبديل
+    }
 
-    return { 
-      data: jobs, 
-      totalCount, 
-      lastVisible: newLastVisible // ✅ مهم لزر "عرض المزيد"
-    };
+    return { data: jobs, totalCount };
 
   } catch (error) {
     console.error("Error fetching jobs: ", error);
     return { data: [], totalCount: 0 };
   }
-  }
-
+    }
 // Helper function for client-side filtering
 function applyClientSideFilters(
   jobs: Job[], 
