@@ -29,7 +29,7 @@ export function PageContent() {
     if (pageNum === 1) setLoading(true); 
     else setLoadingMore(true);
 
-    const { data: newJobs, totalCount } = await getJobs({
+    const { data: newJobs, lastDoc } = await getJobs({
       postType: 'seeking_worker',
       searchQuery: q || undefined,
       country: country || undefined,
