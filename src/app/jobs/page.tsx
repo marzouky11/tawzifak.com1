@@ -1,4 +1,3 @@
-
 import type { Metadata } from 'next';
 import { JobCard } from '@/components/job-card';
 import { getJobs } from '@/lib/data';
@@ -48,7 +47,7 @@ export default async function JobsPage({
 }: {
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
-  const jobs = await getJobs({
+  const jobsData = await getJobs({
       postType: 'seeking_worker',
       searchQuery: typeof searchParams?.q === 'string' ? searchParams.q : undefined,
       country: typeof searchParams?.country === 'string' ? searchParams.country : undefined,
@@ -76,10 +75,9 @@ export default async function JobsPage({
        </div>
       <div className="container pt-4 pb-6">
         <Suspense fallback={<JobListSkeleton />}>
-          <JobList jobs={jobs} />
+          <JobList jobs={jobsData.data} />
         </Suspense>
       </div>
     </>
   );
-        }
-        
+      }
