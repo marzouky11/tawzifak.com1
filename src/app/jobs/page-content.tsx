@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { JobCard } from '@/components/job-card';
 import { JobFilters } from '@/components/job-filters';
 import type { Job, WorkType } from '@/lib/types';
@@ -11,6 +11,7 @@ import { Loader2 } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 16;
 const CACHE_KEY_PREFIX = 'jobs_cache_';
+const CACHE_DURATION = 5 * 60 * 1000;
 
 export function PageContent() {
   const searchParams = useSearchParams();
@@ -19,6 +20,7 @@ export function PageContent() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
+  const previousFilters = useRef<string>('');
 
   const q = searchParams.get('q');
   const country = searchParams.get('country');
@@ -30,70 +32,90 @@ export function PageContent() {
     return `${CACHE_KEY_PREFIX}${q || ''}_${country || ''}_${city || ''}_${category || ''}_${workType || ''}`;
   }, [q, country, city, category, workType]);
 
-  const fetchJobsPage = useCallback(async (pageNum: number, reset: boolean) => {
+  const updateCache = useCallback((jobs: Job[], pageNum: number, totalCount: number) => {
+    const cacheData = {
+      items: jobs,
+      page: pageNum,
+      hasMore: (pageNum * ITEMS_PER_PAGE) < totalCount,
+      timestamp: Date.now()
+    };
+    
+    setTimeout(() => {
+      try {
+        sessionStorage.setItem(getCacheKey(), JSON.stringify(cacheData));
+      } catch (e) {
+        console.error("Failed to save to sessionStorage", e);
+      }
+    }, 0);
+  }, [getCacheKey]);
+
+  const fetchAndSetJobs = useCallback(async (pageNum: number, reset: boolean) => {
     if (pageNum === 1) setLoading(true);
     else setLoadingMore(true);
 
     try {
-      const { data: newJobs, totalCount } = await getJobs({
-        postType: 'seeking_worker',
-        searchQuery: q || undefined,
-        country: country || undefined,
-        city: city || undefined,
-        categoryId: category || undefined,
-        workType: workType as WorkType || undefined,
-        page: pageNum,
-        limit: ITEMS_PER_PAGE,
+      const { data: newJobs, totalCount } = await getJobs({  
+        postType: 'seeking_worker',  
+        searchQuery: q || undefined,  
+        country: country || undefined,  
+        city: city || undefined,  
+        categoryId: category || undefined,  
+        workType: workType as WorkType || undefined,  
+        page: pageNum,  
+        limit: ITEMS_PER_PAGE,  
       });
 
-      setJobs(prev => reset ? newJobs : [...prev, ...newJobs]);
+      setJobs(prev => {
+        const updatedJobs = reset ? newJobs : [...prev, ...newJobs];
+        updateCache(updatedJobs, pageNum, totalCount);
+        return updatedJobs;
+      });
+
       setHasMore((pageNum * ITEMS_PER_PAGE) < totalCount);
-
-      try {
-        sessionStorage.setItem(getCacheKey(), JSON.stringify({
-          items: newJobs,
-          page: pageNum,
-          hasMore: (pageNum * ITEMS_PER_PAGE) < totalCount
-        }));
-      } catch (e) {
-        console.error("Failed to save to sessionStorage", e);
-      }
-
-    } catch (err) {
-      console.error("Failed to fetch jobs", err);
+    } catch (error) {
+      console.error("Failed to fetch jobs:", error);
     } finally {
       if (pageNum === 1) setLoading(false);
       else setLoadingMore(false);
     }
-  }, [q, country, city, category, workType, getCacheKey]);
+  }, [q, country, city, category, workType, updateCache]);
 
   useEffect(() => {
+    const currentFilters = getCacheKey();
+    
+    if (previousFilters.current === currentFilters) {
+      return;
+    }
+    
+    previousFilters.current = currentFilters;
+
     const cacheKey = getCacheKey();
     try {
       const cachedData = sessionStorage.getItem(cacheKey);
       if (cachedData) {
-        const { items, page: cachedPage, hasMore: cachedHasMore } = JSON.parse(cachedData);
-        setJobs(items);
-        setPage(cachedPage);
-        setHasMore(cachedHasMore);
-        setLoading(false);
-        return;
+        const { items, page: cachedPage, hasMore: cachedHasMore, timestamp } = JSON.parse(cachedData);
+        
+        if (Date.now() - timestamp < CACHE_DURATION) {
+          setJobs(items);
+          setPage(cachedPage);
+          setHasMore(cachedHasMore);
+          setLoading(false);
+          return;
+        }
       }
     } catch(e) {
       console.error("Failed to read from sessionStorage", e);
     }
 
-    setJobs([]);
     setPage(1);
     setHasMore(true);
-    fetchJobsPage(1, true);
-  }, [q, country, city, category, workType, fetchJobsPage, getCacheKey]);
+    fetchAndSetJobs(1, true);
+  }, [q, country, city, category, workType, fetchAndSetJobs, getCacheKey]);
 
   const loadMore = () => {
-    if (!hasMore || loadingMore) return;
     const nextPage = page + 1;
     setPage(nextPage);
-    fetchJobsPage(nextPage, false);
+    fetchAndSetJobs(nextPage, false);
   };
 
   return (
@@ -104,43 +126,37 @@ export function PageContent() {
         </div>
       </div>
 
-      <div className="container pt-4 pb-6">
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {Array.from({ length: ITEMS_PER_PAGE }).map((_, i) => (
-              <div key={i} className="bg-muted rounded-lg h-48 animate-pulse" />
-            ))}
-          </div>
-        ) : jobs.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {jobs.map((job) => <JobCard key={job.id} job={job} />)}
-            </div>
-            {hasMore && (
-              <div className="text-center mt-8">
-                <Button
-                  onClick={loadMore}
-                  disabled={loadingMore}
-                  size="lg"
-                  variant="outline"
-                  className="active:scale-95 transition-transform"
-                >
-                  {loadingMore ? (
-                    <>
-                      <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                      جاري التحميل...
-                    </>
-                  ) : (
-                    'تحميل المزيد'
-                  )}
-                </Button>
-              </div>
-            )}
-          </>
-        ) : (
-          <p className="col-span-full text-center text-muted-foreground py-10">لا توجد عروض عمل تطابق بحثك.</p>
-        )}
-      </div>
+      <div className="container pt-4 pb-6">  
+        {loading ? (  
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">  
+            {Array.from({ length: 12 }).map((_, i) => (  
+              <div key={i} className="bg-muted rounded-lg h-48 animate-pulse" />  
+            ))}  
+          </div>  
+        ) : jobs.length > 0 ? (  
+          <>  
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">  
+              {jobs.map((job) => <JobCard key={job.id} job={job} />)}  
+            </div>  
+            {hasMore && (  
+              <div className="text-center mt-8">  
+                <Button onClick={loadMore} disabled={loadingMore} size="lg" variant="outline" className="active:scale-95 transition-transform">  
+                  {loadingMore ? (  
+                    <>  
+                      <Loader2 className="ml-2 h-4 w-4 animate-spin" />  
+                      جاري التحميل...  
+                    </>  
+                  ) : (  
+                    'تحميل المزيد'  
+                  )}  
+                </Button>  
+              </div>  
+            )}  
+          </>  
+        ) : (  
+          <p className="col-span-full text-center text-muted-foreground py-10">لا توجد عروض عمل تطابق بحثك.</p>  
+        )}  
+      </div>  
     </>
   );
-        }
+                                   }
