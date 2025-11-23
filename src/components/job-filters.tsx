@@ -1,11 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search } from 'lucide-react';
-import debounce from 'lodash.debounce';
+
+// Debounce صغير بدون مكتبات
+function debounce<F extends (...args: any[]) => void>(func: F, wait: number) {
+  let timeout: ReturnType<typeof setTimeout>;
+  return function(...args: Parameters<F>) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+}
 
 export function JobFilters() {
   const router = useRouter();
@@ -14,8 +22,7 @@ export function JobFilters() {
 
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
 
-  // Debounced push
-  const pushSearch = React.useMemo(
+  const pushSearch = useMemo(
     () =>
       debounce((query: string) => {
         const params = new URLSearchParams(searchParams);
@@ -33,7 +40,7 @@ export function JobFilters() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    pushSearch.flush();
+    pushSearch(""); // لتأكيد التطبيق الفوري عند الضغط على زر البحث
   };
 
   return (
@@ -53,4 +60,4 @@ export function JobFilters() {
       </div>
     </form>
   );
-  }
+}
