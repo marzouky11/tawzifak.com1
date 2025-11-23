@@ -73,26 +73,25 @@ function formatTimeAgo(timestamp: any) {
   }
   return 'الآن';
 }
-export async function getJobs(
-  options: {
-    postType?: PostType;
-    count?: number;
-    searchQuery?: string;
-    country?: string;
-    city?: string;
-    categoryId?: string;
-    workType?: WorkType;
-    excludeId?: string;
-    page?: number;
-    limit?: number;
-  } = {}
-): Promise<{ data: Job[]; totalCount: number }> {
+
+export async function getJobs(options: {
+  postType?: PostType;
+  count?: number;
+  searchQuery?: string;
+  country?: string;
+  city?: string;
+  categoryId?: string;
+  workType?: WorkType;
+  excludeId?: string;
+  page?: number;
+  limit?: number;
+} = {}): Promise<{ data: Job[]; totalCount: number }> {
   try {
     const {
       postType,
       count,
       searchQuery,
-      country,
+      country = 'Morocco',
       city,
       categoryId,
       workType,
@@ -101,21 +100,22 @@ export async function getJobs(
       limit: pageLimit,
     } = options;
 
-    // Step 1: Fetch all documents based on filters (excluding pagination)
     const adsRef = collection(db, 'ads');
     const queryConstraints: QueryConstraint[] = [];
 
     if (postType) queryConstraints.push(where('postType', '==', postType));
     if (categoryId) queryConstraints.push(where('categoryId', '==', categoryId));
     if (workType) queryConstraints.push(where('workType', '==', workType));
+    if (country) queryConstraints.push(where('country', '==', country));
+    if (city) queryConstraints.push(where('city', '==', city));
 
-    const q = query(adsRef, ...queryConstraints);
+    const limitValue = pageLimit || count || 50;
+    const q = query(adsRef, ...queryConstraints, limitFn(limitValue));
     const querySnapshot = await getDocs(q);
 
-    let allJobs: Job[] = querySnapshot.docs.map(doc => {
+    let allJobs: Job[] = querySnapshot.docs.map((doc) => {
       const data = doc.data();
       const createdAt = data.createdAt.toDate();
-      
       return {
         id: doc.id,
         ...data,
@@ -124,29 +124,25 @@ export async function getJobs(
       } as Job;
     });
 
-    // Step 2: Apply client-side filtering
-    allJobs = applyClientSideFilters(allJobs, {
-      excludeId,
-      searchQuery,
-      country,
-      city
-    });
+    if (excludeId) allJobs = allJobs.filter((job) => job.id !== excludeId);
 
-    // Sort by creation date (newest first)
+    if (searchQuery) {
+      const fuse = new Fuse(allJobs, {
+        keys: ['title', 'description', 'categoryName', 'companyName'],
+        includeScore: true,
+        threshold: 0.4,
+      });
+      allJobs = fuse.search(searchQuery).map((res) => res.item);
+    }
+
     allJobs.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
 
-    const totalCount = allJobs.length;
-
-    // Step 3: Apply pagination or count limit
-    const data = applyPagination(allJobs, { page, pageLimit, count });
-
-    return { data, totalCount };
-
+    return { data: allJobs, totalCount: allJobs.length };
   } catch (error) {
-    console.error("Error fetching jobs: ", error);
+    console.error('Error fetching jobs:', error);
     return { data: [], totalCount: 0 };
   }
-}
+    }
 
 // Helper function for client-side filtering
 function applyClientSideFilters(
