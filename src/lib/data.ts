@@ -110,7 +110,7 @@ export async function getJobs(options: {
     if (city) queryConstraints.push(where('city', '==', city));
 
     const limitValue = pageLimit || count || 50;
-    const q = query(adsRef, ...queryConstraints, limitFn(limitValue));
+    const q = query(adsRef, ...queryConstraints, limit(limitValue));
     const querySnapshot = await getDocs(q);
 
     let allJobs: Job[] = querySnapshot.docs.map((doc) => {
