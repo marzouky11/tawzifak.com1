@@ -20,19 +20,19 @@ export function PageContent() {
   const [page, setPage] = useState(1);
 
   const q = searchParams.get('q');
-  const country = searchParams.get('country');
+  const country = searchParams.get('country') || 'Morocco';
   const city = searchParams.get('city');
   const category = searchParams.get('category');
   const workType = searchParams.get('workType');
 
   const fetchAndSetJobs = useCallback(async (pageNum: number, reset: boolean) => {
-    if (pageNum === 1) setLoading(true); 
+    if (pageNum === 1) setLoading(true);
     else setLoadingMore(true);
 
     const { data: newJobs, totalCount } = await getJobs({
       postType: 'seeking_worker',
       searchQuery: q || undefined,
-      country: country || undefined,
+      country,
       city: city || undefined,
       categoryId: category || undefined,
       workType: (workType as WorkType) || undefined,
@@ -42,8 +42,8 @@ export function PageContent() {
 
     setJobs(prev => reset ? newJobs : [...prev, ...newJobs]);
     setHasMore((pageNum * ITEMS_PER_PAGE) < totalCount);
-    
-    if (pageNum === 1) setLoading(false); 
+
+    if (pageNum === 1) setLoading(false);
     else setLoadingMore(false);
   }, [q, country, city, category, workType]);
 
@@ -78,17 +78,18 @@ export function PageContent() {
         ) : jobs.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {jobs.map((job) => (
+              {jobs.map(job => (
                 <JobCard key={job.id} job={job} />
               ))}
             </div>
+
             {hasMore && (
               <div className="text-center mt-8">
-                <Button 
-                  onClick={loadMore} 
-                  disabled={loadingMore} 
-                  size="lg" 
-                  variant="outline" 
+                <Button
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  size="lg"
+                  variant="outline"
                   className="active:scale-95 transition-transform"
                 >
                   {loadingMore ? (
@@ -96,9 +97,7 @@ export function PageContent() {
                       <Loader2 className="ml-2 h-4 w-4 animate-spin" />
                       جاري التحميل...
                     </>
-                  ) : (
-                    'تحميل المزيد'
-                  )}
+                  ) : 'تحميل المزيد'}
                 </Button>
               </div>
             )}
@@ -112,4 +111,3 @@ export function PageContent() {
     </>
   );
     }
-    
