@@ -1,19 +1,11 @@
+
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search } from 'lucide-react';
-
-// Debounce صغير بدون مكتبات
-function debounce<F extends (...args: any[]) => void>(func: F, wait: number) {
-  let timeout: ReturnType<typeof setTimeout>;
-  return function(...args: Parameters<F>) {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-}
 
 export function JobFilters() {
   const router = useRouter();
@@ -22,35 +14,25 @@ export function JobFilters() {
 
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
 
-  const pushSearch = useMemo(
-    () =>
-      debounce((query: string) => {
-        const params = new URLSearchParams(searchParams);
-        if (query.trim()) params.set('q', query.trim());
-        else params.delete('q');
-        router.push(`${pathname}?${params.toString()}`);
-      }, 500),
-    [searchParams, router, pathname]
-  );
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    pushSearch(e.target.value);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    pushSearch(""); // لتأكيد التطبيق الفوري عند الضغط على زر البحث
+    const params = new URLSearchParams(searchParams);
+    if (searchQuery.trim()) {
+      params.set('q', searchQuery.trim());
+    } else {
+      params.delete('q');
+    }
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2 items-center">
+    <form onSubmit={handleSearch} className="flex gap-2 items-center">
       <div className="relative w-full flex-grow">
         <Input
           placeholder="ابحث بالمنصب، المدينة، الدولة، أو أي كلمة مفتاحية..."
           className="h-14 text-base rounded-xl pl-4 pr-16 border-2 bg-background shadow-inner focus-visible:ring-primary/50"
           value={searchQuery}
-          onChange={handleChange}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
         <div className="absolute right-4 top-1/2 -translate-y-1/2">
           <Button type="submit" size="icon" variant="ghost" className="rounded-full h-10 w-10">
@@ -60,4 +42,5 @@ export function JobFilters() {
       </div>
     </form>
   );
-}
+      }
+            
