@@ -20,7 +20,7 @@ export function PageContent() {
   const [page, setPage] = useState(1);
 
   const q = searchParams.get('q');
-  const country = searchParams.get('country') || 'Morocco';
+  const country = searchParams.get('country');
   const city = searchParams.get('city');
   const category = searchParams.get('category');
   const workType = searchParams.get('workType');
@@ -32,7 +32,7 @@ export function PageContent() {
     const { data: newJobs, totalCount } = await getJobs({
       postType: 'seeking_worker',
       searchQuery: q || undefined,
-      country,
+      country: country || undefined,
       city: city || undefined,
       categoryId: category || undefined,
       workType: (workType as WorkType) || undefined,
@@ -40,7 +40,7 @@ export function PageContent() {
       limit: ITEMS_PER_PAGE,
     });
 
-    setJobs(prev => reset ? newJobs : [...prev, ...newJobs]);
+    setJobs(prev => (reset ? newJobs : [...prev, ...newJobs]));
     setHasMore((pageNum * ITEMS_PER_PAGE) < totalCount);
 
     if (pageNum === 1) setLoading(false);
@@ -110,4 +110,4 @@ export function PageContent() {
       </div>
     </>
   );
-    }
+}
