@@ -73,6 +73,7 @@ function formatTimeAgo(timestamp: any) {
   }
   return 'الآن';
 }
+
 export async function getJobs(
   options: {
     postType?: PostType;
@@ -101,18 +102,14 @@ export async function getJobs(
       limit: pageLimit,
     } = options;
 
-    // Step 1: Fetch all documents based on filters (excluding pagination)
     const adsRef = collection(db, 'ads');
-    const queryConstraints: QueryConstraint[] = [];
+    let allJobs: Job[] = [];
 
-    if (postType) queryConstraints.push(where('postType', '==', postType));
-    if (categoryId) queryConstraints.push(where('categoryId', '==', categoryId));
-    if (workType) queryConstraints.push(where('workType', '==', workType));
-
-    const q = query(adsRef, ...queryConstraints);
-    const querySnapshot = await getDocs(q);
-
-    let allJobs: Job[] = querySnapshot.docs.map(doc => {
+    // Step 1: Fetch ALL documents from the 'ads' collection once.
+    // This is inefficient but necessary because of Firestore's query limitations on multiple '!=' or 'OR' conditions.
+    const querySnapshot = await getDocs(query(adsRef, orderBy('createdAt', 'desc')));
+    
+    allJobs = querySnapshot.docs.map(doc => {
       const data = doc.data();
       const createdAt = data.createdAt.toDate();
       
@@ -124,21 +121,53 @@ export async function getJobs(
       } as Job;
     });
 
-    // Step 2: Apply client-side filtering
-    allJobs = applyClientSideFilters(allJobs, {
-      excludeId,
-      searchQuery,
-      country,
-      city
-    });
+    // Step 2: Apply all filtering on the client-side (in this server component).
+    let filteredJobs = allJobs;
 
-    // Sort by creation date (newest first)
-    allJobs.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
+    if (postType) {
+        filteredJobs = filteredJobs.filter(job => job.postType === postType);
+    }
+    if (excludeId) {
+        filteredJobs = filteredJobs.filter(job => job.id !== excludeId);
+    }
+    if (categoryId) {
+        filteredJobs = filteredJobs.filter(job => job.categoryId === categoryId);
+    }
+    if (workType) {
+        filteredJobs = filteredJobs.filter(job => job.workType === workType);
+    }
+    
+    // Apply fuzzy search on the already filtered data
+    if (searchQuery) {
+        const fuse = new Fuse(filteredJobs, {
+            keys: ['title', 'description', 'categoryName', 'country', 'city', 'companyName'],
+            includeScore: true,
+            threshold: 0.4,
+        });
+        filteredJobs = fuse.search(searchQuery).map(result => result.item);
+    } else {
+       // If no search query, apply text filters for country and city
+        if (country) {
+            filteredJobs = filteredJobs.filter(job => job.country && job.country.toLowerCase().includes(country.toLowerCase()));
+        }
+        if (city) {
+            filteredJobs = filteredJobs.filter(job => job.city && job.city.toLowerCase().includes(city.toLowerCase()));
+        }
+    }
 
-    const totalCount = allJobs.length;
+    const totalCount = filteredJobs.length;
 
     // Step 3: Apply pagination or count limit
-    const data = applyPagination(allJobs, { page, pageLimit, count });
+    let data;
+    if (pageLimit) {
+        const startIndex = (page - 1) * pageLimit;
+        const endIndex = startIndex + pageLimit;
+        data = filteredJobs.slice(startIndex, endIndex);
+    } else if (count) {
+        data = filteredJobs.slice(0, count);
+    } else {
+        data = filteredJobs;
+    }
 
     return { data, totalCount };
 
@@ -146,85 +175,6 @@ export async function getJobs(
     console.error("Error fetching jobs: ", error);
     return { data: [], totalCount: 0 };
   }
-}
-
-// Helper function for client-side filtering
-function applyClientSideFilters(
-  jobs: Job[], 
-  filters: {
-    excludeId?: string;
-    searchQuery?: string;
-    country?: string;
-    city?: string;
-  }
-): Job[] {
-  let filteredJobs = [...jobs];
-
-  if (filters.excludeId) {
-    filteredJobs = filteredJobs.filter(job => job.id !== filters.excludeId);
-  }
-
-  if (filters.searchQuery) {
-    const fuse = new Fuse(filteredJobs, {
-      keys: [
-        'title', 
-        'description', 
-        'categoryName', 
-        'country', 
-        'city', 
-        'companyName', 
-        'experience', 
-        'qualifications'
-      ],
-      includeScore: true,
-      threshold: 0.4,
-    });
-    filteredJobs = fuse.search(filters.searchQuery).map(result => result.item);
-  }
-
-  if (filters.country) {
-    const fuse = new Fuse(filteredJobs, { 
-      keys: ['country'], 
-      includeScore: true, 
-      threshold: 0.3 
-    });
-    filteredJobs = fuse.search(filters.country).map(result => result.item);
-  }
-
-  if (filters.city) {
-    const fuse = new Fuse(filteredJobs, { 
-      keys: ['city'], 
-      includeScore: true, 
-      threshold: 0.3 
-    });
-    filteredJobs = fuse.search(filters.city).map(result => result.item);
-  }
-
-  return filteredJobs;
-}
-
-// Helper function for pagination
-function applyPagination(
-  jobs: Job[], 
-  options: {
-    page: number;
-    pageLimit?: number;
-    count?: number;
-  }
-): Job[] {
-  const { page, pageLimit, count } = options;
-
-  if (pageLimit) {
-    const startIndex = (page - 1) * pageLimit;
-    const endIndex = startIndex + pageLimit;
-    return jobs.slice(startIndex, endIndex);
-  }
-
-  if (count) {
-    return jobs.slice(0, count);
-  }
-
-  return jobs;
 }
 
 export async function getJobsByUserId(userId: string): Promise<Job[]> {
