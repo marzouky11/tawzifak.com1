@@ -1,5 +1,6 @@
 
-import { getJobs } from '@/lib/data';
+
+import { getJobOffers } from '@/lib/data';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +29,7 @@ function generateSitemap(jobs: any[]) {
 
 export async function GET() {
   try {
-    const { data: jobs } = await getJobs({ postType: 'seeking_worker' });
+    const { data: jobs } = await getJobOffers({ count: 9999 });
     const sitemap = generateSitemap(jobs);
 
     return new Response(sitemap, {
