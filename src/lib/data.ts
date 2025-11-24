@@ -74,9 +74,9 @@ function formatTimeAgo(timestamp: any) {
   return 'الآن';
 }
 
-export async function getJobs(
+async function getAds(
+  postType: PostType,
   options: {
-    postType?: PostType;
     count?: number;
     searchQuery?: string;
     country?: string;
@@ -89,30 +89,18 @@ export async function getJobs(
   } = {}
 ): Promise<{ data: Job[]; totalCount: number }> {
   try {
-    const {
-      postType,
-      count,
-      searchQuery,
-      country,
-      city,
-      categoryId,
-      workType,
-      excludeId,
-      page = 1,
-      limit: pageLimit,
-    } = options;
-
+    const { count, searchQuery, excludeId, page = 1, limit: pageLimit } = options;
     const adsRef = collection(db, 'ads');
-    let allJobs: Job[] = [];
-
-    // Step 1: Fetch ALL documents from the 'ads' collection once.
-    // This is inefficient but necessary because of Firestore's query limitations on multiple '!=' or 'OR' conditions.
-    const querySnapshot = await getDocs(query(adsRef, orderBy('createdAt', 'desc')));
     
-    allJobs = querySnapshot.docs.map(doc => {
+    // Server-side filtering
+    const constraints: QueryConstraint[] = [where('postType', '==', postType), orderBy('createdAt', 'desc')];
+    const q = query(adsRef, ...constraints);
+    
+    const querySnapshot = await getDocs(q);
+    
+    let allJobs: Job[] = querySnapshot.docs.map(doc => {
       const data = doc.data();
       const createdAt = data.createdAt.toDate();
-      
       return {
         id: doc.id,
         ...data,
@@ -121,60 +109,46 @@ export async function getJobs(
       } as Job;
     });
 
-    // Step 2: Apply all filtering on the client-side (in this server component).
-    let filteredJobs = allJobs;
-
-    if (postType) {
-        filteredJobs = filteredJobs.filter(job => job.postType === postType);
-    }
-    if (excludeId) {
-        filteredJobs = filteredJobs.filter(job => job.id !== excludeId);
-    }
-    if (categoryId) {
-        filteredJobs = filteredJobs.filter(job => job.categoryId === categoryId);
-    }
-    if (workType) {
-        filteredJobs = filteredJobs.filter(job => job.workType === workType);
-    }
-    
-    // Apply fuzzy search on the already filtered data
+    // Client-side filtering for search and other text-based fields
     if (searchQuery) {
-        const fuse = new Fuse(filteredJobs, {
+        const fuse = new Fuse(allJobs, {
             keys: ['title', 'description', 'categoryName', 'country', 'city', 'companyName'],
             includeScore: true,
             threshold: 0.4,
         });
-        filteredJobs = fuse.search(searchQuery).map(result => result.item);
-    } else {
-       // If no search query, apply text filters for country and city
-        if (country) {
-            filteredJobs = filteredJobs.filter(job => job.country && job.country.toLowerCase().includes(country.toLowerCase()));
-        }
-        if (city) {
-            filteredJobs = filteredJobs.filter(job => job.city && job.city.toLowerCase().includes(city.toLowerCase()));
-        }
+        allJobs = fuse.search(searchQuery).map(result => result.item);
+    }
+    
+    if (excludeId) {
+        allJobs = allJobs.filter(job => job.id !== excludeId);
     }
 
-    const totalCount = filteredJobs.length;
+    const totalCount = allJobs.length;
 
-    // Step 3: Apply pagination or count limit
     let data;
     if (pageLimit) {
-        const startIndex = (page - 1) * pageLimit;
-        const endIndex = startIndex + pageLimit;
-        data = filteredJobs.slice(startIndex, endIndex);
+      const startIndex = (page - 1) * pageLimit;
+      const endIndex = startIndex + pageLimit;
+      data = allJobs.slice(startIndex, endIndex);
     } else if (count) {
-        data = filteredJobs.slice(0, count);
+      data = allJobs.slice(0, count);
     } else {
-        data = filteredJobs;
+      data = allJobs;
     }
-
+    
     return { data, totalCount };
-
   } catch (error) {
-    console.error("Error fetching jobs: ", error);
+    console.error("Error fetching ads: ", error);
     return { data: [], totalCount: 0 };
   }
+}
+
+export async function getJobOffers(options: Parameters<typeof getAds>[1] = {}): Promise<{ data: Job[]; totalCount: number }> {
+    return getAds('seeking_worker', options);
+}
+
+export async function getJobSeekers(options: Parameters<typeof getAds>[1] = {}): Promise<{ data: Job[]; totalCount: number }> {
+    return getAds('seeking_job', options);
 }
 
 export async function getJobsByUserId(userId: string): Promise<Job[]> {

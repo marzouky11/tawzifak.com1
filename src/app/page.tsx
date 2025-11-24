@@ -1,9 +1,10 @@
+
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { JobCard } from '@/components/job-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { getJobs, getTestimonials, getCompetitions, getImmigrationPosts } from '@/lib/data';
+import { getJobOffers, getJobSeekers, getTestimonials, getCompetitions, getImmigrationPosts } from '@/lib/data';
 import React, { Suspense } from 'react';
 import { Newspaper, Briefcase, Users, ArrowLeft, Landmark, Plane } from 'lucide-react';
 import { HomePageFilters } from './home-page-filters';
@@ -168,8 +169,8 @@ async function getHomePageData(isMobile: boolean): Promise<HomePageData> {
     immigrationPostsData,  
     testimonialsData,  
   ] = await Promise.all([  
-    getJobs({ postType: 'seeking_worker', count: counts.jobOffers }),  
-    getJobs({ postType: 'seeking_job', count: counts.jobSeekers }),  
+    getJobOffers({ count: counts.jobOffers }),  
+    getJobSeekers({ count: counts.jobSeekers }),  
     getCompetitions({ count: counts.competitions }),  
     getImmigrationPosts({ count: counts.immigrationPosts }),  
     getTestimonials(),  

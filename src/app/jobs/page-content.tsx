@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
@@ -5,7 +6,7 @@ import { JobCard } from '@/components/job-card';
 import { JobFilters } from '@/components/job-filters';
 import type { Job, WorkType } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
-import { getJobs } from '@/lib/data';
+import { getJobOffers } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 
@@ -29,8 +30,7 @@ export function PageContent() {
     if (pageNum === 1) setLoading(true);
     else setLoadingMore(true);
 
-    const { data: newJobs, totalCount } = await getJobs({
-      postType: 'seeking_worker',
+    const { data: newJobs, totalCount } = await getJobOffers({
       searchQuery: q || undefined,
       country: country || undefined,
       city: city || undefined,

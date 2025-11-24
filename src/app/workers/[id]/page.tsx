@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { notFound } from 'next/navigation';
-import { getJobById, getJobs } from '@/lib/data';
+import { getJobById, getJobSeekers } from '@/lib/data';
 import type { Metadata } from 'next';
 import { MobilePageHeader } from '@/components/layout/mobile-page-header';
 import { User as UserIcon } from 'lucide-react';
@@ -38,9 +39,8 @@ export default async function WorkerDetailPage({ params }: JobDetailPageProps) {
         notFound();
     }
     
-    const { data: similarJobs } = await getJobs({
+    const { data: similarJobs } = await getJobSeekers({
       categoryId: job.categoryId,
-      postType: job.postType,
       count: 3,
       excludeId: job.id,
     });

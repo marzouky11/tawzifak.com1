@@ -26,7 +26,8 @@ import {
 import {
   getJobsByUserId,
   deleteAd,
-  getJobs,
+  getJobOffers,
+  getJobSeekers,
   getCompetitions,
   deleteCompetition,
   getImmigrationPosts,
@@ -206,7 +207,8 @@ export default function MyAdsPage() {
   const { toast } = useToast();
   const { user, userData, loading: authLoading } = useAuth();
 
-  const [allAds, setAllAds] = useState<Job[]>([]);
+  const [jobOffers, setJobOffers] = useState<Job[]>([]);
+  const [jobRequests, setJobRequests] = useState<Job[]>([]);
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [immigrationPosts, setImmigrationPosts] = useState<ImmigrationPost[]>(
     []
@@ -234,17 +236,19 @@ export default function MyAdsPage() {
         setAdsLoading(true);
         try {
           if (userData?.isAdmin) {
-            const [jobs, comps, immigrations] = await Promise.all([
-              getJobs(),
+            const [jobsData, seekersData, comps, immigrations] = await Promise.all([
+              getJobOffers(),
+              getJobSeekers(),
               getCompetitions(),
               getImmigrationPosts(),
             ]);
-            setAllAds(jobs.data);
+            setJobOffers(jobsData.data);
+            setJobRequests(seekersData.data);
             setCompetitions(comps.data);
             setImmigrationPosts(immigrations.data);
           } else {
             const userJobs = await getJobsByUserId(user.uid);
-            setAllAds(userJobs);
+            setJobRequests(userJobs);
           }
         } catch (error) {
           console.error("Failed to fetch ads:", error);
@@ -262,9 +266,8 @@ export default function MyAdsPage() {
     try {
       if (adToDelete.type === "ad") {
         await deleteAd(adToDelete.id);
-        setAllAds((prevAds) =>
-          prevAds.filter((ad) => ad.id !== adToDelete.id)
-        );
+        setJobOffers((prev) => prev.filter((ad) => ad.id !== adToDelete.id));
+        setJobRequests((prev) => prev.filter((ad) => ad.id !== adToDelete.id));
       } else if (adToDelete.type === "competition") {
         await deleteCompetition(adToDelete.id);
         setCompetitions((prevComps) =>
@@ -283,12 +286,6 @@ export default function MyAdsPage() {
       setAdToDelete(null);
     }
   };
-
-  const { jobOffers, jobRequests } = useMemo(() => {
-    const jobOffers = allAds.filter((ad) => ad.postType === "seeking_worker");
-    const jobRequests = allAds.filter((ad) => ad.postType === "seeking_job");
-    return { jobOffers, jobRequests };
-  }, [allAds]);
 
   const handleDeleteTrigger = (
     id: string,
@@ -369,7 +366,7 @@ export default function MyAdsPage() {
           <Card>
             <CardContent className="pt-6">
               <AdGrid
-                ads={allAds}
+                ads={jobRequests}
                 onAdDelete={(id) => handleDeleteTrigger(id, "ad")}
                 showEditButton={true}
               />

@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { notFound } from 'next/navigation';
-import { getJobById, getJobs } from '@/lib/data';
+import { getJobById, getJobOffers } from '@/lib/data';
 import type { Metadata } from 'next';
 import { MobilePageHeader } from '@/components/layout/mobile-page-header';
 import { Briefcase } from 'lucide-react';
@@ -147,9 +148,8 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
         notFound();
     }
 
-    const { data: similarJobs } = await getJobs({
+    const { data: similarJobs } = await getJobOffers({
         categoryId: job.categoryId,
-        postType: 'seeking_worker',
         count: 3,
         excludeId: job.id,
     });
@@ -178,4 +178,3 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
         </>
     );
 }
-

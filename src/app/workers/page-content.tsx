@@ -1,3 +1,4 @@
+
 'use client';
 
 import { JobCard } from '@/components/job-card';
@@ -5,7 +6,7 @@ import { Suspense, useEffect, useState, useCallback } from 'react';
 import { JobFilters } from '@/components/job-filters';
 import type { WorkType, Job } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
-import { getJobs } from '@/lib/data';
+import { getJobSeekers } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 
@@ -30,15 +31,10 @@ export function PageContent() {
   const category = searchParams.get('category');
   const workType = searchParams.get('job');
 
-  const getCacheKey = useCallback(() => {
-    return `${CACHE_KEY_PREFIX}${q || ''}_${country || ''}_${city || ''}_${category || ''}_${workType || ''}`;
-  }, [q, country, city, category, workType]);
-
   const fetchAndSetWorkers = useCallback(async (pageNum: number, reset: boolean) => {
     if(pageNum === 1) setLoading(true); else setLoadingMore(true);
 
-    const { data: newWorkers, totalCount } = await getJobs({
-      postType: 'seeking_job',
+    const { data: newWorkers, totalCount } = await getJobSeekers({
       searchQuery: q || undefined,
       country: country || undefined,
       city: city || undefined,
@@ -48,41 +44,18 @@ export function PageContent() {
       limit: ITEMS_PER_PAGE,
     });
     
-    setWorkers(prev => {
-        const updatedWorkers = reset ? newWorkers : [...prev, ...newWorkers];
-        try {
-            sessionStorage.setItem(getCacheKey(), JSON.stringify({
-                items: updatedWorkers,
-                page: pageNum,
-                hasMore: (pageNum * ITEMS_PER_PAGE) < totalCount
-            }));
-        } catch (e) { console.error("Failed to save to sessionStorage", e); }
-        return updatedWorkers;
-    });
+    setWorkers(prev => (reset ? newWorkers : [...prev, ...newWorkers]));
     setHasMore((pageNum * ITEMS_PER_PAGE) < totalCount);
 
     if(pageNum === 1) setLoading(false); else setLoadingMore(false);
-  }, [q, country, city, category, workType, getCacheKey]);
+  }, [q, country, city, category, workType]);
 
   useEffect(() => {
-    const cacheKey = getCacheKey();
-    try {
-        const cachedData = sessionStorage.getItem(cacheKey);
-        if (cachedData) {
-            const { items, page: cachedPage, hasMore: cachedHasMore } = JSON.parse(cachedData);
-            setWorkers(items);
-            setPage(cachedPage);
-            setHasMore(cachedHasMore);
-            setLoading(false);
-            return;
-        }
-    } catch (e) { console.error("Failed to read from sessionStorage", e); }
-    
     setWorkers([]);
     setPage(1);
     setHasMore(true);
     fetchAndSetWorkers(1, true);
-  }, [q, country, city, category, workType, fetchAndSetWorkers, getCacheKey]);
+  }, [q, country, city, category, workType, fetchAndSetWorkers]);
 
   const loadMore = () => {
     const nextPage = page + 1;
