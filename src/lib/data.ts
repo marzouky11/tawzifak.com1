@@ -1,4 +1,5 @@
 
+
 import { db, auth } from '@/lib/firebase';
 import { collection, getDocs, getDoc, doc, query, where, orderBy, limit, addDoc, serverTimestamp, updateDoc, deleteDoc, setDoc, Query, and, QueryConstraint, QueryFilterConstraint, documentId, increment } from 'firebase/firestore';
 import type { Job, Category, PostType, User, WorkType, Testimonial, Competition, Organizer, Article, Report, ContactMessage, ImmigrationPost } from './types';
@@ -74,8 +75,7 @@ function formatTimeAgo(timestamp: any) {
   return 'الآن';
 }
 
-async function getAds(
-  postType: PostType,
+async function getJobOffers(
   options: {
     count?: number;
     searchQuery?: string;
@@ -92,8 +92,7 @@ async function getAds(
     const { count, searchQuery, excludeId, page = 1, limit: pageLimit } = options;
     const adsRef = collection(db, 'ads');
     
-    // Server-side filtering
-    const constraints: QueryConstraint[] = [where('postType', '==', postType), orderBy('createdAt', 'desc')];
+    const constraints: QueryConstraint[] = [where('postType', '==', 'seeking_worker'), orderBy('createdAt', 'desc')];
     const q = query(adsRef, ...constraints);
     
     const querySnapshot = await getDocs(q);
@@ -109,7 +108,6 @@ async function getAds(
       } as Job;
     });
 
-    // Client-side filtering for search and other text-based fields
     if (searchQuery) {
         const fuse = new Fuse(allJobs, {
             keys: ['title', 'description', 'categoryName', 'country', 'city', 'companyName'],
@@ -138,17 +136,75 @@ async function getAds(
     
     return { data, totalCount };
   } catch (error) {
-    console.error("Error fetching ads: ", error);
+    console.error("Error fetching job offers: ", error);
     return { data: [], totalCount: 0 };
   }
 }
 
-export async function getJobOffers(options: Parameters<typeof getAds>[1] = {}): Promise<{ data: Job[]; totalCount: number }> {
-    return getAds('seeking_worker', options);
-}
+async function getJobSeekers(
+  options: {
+    count?: number;
+    searchQuery?: string;
+    country?: string;
+    city?: string;
+    categoryId?: string;
+    workType?: WorkType;
+    excludeId?: string;
+    page?: number;
+    limit?: number;
+  } = {}
+): Promise<{ data: Job[]; totalCount: number }> {
+  try {
+    const { count, searchQuery, excludeId, page = 1, limit: pageLimit } = options;
+    const adsRef = collection(db, 'ads');
+    
+    const constraints: QueryConstraint[] = [where('postType', '==', 'seeking_job'), orderBy('createdAt', 'desc')];
+    const q = query(adsRef, ...constraints);
+    
+    const querySnapshot = await getDocs(q);
+    
+    let allJobs: Job[] = querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      const createdAt = data.createdAt.toDate();
+      return {
+        id: doc.id,
+        ...data,
+        postedAt: formatTimeAgo(data.createdAt),
+        isNew: (new Date().getTime() - createdAt.getTime()) < 24 * 60 * 60 * 1000,
+      } as Job;
+    });
 
-export async function getJobSeekers(options: Parameters<typeof getAds>[1] = {}): Promise<{ data: Job[]; totalCount: number }> {
-    return getAds('seeking_job', options);
+    if (searchQuery) {
+        const fuse = new Fuse(allJobs, {
+            keys: ['title', 'description', 'categoryName', 'country', 'city'],
+            includeScore: true,
+            threshold: 0.4,
+        });
+        allJobs = fuse.search(searchQuery).map(result => result.item);
+    }
+    
+    if (excludeId) {
+        allJobs = allJobs.filter(job => job.id !== excludeId);
+    }
+
+    const totalCount = allJobs.length;
+
+    let data;
+    if (pageLimit) {
+      const startIndex = (page - 1) * pageLimit;
+      const endIndex = startIndex + pageLimit;
+      data = allJobs.slice(startIndex, endIndex);
+    } else if (count) {
+      data = allJobs.slice(0, count);
+    } else {
+      data = allJobs;
+    }
+    
+    return { data, totalCount };
+  } catch (error) {
+    console.error("Error fetching job seekers: ", error);
+    return { data: [], totalCount: 0 };
+  }
 }
 
 export async function getJobsByUserId(userId: string): Promise<Job[]> {
@@ -986,3 +1042,8 @@ export async function getContactMessages(): Promise<ContactMessage[]> {
 export async function deleteContactMessage(messageId: string): Promise<void> {
   await deleteDoc(doc(db, 'contacts', messageId));
 }
+
+
+// Duplicated functions for new page content structure
+// These will replace the older getAds function eventually.
+export { getJobOffers, getJobSeekers };
