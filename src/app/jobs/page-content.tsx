@@ -9,6 +9,7 @@ import { useSearchParams } from 'next/navigation';
 import { getJobOffers } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import {DocumentSnapshot} from 'firebase/firestore';
 
 const ITEMS_PER_PAGE = 16;
 
@@ -19,8 +20,8 @@ export function PageContent() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
-  const [lastDocSnapshot,setLastDocSnapShot] = useState<DocumentSnapshot|undefined>(undefined)
-  
+  const [lastDocSnapshot,setLastDocSnapShot] = useState<DocumentSnapshot>()
+
   const q = searchParams.get('q');
   const country = searchParams.get('country');
   const city = searchParams.get('city');
@@ -114,5 +115,4 @@ export function PageContent() {
       </div>
     </>
   );
-      }
-    
+            }
