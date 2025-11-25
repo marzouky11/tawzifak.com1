@@ -183,7 +183,8 @@ async function getHomePageData(isMobile: boolean): Promise<HomePageData> {
     immigrationPosts: immigrationPostsData.data,  
     testimonials: testimonialsData.slice(0, counts.testimonials),  
     stats: {  
-      jobs: jobOffersData.totalCount,  
+    jobs: jobOffersData.data.length,  
+
       competitions: competitionsData.totalCount,  
       immigration: immigrationPostsData.totalCount,  
       seekers: jobSeekersData.totalCount,  
