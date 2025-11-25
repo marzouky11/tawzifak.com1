@@ -39,7 +39,7 @@ export function PageContent() {
       workType: (workType as WorkType) || undefined,
       page: pageNum,
       pageLimit: ITEMS_PER_PAGE,
-      lastVisible:lastDocSnapshot
+      lastVisible: lastDocSnapshot ?? undefined
     });
     setLastDocSnapShot(lastVisible)
 
