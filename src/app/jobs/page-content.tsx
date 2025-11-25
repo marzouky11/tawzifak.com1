@@ -19,8 +19,8 @@ export function PageContent() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
-  const [lastDocSnapshot,setLastDocSnapShot] = useState(null)
-
+  const [lastDocSnapshot,setLastDocSnapShot] = useState<DocumentSnapshot|undefined>(undefined)
+  
   const q = searchParams.get('q');
   const country = searchParams.get('country');
   const city = searchParams.get('city');
@@ -39,7 +39,7 @@ export function PageContent() {
       workType: (workType as WorkType) || undefined,
       page: pageNum,
       pageLimit: ITEMS_PER_PAGE,
-      lastVisible: lastDocSnapshot ?? undefined
+      lastVisible:lastDocSnapshot
     });
     setLastDocSnapShot(lastVisible)
 
@@ -114,4 +114,5 @@ export function PageContent() {
       </div>
     </>
   );
-}
+      }
+    
