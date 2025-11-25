@@ -43,8 +43,6 @@ export function PageContent() {
       lastVisible:lastDocSnapshot
     });
     setLastDocSnapShot(lastVisible)
-
-
     setJobs(prev => (reset ? newJobs : [...prev, ...newJobs]));
     setHasMore(lastVisible == null);
 
@@ -115,5 +113,5 @@ export function PageContent() {
       </div>
     </>
   );
-            }
-                
+      }
+    
