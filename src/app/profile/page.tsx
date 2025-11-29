@@ -100,8 +100,8 @@ function LoggedInView({ userData, onLogout }: { userData: any, onLogout: () => v
                 <CardContent className="p-0">
                     <ul className="divide-y divide-border">
                         <SettingItem icon={User} label="تعديل الملف الشخصي" href="/profile/edit" />
-                        <SettingItem icon={PlusCircle} label="نشر إعلان جديد" href="/post-job/select-type" />
                         <SettingItem icon={Bookmark} label="الإعلانات المحفوظة" href="/profile/saved-ads" />
+                        <SettingItem icon={PlusCircle} label="نشر إعلان جديد" href="/post-job/select-type" />
                         {!userData?.isAdmin && <SettingItem icon={FileText} label="إعلاناتي" href="/profile/my-ads" />}
                         <SettingItem icon={MessageSquare} label="أضف رأيك" href="/add-testimonial" />
                         <li className="flex items-center justify-between p-4">
