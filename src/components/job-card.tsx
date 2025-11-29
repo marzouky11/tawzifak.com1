@@ -1,4 +1,3 @@
-
 'use client'
 
 import Link from 'next/link';
@@ -88,9 +87,17 @@ export function JobCard({ job }: JobCardProps) {
               </div>
           </CardHeader>
           <Separator/>
-          <CardContent className="p-4 pt-3 flex-grow grid grid-cols-2 gap-2">
-             <InfoBadge icon={MapPin} text={`${job.country}, ${job.city}`} className="bg-gray-100 dark:bg-gray-800/80 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700"/>
-             {categoryName && <InfoBadge icon={LayoutGrid} text={categoryName} className="bg-gray-100 dark:bg-gray-800/80 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700"/>}
+          <CardContent className="p-4 pt-3 flex-grow grid grid-cols-1 gap-2">
+            <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+              <MapPin className="h-4 w-4" />
+              <span className="truncate">{`${job.country}, ${job.city}`}</span>
+            </div>
+            {categoryName && (
+              <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+                <LayoutGrid className="h-4 w-4" />
+                <span className="truncate">{categoryName}</span>
+              </div>
+            )}
           </CardContent>
           <CardFooter className="p-3 pt-0 mt-auto flex items-center justify-between">
                <span className="text-xs text-muted-foreground">{job.postedAt}</span>
