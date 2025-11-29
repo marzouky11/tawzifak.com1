@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { 
     Loader2, Plane, FileText, Globe, MapPin, Users, Calendar, Award, Wallet, Link as LinkIcon, 
     GraduationCap, ClipboardList, Info, Briefcase, Mail, MessageSquare, Instagram,
-    Phone, HelpCircle, Target, CheckSquare, LayoutGrid,
+    Phone, HelpCircle, Target, CheckSquare, LayoutGrid, X
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { ImmigrationPost, ImmigrationProgramType } from '@/lib/types';
@@ -28,7 +28,8 @@ const formSchema = z.object({
   title: z.string().min(5, 'العنوان يجب أن يكون 5 أحرف على الأقل.'),
   targetCountry: z.string().min(2, 'الدولة المستهدفة مطلوبة.'),
   city: z.string().optional(),
-  programType: z.enum(programTypeValues, { required_error: "نوع البرنامج مطلوب." }),
+  programType: z.enum(programTypeValues).optional(),
+  customProgramType: z.string().optional(),
   
   salary: z.string().optional(),
   targetAudience: z.string().min(2, "الفئة المستهدفة مطلوبة."),
@@ -50,6 +51,9 @@ const formSchema = z.object({
 }).refine(data => !!data.phone || !!data.whatsapp || !!data.email || !!data.instagram || !!data.applyUrl, {
   message: 'يجب توفير وسيلة تواصل واحدة على الأقل أو رابط للتقديم.',
   path: ['phone'],
+}).refine(data => data.programType || data.customProgramType, {
+    message: "يجب اختيار نوع البرنامج أو إدخال نوع مخصص.",
+    path: ["programType"],
 });
 
 
@@ -72,13 +76,16 @@ export function EditImmigrationForm({ post }: EditImmigrationFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const isCustomProgramType = !programTypes.some(p => p.value === post?.programType);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: post?.title || '',
       targetCountry: post?.targetCountry || '',
       city: post?.city || '',
-      programType: post?.programType || undefined,
+      programType: isCustomProgramType ? undefined : (post?.programType as ImmigrationProgramType),
+      customProgramType: isCustomProgramType ? post?.programType : '',
       targetAudience: post?.targetAudience || '',
       deadline: post?.deadline || '',
       description: post?.description || '',
@@ -98,15 +105,25 @@ export function EditImmigrationForm({ post }: EditImmigrationFormProps) {
     },
   });
 
+  const programType = form.watch('programType');
+  const customProgramType = form.watch('customProgramType');
+
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     try {
+      const { customProgramType, ...restOfValues } = values;
+
       const dataToSave: Partial<ImmigrationPost> = { 
-        ...values, 
+        ...restOfValues, 
         slug: slugify(values.title),
-        programType: values.programType as ImmigrationProgramType,
       };
+
+      if (customProgramType) {
+          dataToSave.programType = customProgramType;
+      } else {
+          dataToSave.programType = values.programType as ImmigrationProgramType;
+      }
 
       await updateImmigrationPost(post.id, dataToSave);
       toast({ title: "تم تحديث الإعلان بنجاح!" });
@@ -128,12 +145,41 @@ export function EditImmigrationForm({ post }: EditImmigrationFormProps) {
             <FormField control={form.control} name="targetCountry" render={({ field }) => (<FormItem><FormLabelIcon icon={Globe} label="الدولة المستهدفة" /><FormControl><Input placeholder="مثال: كندا" {...field} /></FormControl><FormMessage /></FormItem>)} />
             <FormField control={form.control} name="city" render={({ field }) => (<FormItem><FormLabelIcon icon={MapPin} label="المدينة (اختياري)" /><FormControl><Input placeholder="مثال: مونتريال" {...field} /></FormControl><FormMessage /></FormItem>)} />
         </div>
-        <FormField control={form.control} name="programType" render={({ field }) => (<FormItem><FormLabelIcon icon={LayoutGrid} label="نوع البرنامج" /><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="اختر نوع البرنامج" /></SelectTrigger></FormControl><SelectContent>{programTypes.map(p => (<SelectItem key={p.value} value={p.value}><div className="flex items-center gap-2"><CategoryIcon name={p.icon} className="w-5 h-5" style={{ color: p.color }} /> {p.label}</div></SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
+        
+        <div className="space-y-4">
+            <div className="flex justify-between items-center">
+                <FormLabelIcon icon={LayoutGrid} label="نوع البرنامج" />
+                {(programType || customProgramType) && (
+                    <Button type="button" variant="ghost" size="sm" className="h-auto p-1 text-xs text-destructive hover:bg-destructive/10" onClick={() => { form.setValue('programType', undefined); form.setValue('customProgramType', ''); }}>
+                        <X className="ml-1 h-3 w-3" />
+                        مسح
+                    </Button>
+                )}
+            </div>
+            <p className="text-sm text-muted-foreground -mt-2">اختر من القائمة أو أدخل نوعًا مخصصًا. لا يمكن اختيار الاثنين معاً.</p>
+            <FormField control={form.control} name="programType" render={({ field }) => (
+                <FormItem>
+                    <Select onValueChange={(value) => { field.onChange(value); if (value) form.setValue('customProgramType', ''); }} value={field.value} disabled={!!customProgramType}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="اختر نوع البرنامج" /></SelectTrigger></FormControl>
+                        <SelectContent>{programTypes.map(p => (<SelectItem key={p.value} value={p.value}><div className="flex items-center gap-2"><CategoryIcon name={p.icon} className="w-5 h-5" style={{ color: p.color }} /> {p.label}</div></SelectItem>))}</SelectContent>
+                    </Select>
+                    <FormMessage />
+                </FormItem>
+            )} />
+            <div className="relative flex items-center"><div className="flex-grow border-t border-border"></div><span className="flex-shrink mx-4 text-xs text-muted-foreground">أو</span><div className="flex-grow border-t border-border"></div></div>
+            <FormField control={form.control} name="customProgramType" render={({ field }) => (
+                <FormItem>
+                    <FormControl><Input placeholder="أدخل نوع برنامج مخصص" {...field} onChange={(e) => { field.onChange(e); if (e.target.value) form.setValue('programType', undefined); }} disabled={!!programType} /></FormControl>
+                    <FormMessage />
+                </FormItem>
+            )} />
+        </div>
+        
         <FormField control={form.control} name="salary" render={({ field }) => (<FormItem><FormLabelIcon icon={Wallet} label="الأجر (اختياري)" /><FormControl><Input placeholder="مثال: 3000 دولار شهريا" {...field} /></FormControl><FormMessage /></FormItem>)} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField control={form.control} name="targetAudience" render={({ field }) => (<FormItem><FormLabelIcon icon={Users} label="الفئة المستهدفة" /><FormControl><Input placeholder="طلاب، عمال، مهنيين..." {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="deadline" render={({ field }) => (<FormItem><FormLabelIcon icon={Calendar} label="آخر أجل للتقديم (اختياري)" /><FormControl><Input placeholder="YYYY-MM-DD" {...field} /></FormControl><FormMessage /></FormItem>)} />
-            </div>
+        </div>
     </div>
   );
 
