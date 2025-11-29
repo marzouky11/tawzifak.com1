@@ -76,12 +76,10 @@ export function ImmigrationCard({ post }: ImmigrationCardProps) {
       
       <Separator />
 
-      <CardContent className="p-4 pt-3 flex-grow">
-        <div className="flex flex-wrap gap-2">
-          <InfoBadge icon={MapPin} text={`${post.targetCountry}${post.city ? ', ' + post.city : ''}`} className="bg-sky-100/60 dark:bg-sky-900/40 text-sky-700/80 dark:text-sky-300/80 border-sky-200/50 dark:border-sky-800/50"/>
-          {post.positionsAvailable && <InfoBadge icon={Users} text={`${post.positionsAvailable} منصب`} className="bg-orange-100/60 dark:bg-orange-900/40 text-orange-800/80 dark:text-orange-200/80 border-orange-200/50 dark:border-orange-800/50" />}
-          {post.salary && <InfoBadge icon={Wallet} text={post.salary} className="bg-green-100/60 dark:bg-green-900/40 text-green-800/80 dark:text-green-200/80 border-green-200/50 dark:border-green-800/50" />}
-        </div>
+      <CardContent className="p-4 pt-3 flex-grow grid grid-cols-2 gap-2">
+        <InfoBadge icon={MapPin} text={`${post.targetCountry}${post.city ? ', ' + post.city : ''}`} className="bg-sky-100/60 dark:bg-sky-900/40 text-sky-700/80 dark:text-sky-300/80 border-sky-200/50 dark:border-sky-800/50"/>
+        {post.positionsAvailable && <InfoBadge icon={Users} text={`${post.positionsAvailable} منصب`} className="bg-orange-100/60 dark:bg-orange-900/40 text-orange-800/80 dark:text-orange-200/80 border-orange-200/50 dark:border-orange-800/50" />}
+        {post.salary && <InfoBadge icon={Wallet} text={post.salary} className="bg-green-100/60 dark:bg-green-900/40 text-green-800/80 dark:text-green-200/80 border-green-200/50 dark:border-green-800/50" />}
       </CardContent>
 
       <CardFooter className="p-4 pt-0 mt-auto bg-card flex items-center justify-between">

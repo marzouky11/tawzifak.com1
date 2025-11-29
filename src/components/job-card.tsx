@@ -91,7 +91,7 @@ export function JobCard({ job }: JobCardProps) {
           </CardHeader>
           <Separator/>
           <CardContent className="p-4 pt-3 flex-grow space-y-3">
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+              <div className="flex flex-col gap-2 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-primary/70" />
                       <span className="truncate">{job.country}, {job.city}</span>
@@ -142,21 +142,19 @@ export function JobCard({ job }: JobCardProps) {
       
       <Separator />
 
-      <CardContent className="p-4 flex-grow flex flex-wrap items-start gap-2">
-          <>
-            <InfoBadge
-                icon={MapPin}
-                text={`${job.country}, ${job.city}`}
-                className="bg-blue-100/60 dark:bg-blue-900/40 text-blue-800/80 dark:text-blue-200/80 border-blue-200/50 dark:border-blue-800/50"
-            />
-            {salaryText && (
-                <InfoBadge 
-                    icon={Wallet} 
-                    text={salaryText} 
-                    className="bg-green-100/60 dark:bg-green-900/40 text-green-800/80 dark:text-green-200/80 border-green-200/50 dark:border-green-800/50"
-                />
-            )}
-          </>
+      <CardContent className="p-4 flex-grow grid grid-cols-2 gap-2">
+          <InfoBadge
+              icon={MapPin}
+              text={`${job.country}, ${job.city}`}
+              className="bg-blue-100/60 dark:bg-blue-900/40 text-blue-800/80 dark:text-blue-200/80 border-blue-200/50 dark:border-blue-800/50"
+          />
+          {salaryText && (
+              <InfoBadge 
+                  icon={Wallet} 
+                  text={salaryText} 
+                  className="bg-green-100/60 dark:bg-green-900/40 text-green-800/80 dark:text-green-200/80 border-green-200/50 dark:border-green-800/50"
+              />
+          )}
       </CardContent>
 
       <CardFooter className="p-4 pt-0 mt-auto flex items-center justify-between">

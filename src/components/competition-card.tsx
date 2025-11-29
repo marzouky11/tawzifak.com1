@@ -79,7 +79,7 @@ export function CompetitionCard({ competition }: CompetitionCardProps) {
       
       <Separator />
 
-      <CardContent className="p-4 flex-grow flex flex-wrap items-start gap-2">
+      <CardContent className="p-4 flex-grow grid grid-cols-2 gap-2">
         {competition.location && (
             <InfoBadge
                 icon={MapPin}
