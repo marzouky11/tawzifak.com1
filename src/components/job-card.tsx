@@ -23,7 +23,7 @@ const InfoBadge = ({ icon, text, className }: { icon?: React.ElementType, text: 
   if (!text) return null;
   const Icon = icon;
   return (
-    <Badge variant="secondary" className={cn("flex items-center gap-1.5 font-normal text-xs py-1 max-w-full", className)}>
+    <Badge variant="secondary" className={cn("inline-flex items-center gap-1.5 font-normal text-xs py-1 px-2 max-w-full", className)}>
       {Icon && <Icon className="h-3.5 w-3.5 flex-shrink-0" />}
       <span className="truncate font-medium">{text}</span>
     </Badge>
@@ -140,7 +140,7 @@ export function JobCard({ job }: JobCardProps) {
       
       <Separator />
 
-      <CardContent className="p-4 flex-grow grid grid-cols-2 gap-2">
+      <CardContent className="p-4 flex-grow flex flex-wrap gap-2">
           <InfoBadge
               icon={MapPin}
               text={`${job.country}, ${job.city}`}

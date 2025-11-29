@@ -21,7 +21,7 @@ const InfoBadge = ({ icon, text, variant, className, textColor }: { icon?: React
   if (!text) return null;
   const Icon = icon;
   return (
-    <Badge variant={variant} className={cn("flex items-center gap-1.5 font-normal text-xs py-1 max-w-full", className)}>
+    <Badge variant={variant} className={cn("inline-flex items-center gap-1.5 font-normal text-xs py-1 px-2 max-w-full", className)}>
       {Icon && <Icon className="h-3.5 w-3.5 flex-shrink-0" />}
       <span className={cn("truncate font-medium", textColor)}>{text}</span>
     </Badge>
@@ -79,7 +79,7 @@ export function CompetitionCard({ competition }: CompetitionCardProps) {
       
       <Separator />
 
-      <CardContent className="p-4 flex-grow grid grid-cols-2 gap-2">
+      <CardContent className="p-4 flex-grow flex flex-wrap gap-2">
         {competition.location && (
             <InfoBadge
                 icon={MapPin}

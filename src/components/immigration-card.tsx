@@ -22,7 +22,7 @@ const InfoBadge = ({ icon, text, className }: { icon?: React.ElementType; text: 
   return (
     <Badge
       variant="secondary"
-      className={cn("flex items-center gap-1.5 font-normal text-xs py-1 max-w-full", className)}
+      className={cn("inline-flex items-center gap-1.5 font-normal text-xs py-1 px-2 max-w-full", className)}
     >
       {Icon && <Icon className="h-3.5 w-3.5 flex-shrink-0" />}
       <span className="truncate font-medium">{text}</span>
@@ -76,7 +76,7 @@ export function ImmigrationCard({ post }: ImmigrationCardProps) {
       
       <Separator />
 
-      <CardContent className="p-4 pt-3 flex-grow grid grid-cols-2 gap-2">
+      <CardContent className="p-4 pt-3 flex-grow flex flex-wrap gap-2">
         <InfoBadge icon={MapPin} text={`${post.targetCountry}${post.city ? ', ' + post.city : ''}`} className="bg-sky-100/60 dark:bg-sky-900/40 text-sky-700/80 dark:text-sky-300/80 border-sky-200/50 dark:border-sky-800/50"/>
         {post.positionsAvailable && <InfoBadge icon={Users} text={`${post.positionsAvailable} منصب`} className="bg-orange-100/60 dark:bg-orange-900/40 text-orange-800/80 dark:text-orange-200/80 border-orange-200/50 dark:border-orange-800/50" />}
         {post.salary && <InfoBadge icon={Wallet} text={post.salary} className="bg-green-100/60 dark:bg-green-900/40 text-green-800/80 dark:text-green-200/80 border-green-200/50 dark:border-green-800/50" />}
