@@ -13,7 +13,7 @@ import { postCompetition } from '@/lib/data';
 import { useRouter } from 'next/navigation';
 import { 
     Loader2, Calendar as CalendarIcon, FileText, FileSignature, Info, Check, 
-    ArrowLeft, ArrowRight, Building, Target, ListOrdered, FileUp, LogIn, Users2, MapPin, Briefcase, Award, Mail, HelpCircle
+    ArrowLeft, ArrowRight, Building, Target, ListOrdered, FileUp, LogIn, Users2, MapPin, Briefcase, Award, Mail, HelpCircle, X
 } from 'lucide-react';
 import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -26,7 +26,8 @@ import { getOrganizers } from '@/lib/data';
 
 const formSchema = z.object({
   title: z.string().min(5, 'العنوان يجب أن يكون 5 أحرف على الأقل.'),
-  organizer: z.string().min(2, 'الجهة المنظمة مطلوبة.'),
+  organizer: z.string().optional(),
+  customOrganizer: z.string().optional(),
   positionsAvailable: z.union([z.string(), z.number()]).optional().nullable(),
   competitionType: z.string().optional(),
   location: z.string().optional(),
@@ -47,10 +48,13 @@ const formSchema = z.object({
   officialLink: z.string().url('الرابط الرسمي يجب أن يكون رابطًا صحيحًا.'),
   fileUrl: z.string().url('رابط الملف يجب أن يكون رابطًا صحيحًا.').optional().or(z.literal('')),
   email: z.string().email({ message: "الرجاء إدخال بريد إلكتروني صحيح." }).optional().or(z.literal('')),
+}).refine(data => data.organizer || data.customOrganizer, {
+    message: "يجب اختيار الجهة المنظمة أو إدخال جهة مخصصة.",
+    path: ["organizer"],
 });
 
 const stepFields: FieldPath<z.infer<typeof formSchema>>[][] = [
-  ['title', 'organizer', 'positionsAvailable', 'competitionType', 'location'],
+  ['title', 'organizer', 'customOrganizer', 'positionsAvailable', 'competitionType', 'location'],
   ['description', 'availablePositions', 'requirements', 'competitionStages', 'documentsNeeded', 'trainingFeatures', 'jobProspects', 'howToApply'],
   ['registrationStartDate', 'deadline', 'competitionDate', 'officialLink', 'fileUrl', 'email'],
 ];
@@ -130,6 +134,7 @@ export function PostCompetitionForm() {
     defaultValues: {
       title: '',
       organizer: '',
+      customOrganizer: '',
       competitionType: '',
       positionsAvailable: '',
       requirements: '',
@@ -149,6 +154,9 @@ export function PostCompetitionForm() {
       howToApply: '',
     },
   });
+  
+  const organizer = form.watch('organizer');
+  const customOrganizer = form.watch('customOrganizer');
 
   const nextStep = async () => {
     const fields = stepFields[currentStep];
@@ -183,10 +191,16 @@ export function PostCompetitionForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     try {
-      const dataToSave = { 
-        ...values,
+      const { customOrganizer, ...restOfValues } = values;
+
+      const dataToSave: { [key: string]: any } = { 
+        ...restOfValues,
         positionsAvailable: values.positionsAvailable === undefined || values.positionsAvailable === '' ? null : values.positionsAvailable,
       };
+
+      if (customOrganizer) {
+          dataToSave.organizer = customOrganizer;
+      }
 
       const { id } = await postCompetition(dataToSave);
       toast({
@@ -211,7 +225,36 @@ export function PostCompetitionForm() {
   const stepsContent = [
     <div className="space-y-6" key="step1">
       <FormField control={form.control} name="title" render={({ field }) => (<FormItem><FormLabelIcon icon={FileText} label="عنوان المباراة" /><FormControl><Input placeholder="اسم المباراة أو الإعلان الرسمي" {...field} /></FormControl><FormMessage /></FormItem>)} />
-      <FormField control={form.control} name="organizer" render={({ field }) => (<FormItem><FormLabelIcon icon={Building} label="الجهة المنظمة" /><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="اختر الجهة المنظمة من القائمة" /></SelectTrigger></FormControl><SelectContent><ScrollArea className="h-[250px]">{organizers.map(org => (<SelectItem key={org.name} value={org.name}><div className="flex items-center gap-2"><CategoryIcon name={org.icon} className="w-5 h-5" style={{color: org.color}} /> {org.name}</div></SelectItem>))}</ScrollArea></SelectContent></Select><FormMessage /></FormItem>)} />
+      
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+            <FormLabelIcon icon={Building} label="الجهة المنظمة" />
+            {(organizer || customOrganizer) && (
+                <Button type="button" variant="ghost" size="sm" className="h-auto p-1 text-xs text-destructive hover:bg-destructive/10" onClick={() => { form.setValue('organizer', ''); form.setValue('customOrganizer', ''); }}>
+                    <X className="ml-1 h-3 w-3" />
+                    مسح
+                </Button>
+            )}
+        </div>
+        <p className="text-sm text-muted-foreground -mt-2">اختر من القائمة أو أدخل جهة مخصصة. لا يمكن اختيار الاثنين معاً.</p>
+        <FormField control={form.control} name="organizer" render={({ field }) => (
+            <FormItem>
+                <Select onValueChange={(value) => { field.onChange(value); if (value) form.setValue('customOrganizer', ''); }} value={field.value} disabled={!!customOrganizer}>
+                    <FormControl><SelectTrigger><SelectValue placeholder="اختر الجهة المنظمة من القائمة" /></SelectTrigger></FormControl>
+                    <SelectContent><ScrollArea className="h-[250px]">{organizers.map(org => (<SelectItem key={org.name} value={org.name}><div className="flex items-center gap-2"><CategoryIcon name={org.icon} className="h-5 w-5" style={{ color: org.color }} /> {org.name}</div></SelectItem>))}</ScrollArea></SelectContent>
+                </Select>
+                <FormMessage />
+            </FormItem>
+        )} />
+        <div className="relative flex items-center"><div className="flex-grow border-t border-border"></div><span className="flex-shrink mx-4 text-xs text-muted-foreground">أو</span><div className="flex-grow border-t border-border"></div></div>
+        <FormField control={form.control} name="customOrganizer" render={({ field }) => (
+            <FormItem>
+                <FormControl><Input placeholder="أدخل جهة منظمة مخصصة" {...field} onChange={(e) => { field.onChange(e); if (e.target.value) form.setValue('organizer', ''); }} disabled={!!organizer} /></FormControl>
+                <FormMessage />
+            </FormItem>
+        )} />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <FormField control={form.control} name="positionsAvailable" render={({ field }) => (<FormItem><FormLabelIcon icon={Users2} label="عدد المناصب (اختياري)" /><FormControl><Input
             type="text"
@@ -281,3 +324,4 @@ export function PostCompetitionForm() {
     </Form>
   );
                                }
+    

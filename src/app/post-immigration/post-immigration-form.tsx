@@ -15,7 +15,7 @@ import { useRouter } from 'next/navigation';
 import { 
     Loader2, Plane, FileText, Globe, MapPin, Users, Calendar, Award, Wallet, Link as LinkIcon, 
     GraduationCap, ClipboardList, Info, Briefcase, Check, ArrowRight, ArrowLeft, Mail, MessageSquare, Instagram,
-    Phone, HelpCircle, Target, CheckSquare, LayoutGrid,
+    Phone, HelpCircle, Target, CheckSquare, LayoutGrid, X
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { slugify, cn, getProgramTypeDetails, programTypes } from '@/lib/utils';
@@ -32,7 +32,8 @@ const formSchema = z.object({
   targetCountry: z.string().min(2, 'الدولة المستهدفة مطلوبة.'),
   city: z.string().optional(),
   positionsAvailable: z.string().optional(),
-  programType: z.enum(programTypeValues, { required_error: "نوع البرنامج مطلوب." }),
+  programType: z.enum(programTypeValues).optional(),
+  customProgramType: z.string().optional(),
   
   salary: z.string().optional(),
   targetAudience: z.string().min(2, "الفئة المستهدفة مطلوبة."),
@@ -54,11 +55,14 @@ const formSchema = z.object({
 }).refine(data => !!data.phone || !!data.whatsapp || !!data.email || !!data.instagram || !!data.applyUrl, {
   message: 'يجب توفير وسيلة تواصل واحدة على الأقل أو رابط للتقديم.',
   path: ['phone'],
+}).refine(data => data.programType || data.customProgramType, {
+    message: "يجب اختيار نوع البرنامج أو إدخال نوع مخصص.",
+    path: ["programType"],
 });
 
 
 const stepFields: FieldPath<z.infer<typeof formSchema>>[][] = [
-  ['title', 'programType', 'targetCountry', 'city', 'targetAudience', 'positionsAvailable', 'salary', 'deadline'],
+  ['title', 'programType', 'customProgramType', 'targetCountry', 'city', 'targetAudience', 'positionsAvailable', 'salary', 'deadline'],
   ['description', 'availablePositions', 'requirements', 'qualifications', 'experience', 'tasks', 'featuresAndOpportunities', 'howToApply'],
   ['applyUrl', 'phone', 'whatsapp', 'email', 'instagram'],
 ];
@@ -119,6 +123,7 @@ export function PostImmigrationForm() {
       city: '',
       positionsAvailable: '',
       programType: undefined,
+      customProgramType: '',
       targetAudience: '',
       deadline: '',
       description: '',
@@ -137,6 +142,9 @@ export function PostImmigrationForm() {
       instagram: '',
     },
   });
+
+  const programType = form.watch('programType');
+  const customProgramType = form.watch('customProgramType');
 
   const nextStep = async () => {
     const fields = stepFields[currentStep];
@@ -170,11 +178,15 @@ export function PostImmigrationForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     try {
-      const dataToSave = { 
-        ...values,
-        programType: values.programType as ImmigrationProgramType,
-        slug: slugify(values.title)
-      };
+      const { customProgramType, ...restOfValues } = values;
+
+      const dataToSave: { [key: string]: any } = { ...restOfValues, slug: slugify(values.title) };
+
+      if (customProgramType) {
+          dataToSave.programType = customProgramType;
+      } else {
+          dataToSave.programType = values.programType as ImmigrationProgramType;
+      }
 
       const { id } = await postImmigration(dataToSave);
       toast({ title: "تم نشر الإعلان بنجاح!" });
@@ -192,7 +204,36 @@ export function PostImmigrationForm() {
   const stepsContent = [
     <div className="space-y-6" key="step1">
       <FormField control={form.control} name="title" render={({ field }) => (<FormItem><FormLabelIcon icon={FileText} label="عنوان الفرصة" /><FormControl><Input placeholder="مثال: مطلوب عمال موسميون في كندا" {...field} /></FormControl><FormMessage /></FormItem>)} />
-      <FormField control={form.control} name="programType" render={({ field }) => (<FormItem><FormLabelIcon icon={LayoutGrid} label="نوع البرنامج" /><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="اختر نوع البرنامج" /></SelectTrigger></FormControl><SelectContent>{programTypes.map(p => (<SelectItem key={p.value} value={p.value}><div className="flex items-center gap-2"><CategoryIcon name={p.icon} className="w-5 h-5" style={{ color: p.color }} /> {p.label}</div></SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>)} />
+      
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+            <FormLabelIcon icon={LayoutGrid} label="نوع البرنامج" />
+            {(programType || customProgramType) && (
+                <Button type="button" variant="ghost" size="sm" className="h-auto p-1 text-xs text-destructive hover:bg-destructive/10" onClick={() => { form.setValue('programType', undefined); form.setValue('customProgramType', ''); }}>
+                    <X className="ml-1 h-3 w-3" />
+                    مسح
+                </Button>
+            )}
+        </div>
+        <p className="text-sm text-muted-foreground -mt-2">اختر من القائمة أو أدخل نوعًا مخصصًا. لا يمكن اختيار الاثنين معاً.</p>
+        <FormField control={form.control} name="programType" render={({ field }) => (
+            <FormItem>
+                <Select onValueChange={(value) => { field.onChange(value); if (value) form.setValue('customProgramType', ''); }} value={field.value} disabled={!!customProgramType}>
+                    <FormControl><SelectTrigger><SelectValue placeholder="اختر نوع البرنامج" /></SelectTrigger></FormControl>
+                    <SelectContent>{programTypes.map(p => (<SelectItem key={p.value} value={p.value}><div className="flex items-center gap-2"><CategoryIcon name={p.icon} className="w-5 h-5" style={{ color: p.color }} /> {p.label}</div></SelectItem>))}</SelectContent>
+                </Select>
+                <FormMessage />
+            </FormItem>
+        )} />
+        <div className="relative flex items-center"><div className="flex-grow border-t border-border"></div><span className="flex-shrink mx-4 text-xs text-muted-foreground">أو</span><div className="flex-grow border-t border-border"></div></div>
+        <FormField control={form.control} name="customProgramType" render={({ field }) => (
+            <FormItem>
+                <FormControl><Input placeholder="أدخل نوع برنامج مخصص" {...field} onChange={(e) => { field.onChange(e); if (e.target.value) form.setValue('programType', undefined); }} disabled={!!programType} /></FormControl>
+                <FormMessage />
+            </FormItem>
+        )} />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormField control={form.control} name="targetCountry" render={({ field }) => (<FormItem><FormLabelIcon icon={Globe} label="الدولة المستهدفة" /><FormControl><Input placeholder="مثال: كندا" {...field} /></FormControl><FormMessage /></FormItem>)} />
         <FormField control={form.control} name="city" render={({ field }) => (<FormItem><FormLabelIcon icon={MapPin} label="المدينة (اختياري)" /><FormControl><Input placeholder="مثال: مونتريال" {...field} /></FormControl><FormMessage /></FormItem>)} />
@@ -258,3 +299,4 @@ export function PostImmigrationForm() {
     </Form>
   );
    }
+    

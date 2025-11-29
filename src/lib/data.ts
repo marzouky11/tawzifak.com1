@@ -1,5 +1,3 @@
-
-
 import { db, auth } from '@/lib/firebase';
 import { collection, getDocs, getDoc, doc, query, where, orderBy, limit, addDoc, serverTimestamp, updateDoc, deleteDoc, setDoc, Query, and, QueryConstraint, QueryFilterConstraint, documentId, increment } from 'firebase/firestore';
 import type { Job, Category, PostType, User, WorkType, Testimonial, Competition, Organizer, Article, Report, ContactMessage, ImmigrationPost } from './types';
@@ -1047,3 +1045,4 @@ export async function deleteContactMessage(messageId: string): Promise<void> {
 // Duplicated functions for new page content structure
 // These will replace the older getAds function eventually.
 export { getJobOffers, getJobSeekers };
+    
