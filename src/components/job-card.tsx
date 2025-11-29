@@ -1,3 +1,4 @@
+
 'use client'
 
 import Link from 'next/link';
@@ -89,15 +90,15 @@ export function JobCard({ job }: JobCardProps) {
             </div>
         </CardHeader>
         <Separator/>
-        <CardContent className="p-4 pt-3 flex-grow grid grid-cols-1 gap-2">
-          <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-            <UserIcon className="h-4 w-4 text-primary" />
-            <span className="truncate">{job.ownerName}</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-            <MapPin className="h-4 w-4 text-primary" />
-            <span className="truncate">{`${job.country}, ${job.city}`}</span>
-          </div>
+        <CardContent className="p-4 pt-3 flex-grow grid grid-cols-2 gap-2">
+            <div className="flex items-center gap-1.5 text-muted-foreground text-sm overflow-hidden">
+              <UserIcon className="h-4 w-4 text-primary flex-shrink-0" />
+              <span className="truncate">{job.ownerName}</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-muted-foreground text-sm overflow-hidden">
+              <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
+              <span className="truncate">{`${job.country}, ${job.city}`}</span>
+            </div>
         </CardContent>
         <CardFooter className="p-3 pt-0 mt-auto flex items-center justify-between">
              <span className="text-xs text-muted-foreground">{job.postedAt}</span>
