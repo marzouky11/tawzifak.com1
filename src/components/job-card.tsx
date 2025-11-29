@@ -66,49 +66,49 @@ export function JobCard({ job }: JobCardProps) {
   const salaryText = !isSeekingJob ? (job.salary || 'عند الطلب') : undefined;
 
   if (isSeekingJob) {
-      return (
-        <Card className="flex flex-col h-full overflow-hidden rounded-xl shadow-md bg-card transition-all duration-300">
-          <CardHeader className="p-4 flex-row items-center gap-4">
-              <UserAvatar 
-                name={job.ownerName} 
-                color={job.ownerAvatarColor} 
-                photoURL={job.ownerPhotoURL}
-                className="h-12 w-12 text-lg flex-shrink-0"
-              />
-              <div className="flex-grow overflow-hidden">
-                <h3 className="font-bold text-base leading-snug truncate">
-                  <Link href={detailUrl} className="text-foreground hover:underline">
-                    {job.title}
-                  </Link>
-                </h3>
-                 <p className="text-sm text-muted-foreground truncate">
-                    {job.ownerName}
-                </p>
-              </div>
-          </CardHeader>
-          <Separator/>
-          <CardContent className="p-4 pt-3 flex-grow grid grid-cols-1 gap-2">
-            <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-              <MapPin className="h-4 w-4" />
-              <span className="truncate">{`${job.country}, ${job.city}`}</span>
+    return (
+      <Card className="flex flex-col h-full overflow-hidden rounded-xl shadow-md bg-card transition-all duration-300">
+        <CardHeader className="p-4 flex-row items-center gap-4">
+            <UserAvatar 
+              name={job.ownerName} 
+              color={job.ownerAvatarColor} 
+              photoURL={job.ownerPhotoURL}
+              className="h-12 w-12 text-lg flex-shrink-0"
+            />
+            <div className="flex-grow overflow-hidden">
+              <h3 className="font-bold text-base leading-snug truncate">
+                <Link href={detailUrl} className="text-foreground hover:underline">
+                  {job.title}
+                </Link>
+              </h3>
+               {categoryName && (
+                  <p className="text-sm text-muted-foreground truncate">
+                    {categoryName}
+                  </p>
+                )}
             </div>
-            {categoryName && (
-              <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-                <LayoutGrid className="h-4 w-4" />
-                <span className="truncate">{categoryName}</span>
-              </div>
-            )}
-          </CardContent>
-          <CardFooter className="p-3 pt-0 mt-auto flex items-center justify-between">
-               <span className="text-xs text-muted-foreground">{job.postedAt}</span>
-              <Button asChild size="sm" variant="secondary" className="text-secondary-foreground hover:bg-secondary/80 active:scale-95 transition-transform">
-                  <Link href={detailUrl}>
-                      عرض الملف
-                  </Link>
-              </Button>
-          </CardFooter>
-        </Card>
-      )
+        </CardHeader>
+        <Separator/>
+        <CardContent className="p-4 pt-3 flex-grow grid grid-cols-1 gap-2">
+          <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+            <UserIcon className="h-4 w-4 text-primary" />
+            <span className="truncate">{job.ownerName}</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+            <MapPin className="h-4 w-4 text-primary" />
+            <span className="truncate">{`${job.country}, ${job.city}`}</span>
+          </div>
+        </CardContent>
+        <CardFooter className="p-3 pt-0 mt-auto flex items-center justify-between">
+             <span className="text-xs text-muted-foreground">{job.postedAt}</span>
+            <Button asChild size="sm" variant="secondary" className="text-secondary-foreground hover:bg-secondary/80 active:scale-95 transition-transform">
+                <Link href={detailUrl}>
+                    عرض الملف
+                </Link>
+            </Button>
+        </CardFooter>
+      </Card>
+    )
   }
   
   return (
