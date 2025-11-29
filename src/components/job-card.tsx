@@ -82,28 +82,19 @@ export function JobCard({ job }: JobCardProps) {
                     {job.title}
                   </Link>
                 </h3>
-                {categoryName && (
-                    <p className="text-sm text-muted-foreground truncate">
-                        {categoryName}
-                    </p>
-                )}
+                 <p className="text-sm text-muted-foreground truncate">
+                    {job.ownerName}
+                </p>
               </div>
           </CardHeader>
           <Separator/>
-          <CardContent className="p-4 pt-3 flex-grow space-y-3">
-              <div className="flex flex-col gap-2 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-primary/70" />
-                      <span className="truncate">{job.country}, {job.city}</span>
-                  </div>
-                   <div className="flex items-center gap-2">
-                      <UserIcon className="h-4 w-4 text-primary/70" />
-                      <span className="font-medium truncate">{job.ownerName}</span>
-                  </div>
-              </div>
+          <CardContent className="p-4 pt-3 flex-grow grid grid-cols-2 gap-2">
+             <InfoBadge icon={MapPin} text={`${job.country}, ${job.city}`} className="bg-gray-100 dark:bg-gray-800/80 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700"/>
+             {categoryName && <InfoBadge icon={LayoutGrid} text={categoryName} className="bg-gray-100 dark:bg-gray-800/80 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700"/>}
           </CardContent>
-          <CardFooter className="p-3 pt-0 mt-auto">
-              <Button asChild size="sm" variant="secondary" className="w-full text-secondary-foreground hover:bg-secondary/80 active:scale-95 transition-transform">
+          <CardFooter className="p-3 pt-0 mt-auto flex items-center justify-between">
+               <span className="text-xs text-muted-foreground">{job.postedAt}</span>
+              <Button asChild size="sm" variant="secondary" className="text-secondary-foreground hover:bg-secondary/80 active:scale-95 transition-transform">
                   <Link href={detailUrl}>
                       عرض الملف
                   </Link>
