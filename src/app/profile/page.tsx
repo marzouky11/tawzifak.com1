@@ -8,7 +8,7 @@ import { auth } from '@/lib/firebase';
 import { useAuth } from '@/context/auth-context';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { User, LogOut, ChevronLeft, Loader2, Settings as SettingsIcon, Newspaper, HelpCircle, Info, Mail, Shield, FileText, Instagram, UserPlus, LogIn as LogInIcon, MessageSquare, Bookmark, Flag } from 'lucide-react';
+import { User, LogOut, ChevronLeft, Loader2, Settings as SettingsIcon, Newspaper, HelpCircle, Info, Mail, Shield, FileText, Instagram, UserPlus, LogIn as LogInIcon, MessageSquare, Bookmark, Flag, PlusCircle } from 'lucide-react';
 import { UserAvatar } from '@/components/user-avatar';
 import { useToast } from '@/hooks/use-toast';
 import { MobilePageHeader } from '@/components/layout/mobile-page-header';
@@ -100,8 +100,10 @@ function LoggedInView({ userData, onLogout }: { userData: any, onLogout: () => v
                 <CardContent className="p-0">
                     <ul className="divide-y divide-border">
                         <SettingItem icon={User} label="تعديل الملف الشخصي" href="/profile/edit" />
+                        <SettingItem icon={PlusCircle} label="نشر إعلان جديد" href="/post-job/select-type" />
                         <SettingItem icon={Bookmark} label="الإعلانات المحفوظة" href="/profile/saved-ads" />
                         {!userData?.isAdmin && <SettingItem icon={FileText} label="إعلاناتي" href="/profile/my-ads" />}
+                        <SettingItem icon={MessageSquare} label="أضف رأيك" href="/add-testimonial" />
                         <li className="flex items-center justify-between p-4">
                             <div className="flex items-center gap-4">
                                 <SettingsIcon className="h-5 w-5 text-primary" />
